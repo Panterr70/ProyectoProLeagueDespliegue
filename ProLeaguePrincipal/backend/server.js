@@ -165,6 +165,32 @@ app.get("/api/nfl/teams", async (req, res) => {
     res.status(500).json({ error: "Error obteniendo equipos NFL" });
   }
 });
+
+// =======================
+// NFL - JUGADORES POR EQUIPO
+// =======================
+app.get("/api/nfl/players", async (req, res) => {
+  const { teamId } = req.query;
+  if (!teamId) return res.status(400).json({ error: "teamId requerido" });
+
+  try {
+    const params = new URLSearchParams({
+      "team_ids[]": teamId,
+      per_page: 100
+    });
+
+    const response = await axios.get(
+      `https://api.balldontlie.io/nfl/v1/players?${params}`,
+      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
+    );
+
+    const data = response.data.data;
+    res.json(data);
+  } catch (err) {
+    console.error("Error obteniendo jugadores NFL:", err.message);
+    res.status(500).json({ error: "No se pudieron cargar los jugadores de NFL" });
+  }
+});
 // =======================
 // NBA - CLASIFICACIÓN
 // =======================
@@ -183,6 +209,67 @@ app.get("/api/nba/standings", async (req, res) => {
 });
 
 // =======================
+// NBA - JUGADORES POR EQUIPO
+// =======================
+app.get("/api/nba/players", async (req, res) => {
+  const { teamId } = req.query;
+  if (!teamId) return res.status(400).json({ error: "teamId requerido" });
+
+  try {
+    const params = new URLSearchParams({
+      "team_ids[]": teamId,
+      per_page: 100
+    });
+
+    const response = await axios.get(
+      `https://api.balldontlie.io/v1/players?${params}`,
+      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
+    );
+
+    // En la versión gratuita recogemos los 100 primeros que devuelva la API
+    const data = response.data.data;
+    
+    res.json(data);
+  } catch (err) {
+    console.error("Error obteniendo jugadores NBA:", err.message);
+    res.status(500).json({ error: "No se pudo cargar los jugadores" });
+  }
+});
+
+// =======================
+// NBA - PARTIDOS RECIENTES
+// =======================
+app.get("/api/nba/games", async (req, res) => {
+  try {
+    const today = new Date();
+    // NBA: para asegurar que entran en 1 página de 100, sacamos últimos 10 días (aprox 70 partidos)
+    const startDateDate = new Date(today.getTime() - (10 * 24 * 60 * 60 * 1000));
+    const startDate = startDateDate.toISOString().split('T')[0];
+    const endDate = today.toISOString().split('T')[0];
+
+    const params = new URLSearchParams({
+      "start_date": startDate,
+      "end_date": endDate,
+      "per_page": 100 
+    });
+
+    const response = await axios.get(
+      `https://api.balldontlie.io/v1/games?${params}`,
+      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
+    );
+
+    let games = response.data.data.filter(g => g.status === "Final");
+    games.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.json(games.slice(0, 15));
+
+  } catch (err) {
+    console.error("Error obteniendo resultados de partidos NBA:", err.message);
+    res.status(500).json({ error: "No se pudieron cargar los últimos partidos" });
+  }
+});
+
+// =======================
 // NFL - CLASIFICACIÓN
 // =======================
 app.get("/api/nfl/standings", async (req, res) => {
@@ -191,7 +278,6 @@ app.get("/api/nfl/standings", async (req, res) => {
       "https://site.api.espn.com/apis/v2/sports/football/nfl/standings"
     );
 
-    // Enviamos los datos crudos al frontend
     res.json(response.data);
   } catch (err) {
     console.error("Error obteniendo clasificación NFL:", err.message);
@@ -199,6 +285,35 @@ app.get("/api/nfl/standings", async (req, res) => {
   }
 });
 
+// =======================
+// NFL - PARTIDOS RECIENTES
+// =======================
+app.get("/api/nfl/games", async (req, res) => {
+  try {
+    const today = new Date();
+    // NFL temporal: para traer los verdaderos últimos partidos de la temporada que acaba en 2026
+    // pedimos directamente la fase de postemporada.
+    const params = new URLSearchParams({
+      "seasons[]": 2025,
+      "postseason": true,
+      "per_page": 100 
+    });
+
+    const response = await axios.get(
+      `https://api.balldontlie.io/nfl/v1/games?${params}`,
+      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
+    );
+
+    let games = response.data.data.filter(g => g.status === "Final");
+    games.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.json(games.slice(0, 15));
+
+  } catch (err) {
+    console.error("Error obteniendo resultados NFL:", err.message);
+    res.status(500).json({ error: "No se pudieron cargar los últimos partidos de NFL" });
+  }
+});
 // Puerto
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {

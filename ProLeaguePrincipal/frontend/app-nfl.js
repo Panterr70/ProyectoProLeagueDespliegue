@@ -219,7 +219,90 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("modal-city").textContent=`Ciudad: ${team.city}`;
         document.getElementById("modal-conference").textContent=`Conferencia: ${team.conference}`;
         document.getElementById("modal-division").textContent=`División: ${team.division}`;
-        document.getElementById("modal-stats").innerHTML=`<p>Número de jugadores: ${team.numPlayers}</p><p>Edad promedio: ${team.avgAge}</p>`;
+        
+        const statsContainer = document.getElementById("modal-stats");
+        statsContainer.innerHTML='';
+        
+        const btnLoadPlayers = document.getElementById("btn-load-players");
+        const playersContainer = document.getElementById("modal-players");
+        
+        playersContainer.style.display = "none";
+        playersContainer.innerHTML = "";
+        btnLoadPlayers.style.display = "block";
+        btnLoadPlayers.textContent = "Ver Equipo";
+        btnLoadPlayers.disabled = false;
+        
+        const newBtn = btnLoadPlayers.cloneNode(true);
+        btnLoadPlayers.parentNode.replaceChild(newBtn, btnLoadPlayers);
+        
+        newBtn.onclick = async () => {
+          newBtn.textContent = "Cargando jugadores...";
+          newBtn.disabled = true;
+          
+          try {
+            const res = await fetch(`http://localhost:3000/api/nfl/players?teamId=${team.id}`);
+            const players = await res.json();
+            
+            newBtn.style.display = "none";
+            playersContainer.style.display = "block";
+            
+            if (!players || players.length === 0) {
+              playersContainer.innerHTML = "<p style='text-align:center; padding: 10px;'>No se encontraron jugadores activos para este equipo.</p>";
+              return;
+            }
+            
+            players.sort((a,b) => {
+              if(a.last_name < b.last_name) return -1;
+              if(a.last_name > b.last_name) return 1;
+              return 0;
+            });
+            
+            let tableHTML = `
+              <div style="overflow-x: auto; margin-top: 15px;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0 5px; font-size: 0.9em; text-align: left; color: #fff;">
+                  <thead>
+                    <tr style="color: var(--nfl-blue); text-transform: uppercase; letter-spacing: 1px;">
+                      <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">Jugador</th>
+                      <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">Pos</th>
+                      <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">#</th>
+                      <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">Altura</th>
+                      <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">Peso</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+            `;
+            
+            players.forEach((p) => {
+              const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim() || '-';
+              const pos = p.position || '-';
+              const number = p.jersey_number || '-';
+              const height = p.height || '-';
+              const weight = p.weight ? `${p.weight} lbs` : '-';
+              
+              tableHTML += `
+                <tr style="background: rgba(255,255,255,0.03); transition: background 0.3s;">
+                  <td style="padding: 10px; border-radius: 8px 0 0 8px;"><strong>${fullName}</strong></td>
+                  <td style="padding: 10px; color: rgba(255,255,255,0.7);">${pos}</td>
+                  <td style="padding: 10px; color: rgba(255,255,255,0.7);">${number}</td>
+                  <td style="padding: 10px; color: rgba(255,255,255,0.7);">${height}</td>
+                  <td style="padding: 10px; color: rgba(255,255,255,0.7); border-radius: 0 8px 8px 0;">${weight}</td>
+                </tr>
+              `;
+            });
+            
+            tableHTML += `</tbody></table></div>`;
+            playersContainer.innerHTML = tableHTML;
+            
+            statsContainer.innerHTML = `
+              <p style="margin-top: 10px; font-size: 1.1em; color: #fff;"><strong>Jugadores Activos:</strong> <span style="color:var(--nfl-blue); text-shadow: 0 0 10px rgba(59,130,246,0.3);">${players.length}</span></p>
+            `;
+            
+          } catch (err) {
+            console.error("Error cargando jugadores NFL:", err);
+            newBtn.textContent = "Error. Reintentar";
+            newBtn.disabled = false;
+          }
+        };
       };
 
       contenedor.appendChild(card);
@@ -233,30 +316,74 @@ document.addEventListener("DOMContentLoaded", async () => {
       ["AFC", equipos.filter(t=>t.conference==="AFC").length],
       ["NFC", equipos.filter(t=>t.conference==="NFC").length]
     ]);
-    new google.visualization.ColumnChart(document.getElementById("chart_conferences"))
-      .draw(data,{title:"Equipos por Conferencia",legend:{position:"none"}});
+    
+    const options = {
+      title: "Equipos por Conferencia",
+      backgroundColor: 'transparent',
+      titleTextStyle: { color: '#ffffff', fontSize: 16, fontName: 'Outfit' },
+      legend: { position: "none" },
+      hAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
+      vAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
+      colors: ['#013369', '#d50a0a'],
+      animation: { startup: true, duration: 1000, easing: 'out' }
+    };
+    
+    new google.visualization.ColumnChart(document.getElementById("chart_conferences")).draw(data, options);
   }
 
   function dibujarGraficoDivision(equipos){
     const divisions={};
     equipos.forEach(t=>divisions[t.division]=(divisions[t.division]||0)+1);
     const data=google.visualization.arrayToDataTable([["División","Equipos"], ...Object.entries(divisions)]);
-    new google.visualization.PieChart(document.getElementById("chart_divisions"))
-      .draw(data,{title:"Equipos por División"});
+    
+    const options = {
+      title: "Equipos por División",
+      backgroundColor: 'transparent',
+      titleTextStyle: { color: '#ffffff', fontSize: 16, fontName: 'Outfit' },
+      legend: { textStyle: { color: '#94a3b8' } },
+      pieHole: 0.4,
+      pieSliceBorderStyle: 'none',
+      colors: ['#00f2ff', '#7000ff', '#ff00c8', '#3b82f6', '#ff3b3b', '#fbbf24'],
+      animation: { startup: true, duration: 1000, easing: 'out' }
+    };
+    
+    new google.visualization.PieChart(document.getElementById("chart_divisions")).draw(data, options);
   }
 
   function dibujarGraficoCiudades(equipos){
     const cities={};
     equipos.forEach(t=>{const c=t.city[0]; cities[c]=(cities[c]||0)+1;});
     const data=google.visualization.arrayToDataTable([["Inicial Ciudad","Equipos"], ...Object.entries(cities)]);
-    new google.visualization.BarChart(document.getElementById("chart_cities"))
-      .draw(data,{title:"Inicial de ciudad",legend:{position:"none"}});
+    
+    const options = {
+      title: "Inicial de ciudad",
+      backgroundColor: 'transparent',
+      titleTextStyle: { color: '#ffffff', fontSize: 16, fontName: 'Outfit' },
+      legend: { position: "none" },
+      hAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
+      vAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
+      colors: ['#3b82f6'],
+      animation: { startup: true, duration: 1000, easing: 'out' }
+    };
+    
+    new google.visualization.BarChart(document.getElementById("chart_cities")).draw(data, options);
   }
 
   function dibujarGraficoJugadores(equipos){
     const data=google.visualization.arrayToDataTable([["Equipo","Jugadores"], ...equipos.map(t=>[t.full_name,t.numPlayers||0])]);
-    new google.visualization.ColumnChart(document.getElementById("chart_players"))
-      .draw(data,{title:"Número de jugadores por equipo",legend:{position:"none"}});
+    
+    const options = {
+      title: "Jugadores por Equipo",
+      backgroundColor: 'transparent',
+      titleTextStyle: { color: '#ffffff', fontSize: 16, fontName: 'Outfit' },
+      legend: { position: "none" },
+      hAxis: { textStyle: { color: '#94a3b8', fontSize: 10 } },
+      vAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
+      colors: ['#013369'],
+      animation: { startup: true, duration: 1000, easing: 'out' }
+    };
+    
+    new google.visualization.ColumnChart(document.getElementById("chart_players")).draw(data, options);
   }
 
 

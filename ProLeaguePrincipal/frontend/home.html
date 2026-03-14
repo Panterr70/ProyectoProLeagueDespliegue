@@ -41,6 +41,22 @@
       <div class="slider-dots" id="slider-dots"></div>
     </section>
 
+    <!-- SCOREBOARD (Partidos Recientes) -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 40px 0; max-width: 1400px; margin: 0 auto;">
+      <h3 style="color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Últimos Resultados</h3>
+      <div id="scoreboard-filters" style="display: flex; gap: 10px;">
+        <button class="sb-filter-btn active" data-sb="all" style="background: var(--primary-color); color: #000; border: none; padding: 6px 18px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: 'Outfit';">Todos</button>
+        <button class="sb-filter-btn" data-sb="NBA" style="background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 6px 18px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: 'Outfit';">NBA</button>
+        <button class="sb-filter-btn" data-sb="NFL" style="background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 6px 18px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: 'Outfit';">NFL</button>
+      </div>
+    </div>
+
+    <section class="scoreboard-section" style="background: rgba(5, 10, 15, 0.4); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 0; overflow-x: auto; white-space: nowrap; display: flex; gap: 20px; align-items: center; scroll-behavior: smooth; margin-top: 15px; margin-bottom: 30px;">
+      <div id="games-ticker" style="display: inline-flex; gap: 15px; padding: 0 40px; min-width: 100%;">
+        <p style="color: #94a3b8; font-style: italic; margin: 0 auto;">Cargando últimos resultados de la NBA...</p>
+      </div>
+    </section>
+
     <!-- NOTICIAS -->
     <section class="news-section">
       <h2>Últimas Noticias</h2>

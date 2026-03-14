@@ -8,18 +8,16 @@ CREATE TABLE users (
   password VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE favorites (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  league ENUM('NBA', 'NFL') NOT NULL,
-  team_id INT NOT NULL,
-  team_name VARCHAR(100) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  UNIQUE (user_id, league, team_id)
-);
-ALTER TABLE users
-ADD COLUMN avatar VARCHAR(255),
-ADD COLUMN bio TEXT;
+DELETE FROM users WHERE id > 0;
 
 
+select * from users;
+
+SET SQL_SAFE_UPDATES = 0;
+DELETE FROM users;
+SET SQL_SAFE_UPDATES = 1; 
+
+
+CREATE USER 'proleague'@'localhost' IDENTIFIED BY '123456';
+GRANT ALL PRIVILEGES ON proleague.* TO 'proleague'@'localhost';
+FLUSH PRIVILEGES;

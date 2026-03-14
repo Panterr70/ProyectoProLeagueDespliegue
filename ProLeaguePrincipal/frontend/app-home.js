@@ -146,6 +146,152 @@ function showSkeletons() {
 }
 
 // =======================
+// SCOREBOARD
+// =======================
+async function cargarScoreboard() {
+  const ticker = document.getElementById("games-ticker");
+  if (!ticker) return;
+
+  try {
+    const [nbaRes, nflRes] = await Promise.all([
+      fetch("http://localhost:3000/api/nba/games").catch(() => null),
+      fetch("http://localhost:3000/api/nfl/games").catch(() => null)
+    ]);
+
+    let games = [];
+    if (nbaRes && nbaRes.ok) {
+      const nbaData = await nbaRes.json();
+      games = games.concat(nbaData.map(g => ({ ...g, sport: 'NBA' })));
+    }
+    if (nflRes && nflRes.ok) {
+      const nflData = await nflRes.json();
+      games = games.concat(nflData.map(g => ({ ...g, sport: 'NFL' })));
+    }
+
+    // Ordenar de más reciente a más antiguo
+    games.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (games.length === 0) {
+      ticker.innerHTML = '<p style="color: #94a3b8; font-style: italic; margin: 0 auto;">No hay resultados recientes de la NBA o NFL.</p>';
+      return;
+    }
+
+    ticker.innerHTML = "";
+    
+    // Equilibrar: cogemos hasta 8 NBA + hasta 7 NFL para asegurar que salgan ambas ligas
+    const nbaGames = games.filter(g => g.sport === 'NBA').slice(0, 8);
+    const nflGames = games.filter(g => g.sport === 'NFL').slice(0, 7);
+    const gamesDisplay = [...nbaGames, ...nflGames].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    gamesDisplay.forEach(game => {
+      const isNBA = game.sport === 'NBA';
+      const gameDate = new Date(game.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+      
+      // Defensa contra objetos nulos
+      const homeTeam = game.home_team || {};
+      const visitorTeam = game.visitor_team || {};
+      const homeAbbr = homeTeam.abbreviation || homeTeam.name || '---';
+      const visitorAbbr = visitorTeam.abbreviation || visitorTeam.name || '---';
+      
+      const hScore = game.home_team_score ?? '?';
+      const vScore = game.visitor_team_score ?? '?';
+
+      const isHomeWinner = Number(hScore) > Number(vScore);
+      const isVisitorWinner = Number(vScore) > Number(hScore);
+      const sportColor = isNBA ? '#ff3b3b' : '#3b82f6';
+
+      const card = document.createElement("div");
+      card.className = "sb-card";
+      card.dataset.sport = game.sport;
+      
+      card.style.cssText = `
+        min-width: 210px;
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-top: 2px solid ${sportColor};
+        border-radius: 12px;
+        padding: 12px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: transform 0.3s, background 0.3s, border-color 0.3s, opacity 0.3s;
+        cursor: default;
+      `;
+      
+      card.onmouseenter = () => {
+        card.style.background = 'rgba(40, 52, 75, 0.9)';
+        card.style.boxShadow = `0 8px 20px ${sportColor}40`;
+      };
+      card.onmouseleave = () => {
+        card.style.background = 'rgba(30, 41, 59, 0.7)';
+        card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+      };
+      
+      card.innerHTML = `
+        <div style="font-size: 0.75em; color: #94a3b8; display: flex; justify-content: space-between; margin-bottom: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
+          <span style="font-weight: 800; color: ${sportColor};">${game.sport}</span>
+          <span>${gameDate} - FINAL</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; color: ${isVisitorWinner ? '#fff' : '#94a3b8'}; font-weight: ${isVisitorWinner ? 'bold' : 'normal'}; margin-top: 5px;">
+          <span style="font-size: 1.1em;">${visitorAbbr}</span>
+          <span style="font-size: 1.25em;">${vScore}</span>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; color: ${isHomeWinner ? '#fff' : '#94a3b8'}; font-weight: ${isHomeWinner ? 'bold' : 'normal'};">
+          <span style="font-size: 1.1em;">${homeAbbr}</span>
+          <span style="font-size: 1.25em;">${hScore}</span>
+        </div>
+      `;
+      
+      ticker.appendChild(card);
+    });
+    
+  } catch (err) {
+    console.error("Error Scoreboard:", err);
+    ticker.innerHTML = '<p style="color: #f87171; font-style: italic; margin: 0 auto;">Error cargando resultados</p>';
+  }
+}
+
+// Filtros funcionales para el Scoreboard
+function instanciarFiltrosScoreboard() {
+  const btns = document.querySelectorAll(".sb-filter-btn");
+  btns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // Remover clase activo
+      btns.forEach(b => {
+        b.classList.remove("active");
+        b.style.background = "rgba(255,255,255,0.1)";
+        b.style.color = "#fff";
+      });
+      // Setear clase activo
+      btn.classList.add("active");
+      btn.style.background = "var(--primary-color)";
+      btn.style.color = "#000";
+
+      const sportFiltro = btn.dataset.sb;
+      const cards = document.querySelectorAll(".sb-card");
+
+      cards.forEach(card => {
+        if (sportFiltro === "all" || card.dataset.sport === sportFiltro) {
+          card.style.display = "flex";
+          setTimeout(() => card.style.opacity = "1", 50);
+        } else {
+          card.style.opacity = "0";
+          setTimeout(() => card.style.display = "none", 300);
+        }
+      });
+    });
+  });
+}
+
+// Empezamos la carga asincrónica al instante
+cargarScoreboard().then(instanciarFiltrosScoreboard);
+
+// =======================
 // CARGAR NOTICIAS (RSS)
 // =======================
 const RSS_FEEDS = [
@@ -240,3 +386,4 @@ filterButtons.forEach(btn => {
     filterNews(searchInput ? searchInput.value.toLowerCase() : "", currentFilter);
   });
 });
+
