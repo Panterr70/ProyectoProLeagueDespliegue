@@ -9,7 +9,8 @@
   <!-- Socket.io CDN -->
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 </head>
-<body>
+<body class="dynamic-body">
+  <div class="dynamic-bg"></div>
 
   <!-- HEADER -->
   <div id="header-placeholder"></div>
@@ -19,31 +20,31 @@
     <div class="chat-container">
       
       <!-- NBA SECTION -->
-      <section class="chat-section chat-nba" id="nba-section">
-        <div class="chat-header nba-header">
-          <img src="images/nba-logo.png" alt="NBA Logo" class="chat-logo">
-          <h2>NBA Chat</h2>
+      <section class="chat-section chat-nba" id="nba-chat-section">
+        <div class="chat-header">
+          <img src="logos/NBA_logo.png" alt="NBA" class="chat-logo" onerror="this.src='images/nba-logo.png'">
+          <h2>NBA Live Chat</h2>
         </div>
         <div class="chat-messages" id="nba-messages">
-          <!-- Mensajes aquí -->
+          <!-- Mensajes dinámicos -->
         </div>
         <form class="chat-form" id="nba-form">
-          <input type="text" id="nba-input" placeholder="Escribe sobre NBA..." autocomplete="off">
+          <input type="text" id="nba-input" placeholder="Comenta la jornada NBA..." autocomplete="off">
           <button type="submit">Enviar</button>
         </form>
       </section>
 
       <!-- NFL SECTION -->
-      <section class="chat-section chat-nfl" id="nfl-section">
-        <div class="chat-header nfl-header">
-          <img src="images/nfl-logo.png" alt="NFL Logo" class="chat-logo">
-          <h2>NFL Chat</h2>
+      <section class="chat-section chat-nfl" id="nfl-chat-section">
+        <div class="chat-header">
+          <img src="logos/NFL_logo.png" alt="NFL" class="chat-logo" onerror="this.src='images/nfl-logo.png'">
+          <h2>NFL Live Chat</h2>
         </div>
         <div class="chat-messages" id="nfl-messages">
-          <!-- Mensajes aquí -->
+          <!-- Mensajes dinámicos -->
         </div>
         <form class="chat-form" id="nfl-form">
-          <input type="text" id="nfl-input" placeholder="Escribe sobre NFL..." autocomplete="off">
+          <input type="text" id="nfl-input" placeholder="Debate sobre la NFL..." autocomplete="off">
           <button type="submit">Enviar</button>
         </form>
       </section>

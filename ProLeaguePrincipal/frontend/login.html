@@ -6,7 +6,8 @@
   <title>Login - ProLeague</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dynamic-body">
+  <div class="dynamic-bg"></div>
 
   <main class="login-register-container">
     <section id="login-section">
@@ -24,11 +25,29 @@
     </section>  
   </main>
 
-  <script>
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // LOGIN
+    // TOAST UTILITY
+    window.showToast = function(message, type = 'success', duration = 3500) {
+      let container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+      }
+      const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span class="toast-icon">${icons[type]||'📢'}</span><span class="toast-message">${message}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast-visible')));
+      setTimeout(() => { toast.classList.remove('toast-visible'); toast.classList.add('toast-hiding'); setTimeout(() => toast.remove(), 400); }, duration);
+    }
+
     const loginForm = document.getElementById("login-form");
-    const loginError = document.getElementById("login-error");
 
     loginForm.addEventListener("submit", async e => {
       e.preventDefault();
@@ -36,22 +55,46 @@
       const password = document.getElementById("login-password").value;
 
       try {
-        const res = await fetch("http://localhost:3000/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          loginError.textContent = data.error;
+        // 1. Iniciar sesión con Firebase Auth
+        let userCredential;
+        try {
+          userCredential = await signInWithEmailAndPassword(auth, email, password);
+        } catch (authErr) {
+          console.error("Auth Error:", authErr);
+          showToast("Correo o contraseña incorrectos", 'error');
           return;
         }
-        loginError.textContent = "";
-        localStorage.setItem("user", JSON.stringify(data.user));
-        window.location.href = "home.html";
+
+        const user = userCredential.user;
+
+        // 2. Obtener datos adicionales desde Firestore
+        let userData = {};
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          userData = userDoc.exists() ? userDoc.data() : {};
+        } catch (dbErr) {
+          console.error("Firestore Error:", dbErr);
+          showToast("Error al conectar con la base de datos (Firestore). ¿Está activada?", 'warning');
+          // Continuamos aunque falle Firestore para no bloquear el login si Auth fue bien
+        }
+
+        // 3. Guardar en localStorage para compatibilidad con el resto de la web
+        const userObj = {
+          uid: user.uid,
+          email: user.email,
+          username: userData.username || user.displayName || "Usuario",
+          bio: userData.bio || "",
+          avatar: userData.avatar || "",
+          favorites: userData.favorites || []
+        };
+        localStorage.setItem("user", JSON.stringify(userObj));
+
+        showToast("¡Bienvenido de nuevo!", 'success');
+        setTimeout(() => { window.location.href = "home.html"; }, 1000);
+
       } catch (err) {
-        loginError.textContent = "Error conectando con el servidor";
-        console.error(err);
+        console.error("General Login Error:", err);
+        showToast("Error inesperado al iniciar sesión", 'error');
       }
     });
   </script>

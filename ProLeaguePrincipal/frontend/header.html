@@ -4,25 +4,50 @@
       <img src="/frontend/logos/logo-png.png" alt="ProLeague" style="height:40px; vertical-align: middle;">
       ProLeague
     </div>
-    <ul class="nav-links">
+
+    <!-- HAMBURGER -->
+    <div class="menu-toggle" id="mobile-menu-btn">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <ul class="nav-links" id="nav-menu">
       <li><a href="home.html" id="nav-home">Inicio</a></li>
       <li><a href="nba.html" id="nav-nba">NBA</a></li>
       <li><a href="nfl.html" id="nav-nfl">NFL</a></li>
+      <li><a href="players.html" id="nav-players">Jugadores</a></li>
       <li><a href="favorites.html" id="nav-favorites" style="display:none;">Favoritos <span id="fav-badge" class="badge" style="display:none; background: var(--primary-color); color: var(--dark-bg); padding: 2px 6px; border-radius: 10px; font-size: 0.8em; margin-left: 5px;">0</span></a></li>
       <li><a href="chat.html" id="nav-chat" style="display:none;">Chat en Vivo</a></li>
       <li><a href="profile.html" id="nav-profile" style="display:none;">Mi perfil</a></li>
       <li><a href="#" id="nav-logout" style="display:none;">Cerrar sesión</a></li>
 
       <li class="translate-li">
-        <!-- Dropdown de idiomas -->
-        <select id="language-selector">
-          <option value="es" selected>🇪🇸 Español</option>
-          <option value="en">🇬🇧 English</option>
-          <option value="fr">🇫🇷 Français</option>
+        <select id="language-selector" style="background: rgba(255,255,255,0.05); color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:4px 8px; cursor:pointer;">
+          <option value="es" selected>🇪🇸 ESP</option>
+          <option value="en">🇬🇧 ENG</option>
+          <option value="fr">🇫🇷 FRA</option>
         </select> 
       </li>
     </ul>
   </nav>
+
+  <script>
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('nav-menu');
+    if(menuBtn && menu) {
+      menuBtn.onclick = () => {
+        menu.classList.toggle('active');
+        menuBtn.classList.toggle('active');
+      };
+      // Cerrar al clickar fuera o en link
+      document.addEventListener('click', (e) => {
+        if(!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('active')) {
+          menu.classList.remove('active');
+        }
+      });
+    }
+  </script>
 </header>
 
 <!-- Google Translate -->

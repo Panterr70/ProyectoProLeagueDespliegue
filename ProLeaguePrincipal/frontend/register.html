@@ -6,7 +6,8 @@
   <title>Registro - ProLeague</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dynamic-body">
+  <div class="dynamic-bg"></div>
 
   <main class="login-register-container">
     <section id="register-section">
@@ -25,11 +26,30 @@
     </section>
   </main>
 
-  <script>
+  <div id="toast-container"></div>
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // REGISTER
+    // TOAST UTILITY
+    window.showToast = function(message, type = 'success', duration = 3500) {
+      let container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+      }
+      const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span class="toast-icon">${icons[type]||'📢'}</span><span class="toast-message">${message}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast-visible')));
+      setTimeout(() => { toast.classList.remove('toast-visible'); toast.classList.add('toast-hiding'); setTimeout(() => toast.remove(), 400); }, duration);
+    }
+
     const registerForm = document.getElementById("register-form");
-    const registerError = document.getElementById("register-error");
 
     registerForm.addEventListener("submit", async e => {
       e.preventDefault();
@@ -38,21 +58,49 @@
       const password = document.getElementById("register-password").value;
 
       try {
-        const res = await fetch("http://localhost:3000/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, email, password })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          registerError.textContent = data.error || "Error registrando usuario";
-          return;
+        // 1. Crear usuario en Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 2. Actualizar perfil con el nombre de usuario
+        await updateProfile(user, { displayName: username });
+
+        // 3. Guardar datos adicionales en Firestore
+        try {
+          await setDoc(doc(db, "users", user.uid), {
+            username: username,
+            email: email,
+            createdAt: new Date().toISOString(),
+            bio: "¡Hola! Soy nuevo en ProLeague.",
+            favorites: []
+          });
+        } catch (dbErr) {
+          console.error("Firestore Error:", dbErr);
+          showToast("Usuario creado en Auth, pero error en Firestore. ¿Está activado?", 'warning');
         }
-        alert("Usuario registrado correctamente");
-        window.location.href = "login.html";
+
+        showToast("¡Cuenta creada con éxito! 🎉", 'success');
+        
+        // Guardar para sesión actual
+        localStorage.setItem("user", JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          username: username,
+          bio: "¡Hola! Soy nuevo en ProLeague.",
+          favorites: []
+        }));
+
+        setTimeout(() => { window.location.href = "home.html"; }, 1500);
+
       } catch (err) {
-        registerError.textContent = "Error conectando con el servidor";
-        console.error(err);
+        console.error("Registration Error:", err);
+        if (err.code === 'auth/email-already-in-use') {
+          showToast("El correo ya está registrado", 'error');
+        } else if (err.code === 'auth/weak-password') {
+          showToast("La contraseña es muy débil", 'warning');
+        } else {
+          showToast("Error al crear la cuenta", 'error');
+        }
       }
     });
   </script>

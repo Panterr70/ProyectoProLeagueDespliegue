@@ -1,3 +1,25 @@
+import { auth, db } from "./firebase-config.js";
+import { doc, getDoc, updateDoc, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// ===============================
+// TOAST UTILITY
+// ===============================
+function showToast(message, type = 'success', duration = 3000) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]||'📢'}</span><span class="toast-message">${message}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+  container.appendChild(toast);
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast-visible')));
+  setTimeout(() => { toast.classList.remove('toast-visible'); toast.classList.add('toast-hiding'); setTimeout(() => toast.remove(), 400); }, duration);
+}
+
 // ===============================
 // MAPAS DE LOGOS
 // ===============================
@@ -33,7 +55,7 @@ const nflLogos = {
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
   const user = JSON.parse(localStorage.getItem("user"));
-  if (!user) {
+  if (!user || (!user.uid && !user.id)) {
     window.location.href = "login.html";
     return;
   }
@@ -41,29 +63,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadHeader();
   await loadFooter();
 
-  cargarFavoritos(user.id);
+  cargarFavoritos(user.uid || user.id);
 });
 
 // ===============================
 // HEADER / FOOTER
 // ===============================
 async function loadHeader() {
-  document.getElementById("header-placeholder").innerHTML =
-    await fetch("header.html").then(r => r.text()); 
+  const html = await fetch("header.html").then(r => r.text());
+  document.getElementById("header-placeholder").innerHTML = html; 
 }
 
 async function loadFooter() {
-  document.getElementById("footer-placeholder").innerHTML =
-    await fetch("footer.html").then(r => r.text());
+  const html = await fetch("footer.html").then(r => r.text());
+  document.getElementById("footer-placeholder").innerHTML = html;
 }
 
 // ===============================
 // CARGAR FAVORITOS
 // ===============================
-async function cargarFavoritos(userId) {
+async function cargarFavoritos(uid) {
   try {
-    const res = await fetch(`http://localhost:3000/api/favorites/${userId}`); // llamando al backend para obtener los favoritos del usuario
-    const favoritos = await res.json();
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (!userDoc.exists()) return;
+
+    const userData = userDoc.data();
+    const favoritos = userData.favorites || [];
 
     const contenedor = document.getElementById("favorites-list");
     contenedor.innerHTML = "";
@@ -76,8 +101,8 @@ async function cargarFavoritos(userId) {
     favoritos.forEach(fav => {
       const logo =
         fav.league === "NBA"
-          ? nbaLogos[fav.team_name]
-          : nflLogos[fav.team_name];
+          ? nbaLogos[fav.teamName]
+          : nflLogos[fav.teamName];
 
       const logoPath = logo
         ? `logos/${logo}`
@@ -88,8 +113,8 @@ async function cargarFavoritos(userId) {
       card.innerHTML = `
         <div class="team-card-inner">
           <div class="team-card-front">
-            <img class="team-logo" src="${logoPath}" alt="${fav.team_name}">
-            <div class="team-name">${fav.team_name}</div>
+            <img class="team-logo" src="${logoPath}" alt="${fav.teamName}">
+            <div class="team-name">${fav.teamName}</div>
             <div class="team-info">Liga: ${fav.league}</div>
             <button class="remove-fav">❌ Quitar</button>
           </div>
@@ -101,17 +126,21 @@ async function cargarFavoritos(userId) {
       card.querySelector(".remove-fav").addEventListener("click", async (e) => {
         e.stopPropagation();
 
-        await fetch("http://localhost:3000/api/favorites", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: userId,
-            league: fav.league,
-            teamId: fav.team_id
-          })
-        });
+        try {
+          const userRef = doc(db, "users", uid);
+          await updateDoc(userRef, {
+            favorites: arrayRemove(fav)
+          });
 
-        card.remove();
+          card.style.transition = "opacity 0.3s, transform 0.3s";
+          card.style.opacity = "0";
+          card.style.transform = "scale(0.9)";
+          setTimeout(() => card.remove(), 300);
+          showToast(`${fav.teamName} eliminado de favoritos`, 'info');
+        } catch (err) {
+          console.error(err);
+          showToast("Error al quitar favorito", 'error');
+        }
       });
     });
 

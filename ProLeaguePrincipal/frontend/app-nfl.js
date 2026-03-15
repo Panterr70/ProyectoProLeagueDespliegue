@@ -1,73 +1,95 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadHeader(); // Cargar header primero
-  await loadFooter(); // Cargar footer
+import { auth, db } from "./firebase-config.js";
+import { doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // ===== LOGUEADO =====
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (!user) { 
-    window.location.href = "login.html"; 
-    return; 
+// ===============================
+// STATE & AUTH
+// ===============================
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user || (!user.uid && !user.id)) window.location.href = "login.html";
+
+// ===============================
+// UI FUNCTIONS
+// ===============================
+async function loadHeader() {
+  const html = await fetch("header.html").then(r => r.text());
+  document.getElementById("header-placeholder").innerHTML = html;
+  
+  if (typeof google !== "undefined" && google.translate) {
+      googleTranslateElementInit();
+  }
+  
+  const logoutLink = document.getElementById("nav-logout");
+  const profileLink = document.getElementById("nav-profile");
+  
+  if (user) {
+    if (logoutLink) logoutLink.style.display = "inline";
+    if (profileLink) profileLink.style.display = "inline";
   }
 
-  // Mostrar "Mi perfil" y "Cerrar sesión"
-  const profileLink = document.getElementById("nav-profile");
-  if (profileLink) profileLink.style.display = "inline";
-
-  const chatLink = document.getElementById("nav-chat");
-  if (chatLink) chatLink.style.display = "inline";
-
-  const logoutLink = document.getElementById("nav-logout");
   if (logoutLink) {
-    logoutLink.style.display = "inline";
     logoutLink.addEventListener("click", e => {
       e.preventDefault();
+      auth.signOut();
       localStorage.removeItem("user");
       window.location.href = "login.html";
     });
   }
+}
 
-  // ===== SECCIÓN NFL =====
+async function loadFooter() {
+  document.getElementById("footer-placeholder").innerHTML =
+    await fetch("footer.html").then(r => r.text());
+}
+
+// INIT
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadHeader();
+  await loadFooter();
+
   const nflSection = document.getElementById("nfl-section");
-  nflSection.style.display = "block";
+  if(nflSection) nflSection.style.display = "block";
 
-  cargarClasificacion();
-  cargarEquipos();
-  cargarFavoritos(user.id);
-
+  await cargarClasificacion();
+  await cargarEquipos();
+  
   // ===== MODAL =====
   const modal = document.getElementById("team-modal");
-  document.getElementById("modal-close").onclick = () => modal.style.display = "none";
-  window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
-
-  // Botón ver favoritos
-  const showFavBtn = document.getElementById("show-favorites-btn");
-  const allTeamsContainer = document.getElementById("team-list");
-  const favContainer = document.getElementById("favorites-list");
-
-  showFavBtn.onclick = async () => {
-    if(favContainer.style.display === "none"){
-      allTeamsContainer.style.display = "none";
-      favContainer.style.display = "grid";
-      await cargarFavoritos(user.id);
-      showFavBtn.textContent = "⬅ Volver a todos los equipos";
-    } else {
-      favContainer.style.display = "none";
-      allTeamsContainer.style.display = "grid";
-      showFavBtn.textContent = "⭐ Ver Mis Favoritos";
-    }
-  };
+  if(modal) {
+    document.getElementById("modal-close").onclick = () => modal.style.display = "none";
+    window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
+  }
 });
 
+// ===============================
+// TOAST NOTIFICATION SYSTEM
+// ===============================
+function showToast(message, type = 'success', duration = 3500) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || '📢'}</span>
+    <span class="toast-message">${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+  `;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('toast-visible'));
+  });
+  setTimeout(() => {
+    toast.classList.remove('toast-visible');
+    toast.classList.add('toast-hiding');
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+}
 
-  // Header/Footer
-  async function loadHeader(){
-    document.getElementById("header-placeholder").innerHTML =
-      await fetch("header.html").then(r=>r.text());
-  }
-  async function loadFooter(){
-    document.getElementById("footer-placeholder").innerHTML =
-      await fetch("footer.html").then(r=>r.text());
-  }
+window.cargarClasificacion = cargarClasificacion;
 
   // Cargar equipos NFL
   const teamLogos = {
@@ -87,15 +109,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Cargar Clasificación NFL
   async function cargarClasificacion() {
     const tbody = document.querySelector("#standings-table tbody");
-    tbody.innerHTML = '<tr><td colspan="5">Cargando clasificación...</td></tr>';
+    const table = document.getElementById("standings-table");
+    
+    // Upgrade to Standings 2.0 Class
+    table.className = "standings-table-v2";
+    
+    // Initial Skeletal State
+    tbody.innerHTML = "";
+    for(let i=0; i<8; i++) {
+      const sTr = document.createElement("tr");
+      sTr.className = "standings-row-v2";
+      sTr.innerHTML = `
+        <td colspan="5">
+          <div class="skeleton" style="height: 45px; width: 100%; border-radius: 12px;"></div>
+        </td>
+      `;
+      tbody.appendChild(sTr);
+    }
 
     try {
       const res = await fetch("http://localhost:3000/api/nfl/standings");
       const data = await res.json();
 
-      // ESPN NFL structure parsing
       let allEntries = [];
-
       function findEntries(node) {
           if (node.standings && node.standings.entries) {
               allEntries = allEntries.concat(node.standings.entries);
@@ -120,7 +156,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           return pb - pa;
       });
 
-      // Render top 16 or all
       allEntries.forEach((entry, index) => {
           const team = entry.team;
           const winsStat = entry.stats.find(s => s.name === "wins") || { value: 0 };
@@ -128,24 +163,31 @@ document.addEventListener("DOMContentLoaded", async () => {
           const pctStat = entry.stats.find(s => s.name === "winPercent") || { value: 0 };
 
           const tr = document.createElement("tr");
+          tr.className = "standings-row-v2";
+
+          const rankColor = index < 3 ? "var(--nfl-blue)" : "inherit";
+
           tr.innerHTML = `
-              <td>${index + 1}</td>
+              <td style="color: ${rankColor}">${index + 1}</td>
               <td>
-                  <div style="display:flex; align-items:center; gap:10px;">
-                      <img src="${team.logos[0].href}" alt="${team.abbreviation}" style="width:30px; height:30px;">
-                      ${team.displayName}
+                  <div class="td-team-v2">
+                      <img src="${team.logos[0].href}" alt="${team.abbreviation}" class="team-logo-v2">
+                      <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight: 700;">${team.displayName}</span>
+                        <span style="font-size: 0.75em; color: #94a3b8; text-transform: uppercase;">${team.abbreviation}</span>
+                      </div>
                   </div>
               </td>
-              <td>${winsStat.value}</td>
-              <td>${lossesStat.value}</td>
-              <td>${(pctStat.value * 100).toFixed(1)}%</td>
+              <td class="win-cell">${winsStat.value}</td>
+              <td class="loss-cell">${lossesStat.value}</td>
+              <td><span class="pct-badge" style="background: rgba(30, 58, 138, 0.2); color: #93c5fd;">${(pctStat.value * 100).toFixed(1)}%</span></td>
           `;
           tbody.appendChild(tr);
       });
 
     } catch(err) {
       console.error("Error cargando clasificación NFL:", err);
-      tbody.innerHTML = `<tr><td colspan="5">No se pudo cargar la clasificación</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px;">⚠️ Error cargando la clasificación</td></tr>`;
     }
   }
 
@@ -197,17 +239,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       const favBtn = document.createElement("button");
       favBtn.textContent="⭐";
       favBtn.className="fav-btn";
-      favBtn.onclick=async e=>{
+      favBtn.onclick = async e => {
         e.stopPropagation();
-        try{
-          await fetch("http://localhost:3000/api/favorites",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-            userId:JSON.parse(localStorage.getItem("user")).id,
-            league:"NFL",
-            teamId:team.id,
-            teamName:team.full_name
-          })});
-          alert("Añadido a favoritos ✅");
-        }catch(err){ console.error(err); alert("Error ❌"); }
+        try {
+          const uid = user.uid || user.id;
+          const userRef = doc(db, "users", uid);
+          await updateDoc(userRef, {
+            favorites: arrayUnion({
+              league: "NFL",
+              teamId: team.id,
+              teamName: team.full_name
+            })
+          });
+          showToast("¡Añadido a favoritos! ⭐", "success");
+        } catch (err) {
+          console.error(err);
+          showToast("No se pudo añadir a favoritos", "error");
+        }
       };
       card.querySelector(".team-card-front").appendChild(favBtn);
 

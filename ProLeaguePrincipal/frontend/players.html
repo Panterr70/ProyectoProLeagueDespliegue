@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jugadores - ProLeague</title>
+  <meta name="description" content="Busca jugadores de NBA y NFL. Consulta su equipo, posición y datos en ProLeague.">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dynamic-body">
+  <div class="dynamic-bg"></div>
+
+  <!-- HEADER -->
+  <div id="header-placeholder"></div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- MAIN -->
+  <main class="players-main">
+
+    <!-- HERO BANNER -->
+    <section class="players-hero">
+      <div class="players-hero-content">
+        <h1>🏆 Jugadores</h1>
+        <p>Busca cualquier jugador de la NBA o NFL</p>
+      </div>
+    </section>
+
+    <!-- SEARCH & FILTERS -->
+    <section class="players-controls">
+      <div class="players-search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="player-search" class="players-search-input" placeholder="Buscar jugador por nombre...">
+        <button id="clear-search" class="clear-search-btn" title="Limpiar">✕</button>
+      </div>
+
+      <div class="players-league-tabs">
+        <button class="league-tab active" data-league="NBA" id="tab-nba">
+          <span class="tab-icon">🏀</span> NBA
+        </button>
+        <button class="league-tab" data-league="NFL" id="tab-nfl">
+          <span class="tab-icon">🏈</span> NFL
+        </button>
+      </div>
+
+      <div class="players-team-filter">
+        <select id="team-filter">
+          <option value="">Todos los equipos</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- RESULTS COUNT -->
+    <div class="players-count-bar">
+      <span id="players-count-text">Selecciona una liga para ver jugadores</span>
+    </div>
+
+    <!-- GRID -->
+    <section class="players-grid-section">
+      <div class="players-grid" id="players-grid">
+        <!-- Landing state -->
+        <div class="players-landing" id="players-landing">
+          <div class="landing-icon">🏆</div>
+          <h2>Explora los Jugadores</h2>
+          <p>Selecciona NBA o NFL para comenzar</p>
+          <div class="landing-buttons">
+            <button class="btn-primary" onclick="setLeague('NBA')">🏀 Ver NBA</button>
+            <button class="btn-secondary" onclick="setLeague('NFL')">🏈 Ver NFL</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL JUGADOR -->
+    <div id="player-modal" class="player-modal-overlay" style="display:none;">
+      <div class="player-modal-card">
+        <button class="modal-close" id="modal-close">✕</button>
+        <div class="modal-header">
+          <div class="modal-league-badge" id="modal-league-badge">NBA</div>
+          <h2 id="modal-player-name">Nombre Jugador</h2>
+        </div>
+        <div class="modal-body">
+          <div class="modal-stat" id="modal-team">
+            <span class="modal-stat-label">Equipo</span>
+            <span class="modal-stat-value" id="modal-team-val">—</span>
+          </div>
+          <div class="modal-stat" id="modal-position">
+            <span class="modal-stat-label">Posición</span>
+            <span class="modal-stat-value" id="modal-pos-val">—</span>
+          </div>
+          <div class="modal-stat" id="modal-number">
+            <span class="modal-stat-label">Dorsal</span>
+            <span class="modal-stat-value" id="modal-num-val">—</span>
+          </div>
+          <div class="modal-stat" id="modal-college">
+            <span class="modal-stat-label">Universidad</span>
+            <span class="modal-stat-value" id="modal-college-val">—</span>
+          </div>
+          <div class="modal-stat" id="modal-country">
+            <span class="modal-stat-label">País</span>
+            <span class="modal-stat-value" id="modal-country-val">—</span>
+          </div>
+          <div class="modal-stat" id="modal-height">
+            <span class="modal-stat-label">Altura</span>
+            <span class="modal-stat-value" id="modal-height-val">—</span>
+          </div>
+          <div class="modal-stat" id="modal-weight">
+            <span class="modal-stat-label">Peso</span>
+            <span class="modal-stat-value" id="modal-weight-val">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <div id="footer-placeholder"></div>
+
+  <script src="app-players.js"></script>
+  <script>
+    fetch("header.html")
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById("header-placeholder").innerHTML = html;
+        const user = JSON.parse(localStorage.getItem("user"));
+        const logoutLink = document.getElementById("nav-logout");
+        const profileLink = document.getElementById("nav-profile");
+        const chatLink = document.getElementById("nav-chat");
+        const favLink = document.getElementById("nav-favorites");
+        if (user) {
+          if (logoutLink) { logoutLink.style.display = "inline"; logoutLink.addEventListener("click", e => { e.preventDefault(); localStorage.removeItem("user"); window.location.href = "login.html"; }); }
+          if (profileLink) profileLink.style.display = "inline";
+          if (chatLink) chatLink.style.display = "inline";
+          if (favLink) favLink.style.display = "inline";
+        }
+      });
+    fetch("footer.html")
+      .then(r => r.text())
+      .then(html => document.getElementById("footer-placeholder").innerHTML = html);
+  </script>
+</body>
+</html>

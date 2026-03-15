@@ -60,13 +60,18 @@ nflForm.addEventListener("submit", (e) => {
 
 // Función DOM
 function addMessageToDOM(msg, room) {
+  const container = room === "nba" ? nbaMessagesDiv : nflMessagesDiv;
+  if (!container) return;
+
   const div = document.createElement("div");
   div.classList.add("message");
   
-  // Estilo diferente si es mio
+  // Diferenciar remitente
+  let userLabel = msg.user;
   if (msg.user === username) {
     div.classList.add("my-message");
-  } else if (msg.user === "🤖 ProLeagueBot") {
+    userLabel = "Tú";
+  } else if (msg.user.includes("Bot")) {
     div.classList.add("bot-message");
   } else {
     div.classList.add("other-message");
@@ -74,25 +79,27 @@ function addMessageToDOM(msg, room) {
   
   div.innerHTML = `
     <div class="meta">
-      <span class="username">${msg.user}</span>
-      <span class="time">${msg.time}</span>
+      <span class="username">${userLabel}</span>
+      <span class="time">${msg.time || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
     </div>
     <p class="text">${msg.text}</p>
   `;
   
-  if (room === "nba") {
-    nbaMessagesDiv.appendChild(div);
-    nbaMessagesDiv.scrollTop = nbaMessagesDiv.scrollHeight;
-  } else if (room === "nfl") {
-    nflMessagesDiv.appendChild(div);
-    nflMessagesDiv.scrollTop = nflMessagesDiv.scrollHeight;
-  }
+  container.appendChild(div);
+  
+  // Scroll suave al final
+  container.scrollTo({
+    top: container.scrollHeight,
+    behavior: 'smooth'
+  });
 }
 
 // Historial (Revisar lógica server)
 socket.on("loadMessages", (data) => {
-  // data es { room: 'nba', messages: [] } <- Necesito que el server mande esto
+  // data es { room: 'nba', messages: [] }
   if(data.room && data.messages) {
+    const container = data.room === "nba" ? nbaMessagesDiv : nflMessagesDiv;
+    container.innerHTML = ""; // Limpiar antes de cargar historial
     data.messages.forEach(m => addMessageToDOM(m, data.room));
   }
 });

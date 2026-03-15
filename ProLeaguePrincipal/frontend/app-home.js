@@ -1,4 +1,67 @@
 // =======================
+// TOAST UTILITY
+// =======================
+function showToast(message, type = 'success', duration = 3500) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || '📢'}</span>
+    <span class="toast-message">${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+  `;
+  container.appendChild(toast);
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast-visible')));
+  setTimeout(() => {
+    toast.classList.remove('toast-visible');
+    toast.classList.add('toast-hiding');
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+}
+
+// =======================
+// LOGO MAPS (Scoreboard)
+// =======================
+const SB_NBA_LOGOS = {
+  "Atlanta Hawks":"ATL.png","Boston Celtics":"BOS.png","Brooklyn Nets":"BKN.png",
+  "Charlotte Hornets":"CHA.png","Chicago Bulls":"CHI.png","Cleveland Cavaliers":"CLE.png",
+  "Dallas Mavericks":"DAL.png","Denver Nuggets":"DEN.png","Detroit Pistons":"DET.png",
+  "Golden State Warriors":"GSW.png","Houston Rockets":"HOU.png","Indiana Pacers":"IND.png",
+  "Los Angeles Clippers":"LAC.png","Los Angeles Lakers":"LAL.png","Memphis Grizzlies":"MEM.png",
+  "Miami Heat":"MIA.png","Milwaukee Bucks":"MIL.png","Minnesota Timberwolves":"MIN.png",
+  "New Orleans Pelicans":"NOP.png","New York Knicks":"NYK.png","Oklahoma City Thunder":"OKC.png",
+  "Orlando Magic":"ORL.png","Philadelphia 76ers":"PHI.png","Phoenix Suns":"PHX.png",
+  "Portland Trail Blazers":"POR.png","Sacramento Kings":"SAC.png","San Antonio Spurs":"SAS.png",
+  "Toronto Raptors":"TOR.png","Utah Jazz":"UTA.png","Washington Wizards":"WIZ.png"
+};
+const SB_NFL_LOGOS = {
+  "Arizona Cardinals":"NFL_ARI.png","Atlanta Falcons":"NFL_ATL.png","Baltimore Ravens":"NFL_BAL.png",
+  "Buffalo Bills":"NFL_BUF.png","Carolina Panthers":"NFL_CAR.png","Chicago Bears":"NFL_CHI.svg",
+  "Cincinnati Bengals":"NFL_CIN.png","Cleveland Browns":"NFL_CLE.png","Dallas Cowboys":"NFL_DAL.svg",
+  "Denver Broncos":"NFL_DEN.svg","Detroit Lions":"NFL_DET.png","Green Bay Packers":"NFL_GB.png",
+  "Houston Texans":"NFL_HOU.png","Indianapolis Colts":"NFL_IND.svg","Jacksonville Jaguars":"NFL_JAX.png",
+  "Kansas City Chiefs":"NFL_KC.png","Las Vegas Raiders":"NFL_LV.png","Los Angeles Chargers":"NFL_LAC.png",
+  "Los Angeles Rams":"NFL_LAR.png","Miami Dolphins":"NFL_MIA.png","Minnesota Vikings":"NFL_MIN.png",
+  "New England Patriots":"NFL_NE.png","New Orleans Saints":"NFL_NO.png","New York Giants":"NFL_NYG.png",
+  "New York Jets":"NFL_NYJ.svg","Philadelphia Eagles":"NFL_PHI.png","Pittsburgh Steelers":"NFL_PIT.png",
+  "San Francisco 49ers":"NFL_SF.svg","Seattle Seahawks":"NFL_SEA.png","Tampa Bay Buccaneers":"NFL_TB.svg",
+  "Tennessee Titans":"NFL_TEN.svg","Washington Commanders":"NFL_WAS.png"
+};
+
+function getSbLogoImg(teamName, isNBA) {
+  const map = isNBA ? SB_NBA_LOGOS : SB_NFL_LOGOS;
+  const file = map[teamName];
+  if (!file) return '';
+  return `<img src="logos/${file}" class="sb-team-logo" alt="${teamName}" onerror="this.style.display='none'">`;
+}
+
+// =======================
 // AUTH & STATE
 // =======================
 const user = JSON.parse(localStorage.getItem("user"));
@@ -230,20 +293,33 @@ async function cargarScoreboard() {
         card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
       };
       
+      const visitorLogoImg = getSbLogoImg(visitorTeam.full_name || visitorTeam.name || '', isNBA);
+      const homeLogoImg = getSbLogoImg(homeTeam.full_name || homeTeam.name || '', isNBA);
+
       card.innerHTML = `
-        <div style="font-size: 0.75em; color: #94a3b8; display: flex; justify-content: space-between; margin-bottom: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px;">
+        <div style="font-size: 0.75em; color: #94a3b8; display: flex; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px;">
           <span style="font-weight: 800; color: ${sportColor};">${game.sport}</span>
-          <span>${gameDate} - FINAL</span>
+          <span>${gameDate} · FINAL</span>
         </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; color: ${isVisitorWinner ? '#fff' : '#94a3b8'}; font-weight: ${isVisitorWinner ? 'bold' : 'normal'}; margin-top: 5px;">
-          <span style="font-size: 1.1em;">${visitorAbbr}</span>
-          <span style="font-size: 1.25em;">${vScore}</span>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; color: ${isHomeWinner ? '#fff' : '#94a3b8'}; font-weight: ${isHomeWinner ? 'bold' : 'normal'};">
-          <span style="font-size: 1.1em;">${homeAbbr}</span>
-          <span style="font-size: 1.25em;">${hScore}</span>
+
+        <div class="sb-card-body">
+          <div class="sb-team-row" style="justify-content: space-between; color: ${isVisitorWinner ? '#fff' : '#94a3b8'}; font-weight: ${isVisitorWinner ? '700' : '400'};">
+            <div style="display:flex; align-items:center; gap:7px;">
+              ${visitorLogoImg}
+              <span style="font-size: 1em;">${visitorAbbr}</span>
+              ${isVisitorWinner ? '<span style="font-size:0.7em; color:' + sportColor + '; background:' + sportColor + '22; padding:1px 6px; border-radius:8px; font-weight:800;">W</span>' : ''}
+            </div>
+            <span style="font-size: 1.25em; min-width:28px; text-align:right;">${vScore}</span>
+          </div>
+
+          <div class="sb-team-row" style="justify-content: space-between; color: ${isHomeWinner ? '#fff' : '#94a3b8'}; font-weight: ${isHomeWinner ? '700' : '400'};">
+            <div style="display:flex; align-items:center; gap:7px;">
+              ${homeLogoImg}
+              <span style="font-size: 1em;">${homeAbbr}</span>
+              ${isHomeWinner ? '<span style="font-size:0.7em; color:' + sportColor + '; background:' + sportColor + '22; padding:1px 6px; border-radius:8px; font-weight:800;">W</span>' : ''}
+            </div>
+            <span style="font-size: 1.25em; min-width:28px; text-align:right;">${hScore}</span>
+          </div>
         </div>
       `;
       

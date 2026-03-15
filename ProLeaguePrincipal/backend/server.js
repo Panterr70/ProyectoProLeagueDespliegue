@@ -7,14 +7,36 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { pool as db } from "./db.js";
 
-import authRoutes from "./routes/auth.routes.js";
-import favoritesRoutes from "./routes/favorites.routes.js";
 import newsRoutes from "./routes/news.routes.js";
+import multer from "multer";
+import fs from "fs";
 
 dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
+
+// Config Multer para subida local de avatares
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "./uploads/";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
+
+// Endpoint para subir avatar local (para ahorrar en Firebase Storage)
+app.post("/api/auth/upload-avatar/:uid", upload.single("avatar"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No se subió ningún archivo" });
+  const avatarUrl = `/uploads/${req.file.filename}`;
+  res.json({ avatarUrl });
+});
+
 const io = new Server(httpServer, {
   cors: {
     origin: "*", // Ajustar en producción si es necesario
@@ -30,8 +52,6 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas
-app.use("/api/auth", authRoutes);
-app.use("/api/favorites", favoritesRoutes);
 app.use("/api/news", newsRoutes);
 
 // Ruta principal
@@ -133,14 +153,11 @@ setInterval(() => {
 app.get("/api/nba/teams", async (req, res) => {
   try {
     const response = await axios.get("https://api.balldontlie.io/v1/teams", {
-      headers: {
-        Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}`,
-      },
+      headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` },
     });
-
     res.json(response.data.data);
   } catch (err) {
-    console.error("Error obteniendo equipos NBA:", err.message);
+    console.error("❌ Error NBA Teams API:", err.response?.status, err.response?.data || err.message);
     res.status(500).json({ error: "Error obteniendo equipos NBA" });
   }
 });
@@ -152,43 +169,39 @@ app.get("/api/nfl/teams", async (req, res) => {
   try {
     const response = await axios.get(
       "https://api.balldontlie.io/nfl/v1/teams",
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}`,
-        },
-      },
+      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } },
     );
-
     res.json(response.data.data);
   } catch (err) {
-    console.error("Error obteniendo equipos NFL:", err.message);
+    console.error("❌ Error NFL Teams API:", err.response?.status, err.response?.data || err.message);
     res.status(500).json({ error: "Error obteniendo equipos NFL" });
   }
 });
 
 // =======================
-// NFL - JUGADORES POR EQUIPO
+// NFL - JUGADORES POR EQUIPO O BÚSQUEDA
 // =======================
 app.get("/api/nfl/players", async (req, res) => {
-  const { teamId } = req.query;
-  if (!teamId) return res.status(400).json({ error: "teamId requerido" });
-
+  const { teamId, search } = req.query;
+  
   try {
-    const params = new URLSearchParams({
-      "team_ids[]": teamId,
-      per_page: 100
-    });
+    const params = new URLSearchParams();
+    if (teamId) params.append("team_ids[]", teamId);
+    if (search) params.append("search", search);
+    params.append("per_page", 100);
 
     const response = await axios.get(
       `https://api.balldontlie.io/nfl/v1/players?${params}`,
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
 
-    const data = response.data.data;
-    res.json(data);
+    res.json(response.data.data);
   } catch (err) {
-    console.error("Error obteniendo jugadores NFL:", err.message);
-    res.status(500).json({ error: "No se pudieron cargar los jugadores de NFL" });
+    console.error("❌ Error NFL Players API:", err.response?.status, err.response?.data || err.message);
+    res.status(err.response?.status || 500).json({ 
+      error: "Error en la API de NFL",
+      details: err.response?.data || err.message 
+    });
   }
 });
 // =======================
@@ -209,30 +222,29 @@ app.get("/api/nba/standings", async (req, res) => {
 });
 
 // =======================
-// NBA - JUGADORES POR EQUIPO
+// NBA - JUGADORES POR EQUIPO O BÚSQUEDA
 // =======================
 app.get("/api/nba/players", async (req, res) => {
-  const { teamId } = req.query;
-  if (!teamId) return res.status(400).json({ error: "teamId requerido" });
+  const { teamId, search } = req.query;
 
   try {
-    const params = new URLSearchParams({
-      "team_ids[]": teamId,
-      per_page: 100
-    });
+    const params = new URLSearchParams();
+    if (teamId) params.append("team_ids[]", teamId);
+    if (search) params.append("search", search);
+    params.append("per_page", 100);
 
     const response = await axios.get(
       `https://api.balldontlie.io/v1/players?${params}`,
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
 
-    // En la versión gratuita recogemos los 100 primeros que devuelva la API
-    const data = response.data.data;
-    
-    res.json(data);
+    res.json(response.data.data);
   } catch (err) {
-    console.error("Error obteniendo jugadores NBA:", err.message);
-    res.status(500).json({ error: "No se pudo cargar los jugadores" });
+    console.error("❌ Error NBA Players API:", err.response?.status, err.response?.data || err.message);
+    res.status(err.response?.status || 500).json({ 
+      error: "Error en la API de NBA",
+      details: err.response?.data || err.message 
+    });
   }
 });
 
