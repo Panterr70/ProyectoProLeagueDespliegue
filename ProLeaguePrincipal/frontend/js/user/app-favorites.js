@@ -1,5 +1,5 @@
-import { auth, db } from "./firebase-config.js";
-import { doc, getDoc, updateDoc, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { auth, db } from "../config/firebase-config.js";
+import { doc, getDoc, updateDoc, setDoc, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ===============================
 // TOAST UTILITY
@@ -56,7 +56,7 @@ const nflLogos = {
 document.addEventListener("DOMContentLoaded", async () => {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user || (!user.uid && !user.id)) {
-    window.location.href = "login.html";
+    window.location.href = "../auth/login.html";
     return;
   }
 
@@ -70,12 +70,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 // HEADER / FOOTER
 // ===============================
 async function loadHeader() {
-  const html = await fetch("header.html").then(r => r.text());
+  const html = await fetch("../components/header.html").then(r => r.text());
   document.getElementById("header-placeholder").innerHTML = html; 
 }
 
 async function loadFooter() {
-  const html = await fetch("footer.html").then(r => r.text());
+  const html = await fetch("../components/footer.html").then(r => r.text());
   document.getElementById("footer-placeholder").innerHTML = html;
 }
 
@@ -105,8 +105,8 @@ async function cargarFavoritos(uid) {
           : nflLogos[fav.teamName];
 
       const logoPath = logo
-        ? `logos/${logo}`
-        : "logos/default.png";
+        ? `../../logos/${logo}`
+        : "../../logos/default.png";
 
       const card = document.createElement("div");
       card.className = "team-card";

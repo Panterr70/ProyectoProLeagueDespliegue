@@ -58,7 +58,7 @@ function getSbLogoImg(teamName, isNBA) {
   const map = isNBA ? SB_NBA_LOGOS : SB_NFL_LOGOS;
   const file = map[teamName];
   if (!file) return '';
-  return `<img src="logos/${file}" class="sb-team-logo" alt="${teamName}" onerror="this.style.display='none'">`;
+  return `<img src="../../logos/${file}" class="sb-team-logo" alt="${teamName}" onerror="this.style.display='none'">`;
 }
 
 // =======================
@@ -397,14 +397,14 @@ async function initNews() {
   newsList.innerHTML = "";
   allItems.forEach((item, index) => {
     const category = item.category;
-    const image = category === "NBA" ? "images/nba-logo.png" : "images/nfl-logo.png";
+    const image = category === "NBA" ? "../../images/nba-logo.png" : "../../images/nfl-logo.png";
 
     const card = document.createElement("div");
     card.className = `news-card ${category.toLowerCase()}`;
     card.style.animationDelay = `${index * 0.1}s`;
 
     card.innerHTML = `
-      <img src="${image}" alt="${category}" loading="lazy" onerror="this.src='https://via.placeholder.com/50'">
+      <img src="${image}" alt="${category}" loading="lazy" onerror="this.src='../../logos/logo-png.png'">
       <div class="news-card-content">
         <span class="news-tag ${category.toLowerCase()}">${category}</span>
         <h3>${item.title}</h3>

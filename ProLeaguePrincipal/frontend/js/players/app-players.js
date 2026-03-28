@@ -220,7 +220,7 @@ function createPlayerCard(player, index) {
   const teamName = player._teamName || '';
   const logoMap = league === 'NBA' ? nbaLogos : nflLogos;
   const logoFile = logoMap[teamName];
-  const logoPath = logoFile ? `logos/${logoFile}` : null;
+  const logoPath = logoFile ? `../../logos/${logoFile}` : null;
   const isNBA = league === 'NBA';
   const sportColor = isNBA ? '#ff3b3b' : '#3b82f6';
 
@@ -337,9 +337,11 @@ let searchDebounce;
 document.getElementById('player-search').addEventListener('input', (e) => {
   searchTerm = e.target.value.trim();
   clearTimeout(searchDebounce);
+  // Require at least 3 characters to avoid API rate limiting (429)
+  if (searchTerm.length > 0 && searchTerm.length < 3) return;
   searchDebounce = setTimeout(() => {
     fetchPlayers();
-  }, 500);
+  }, 600);
 });
 
 document.getElementById('clear-search').addEventListener('click', () => {

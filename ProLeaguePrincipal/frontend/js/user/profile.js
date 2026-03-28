@@ -1,6 +1,6 @@
-import { auth, db } from "./firebase-config.js";
+import { auth, db } from "../config/firebase-config.js";
 import { updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ===== TOAST UTILITY =====
 function showToast(message, type = 'success', duration = 3500) {
@@ -22,7 +22,7 @@ function showToast(message, type = 'success', duration = 3500) {
 // ===== CARGAR USUARIO =====
 let user = JSON.parse(localStorage.getItem("user"));
 if (!user || (!user.uid && !user.id)) {
-  window.location.href = "login.html";
+  window.location.href = "../auth/login.html";
 }
 
 // Función para refrescar los datos del perfil desde Firestore
@@ -46,7 +46,7 @@ async function loadUserProfile() {
     // Imagen del avatar (por ahora local o default)
     document.getElementById("profile-img").src = user.avatar
       ? (user.avatar.startsWith('http') ? user.avatar : `http://localhost:3000${user.avatar}`)
-      : "images/default-avatar.png";
+      : "../../images/default-avatar.png";
   } catch (err) {
     console.error(err);
     showToast("Error cargando perfil", 'error');
@@ -57,7 +57,7 @@ loadUserProfile();
 // ===== HEADER / FOOTER =====
 async function loadHeaderFooter() {
   try {
-    const headerHtml = await fetch("header.html").then(r => r.text());
+    const headerHtml = await fetch("../components/header.html").then(r => r.text());
     document.getElementById("header-placeholder").innerHTML = headerHtml;
 
     const navProfile = document.getElementById("nav-profile");
@@ -73,11 +73,11 @@ async function loadHeaderFooter() {
         e.preventDefault();
         auth.signOut();
         localStorage.removeItem("user");
-        window.location.href = "login.html";
+        window.location.href = "../auth/login.html";
       });
     }
 
-    const footerHtml = await fetch("footer.html").then(r => r.text());
+    const footerHtml = await fetch("../components/footer.html").then(r => r.text());
     document.getElementById("footer-placeholder").innerHTML = footerHtml;
   } catch (err) {
     console.error("Error cargando header/footer:", err);

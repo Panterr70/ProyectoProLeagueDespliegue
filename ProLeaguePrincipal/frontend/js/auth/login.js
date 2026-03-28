@@ -25,7 +25,7 @@ form.addEventListener("submit", async (e) => {
     localStorage.setItem("user", JSON.stringify(data.user));
 
     // Redirigimos a home
-    window.location.href = "home.html";
+    window.location.href = "../home/home.html";
   } catch (err) {
     errorEl.textContent = "Error conectando al servidor";
     console.error(err);

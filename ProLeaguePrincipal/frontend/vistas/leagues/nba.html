@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ProLeague - NBA</title>
 
-  <link rel="stylesheet" href="style.css">
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <link rel="stylesheet" href="../../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body class="dynamic-body">
@@ -52,30 +52,30 @@
 
         <div class="charts-grid">
           <div class="chart-card">
-            <h4>Conferencias</h4>
-            <div class="chart-box" id="chart_conferences"></div>
+            <h4>Top 5 (Victorias)</h4>
+            <canvas class="chart-box" id="chart_top5"></canvas>
           </div>
 
           <div class="chart-card">
-            <h4>Divisiones</h4>
-            <div class="chart-box" id="chart_divisions"></div>
+            <h4>Global Liga (G/P)</h4>
+            <canvas class="chart-box" id="chart_global_winloss"></canvas>
           </div>
 
           <div class="chart-card">
-            <h4>Ciudades</h4>
-            <div class="chart-box" id="chart_cities"></div>
+            <h4>Eficiencia (Pts)</h4>
+            <canvas class="chart-box" id="chart_points"></canvas>
           </div>
 
           <div class="chart-card">
-            <h4>Jugadores</h4>
-            <div class="chart-box" id="chart_players"></div>
+            <h4>Radar Top 5</h4>
+            <canvas class="chart-box" id="chart_radar"></canvas>
           </div>
         </div>
       </section>
 
       <!-- FAVORITOS -->
       <div class="favorites-toggle">
-        <a href="favorites.html" class="btn-secondary">⭐ Ver Mis Favoritos</a>
+        <a href="../user/favorites.html" class="btn-secondary">⭐ Ver Mis Favoritos</a>
       </div>
 
       <!-- EQUIPOS -->
@@ -103,6 +103,6 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <script type="module" src="app-nba.js"></script>
+  <script type="module" src="../../js/leagues/app-nba.js"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 const existingUser = JSON.parse(localStorage.getItem("user"));
 if (existingUser) {
   // Redirigir al home si ya está logueado
-  window.location.href = "home.html";
+  window.location.href = "../home/home.html";
 }
 
 // =======================
@@ -40,7 +40,7 @@ form.addEventListener("submit", async (e) => {
     }
 
     alert("Cuenta creada correctamente. Ahora puedes iniciar sesión.");
-    window.location.href = "login.html"; // redirige al login
+    window.location.href = "../auth/login.html"; // redirige al login
 
   } catch (err) {
     console.error(err);

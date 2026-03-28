@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { exec } from "child_process";
 import { pool as db } from "./db.js";
 
 import newsRoutes from "./routes/news.routes.js";
@@ -46,6 +47,7 @@ const io = new Server(httpServer, {
 
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 // Middlewares
 app.use(cors());
@@ -330,4 +332,8 @@ app.get("/api/nfl/games", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
   console.log(`✅ Backend (Socket.io) activo en http://localhost:${PORT}`);
+  const frontendUrl = `http://localhost:${PORT}/vistas/auth/register.html`;
+  console.log(`Abriendo aplicación en: ${frontendUrl}`);
+  const startCmd = process.platform === 'win32' ? 'start' : (process.platform === 'darwin' ? 'open' : 'xdg-open');
+  exec(`${startCmd} ${frontendUrl}`);
 });

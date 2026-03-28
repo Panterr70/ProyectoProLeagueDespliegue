@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - ProLeague</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body class="dynamic-body">
   <div class="dynamic-bg"></div>
 
   <main class="login-register-container">
     <section id="login-section">
-      <img src="logos/logo-png.png" alt="ProLeague Logo" class="auth-logo">
+      <img src="../../logos/logo-png.png" alt="ProLeague Logo" class="auth-logo">
       <h2>Inicia sesión</h2>
 
       <form id="login-form">
@@ -21,12 +21,12 @@
       </form>
 
       <p id="login-error"></p>
-      <p>¿No tienes cuenta? <a href="register.html">Regístrate</a></p>
+      <p>¿No tienes cuenta? <a href="../auth/register.html">Regístrate</a></p>
     </section>  
   </main>
 
   <script type="module">
-    import { auth, db } from "./firebase-config.js";
+    import { auth, db } from "../../js/config/firebase-config.js";
     import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -90,7 +90,7 @@
         localStorage.setItem("user", JSON.stringify(userObj));
 
         showToast("¡Bienvenido de nuevo!", 'success');
-        setTimeout(() => { window.location.href = "home.html"; }, 1000);
+        setTimeout(() => { window.location.href = "../home/home.html"; }, 1000);
 
       } catch (err) {
         console.error("General Login Error:", err);

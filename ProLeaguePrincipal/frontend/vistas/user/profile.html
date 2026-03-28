@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi Perfil - ProLeague</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body class="dynamic-body">
@@ -22,7 +22,7 @@
 
     <section class="profile-card">
       <div class="profile-avatar">
-        <img id="profile-img" src="images/default-avatar.png" alt="Avatar">
+        <img id="profile-img" src="../../images/default-avatar.png" alt="Avatar">
         <label class="upload-btn">
           Cambiar imagen
           <input type="file" id="avatar-input" accept="image/*" hidden>
@@ -59,10 +59,10 @@
   <div id="footer-placeholder"></div>
 
   <!-- JS -->
-  <script type="module" src="profile.js"></script>
+  <script type="module" src="../../js/user/profile.js"></script>
 
   <script>
-    fetch("header.html")
+    fetch("../components/header.html")
       .then(r => r.text())
       .then(html => {
         document.getElementById("header-placeholder").innerHTML = html;
@@ -84,12 +84,12 @@
           logoutLink.addEventListener("click", e => {
             e.preventDefault();
             localStorage.removeItem("user");
-            window.location.href = "login.html";
+            window.location.href = "../auth/login.html";
           });
         }
       });
 
-    fetch("footer.html")
+    fetch("../components/footer.html")
       .then(r => r.text())
       .then(html => document.getElementById("footer-placeholder").innerHTML = html);
   </script>

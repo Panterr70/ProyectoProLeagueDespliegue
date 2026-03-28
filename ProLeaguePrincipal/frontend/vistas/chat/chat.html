@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat en Vivo - ProLeague</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- Socket.io CDN -->
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
@@ -22,7 +22,7 @@
       <!-- NBA SECTION -->
       <section class="chat-section chat-nba" id="nba-chat-section">
         <div class="chat-header">
-          <img src="logos/NBA_logo.png" alt="NBA" class="chat-logo" onerror="this.src='images/nba-logo.png'">
+          <img src="../../logos/NBA_logo.png" alt="NBA" class="chat-logo" onerror="this.src='../../images/nba-logo.png'">
           <h2>NBA Live Chat</h2>
         </div>
         <div class="chat-messages" id="nba-messages">
@@ -37,7 +37,7 @@
       <!-- NFL SECTION -->
       <section class="chat-section chat-nfl" id="nfl-chat-section">
         <div class="chat-header">
-          <img src="logos/NFL_logo.png" alt="NFL" class="chat-logo" onerror="this.src='images/nfl-logo.png'">
+          <img src="../../logos/NFL_logo.png" alt="NFL" class="chat-logo" onerror="this.src='../../images/nfl-logo.png'">
           <h2>NFL Live Chat</h2>
         </div>
         <div class="chat-messages" id="nfl-messages">
@@ -56,10 +56,10 @@
   <div id="footer-placeholder"></div>
 
   <!-- SCRIPTS -->
-  <script src="chat.js"></script>
+  <script src="../../js/chat/chat.js"></script>
   <script>
     // Cargar Header y Footer
-    fetch("header.html")
+    fetch("../components/header.html")
       .then(r => r.text())
       .then(html => {
         document.getElementById("header-placeholder").innerHTML = html;
@@ -70,7 +70,7 @@
         
         // Chat protegido: si no hay usuario, redirigir a login
         if (!user) {
-          window.location.href = "login.html";
+          window.location.href = "../auth/login.html";
         }
 
         if (user && logoutLink) logoutLink.style.display = "inline";
@@ -78,11 +78,11 @@
         if (logoutLink) logoutLink.addEventListener("click", e => {
           e.preventDefault();
           localStorage.removeItem("user");
-          window.location.href = "login.html";
+          window.location.href = "../auth/login.html";
         });
       });
 
-    fetch("footer.html")
+    fetch("../components/footer.html")
       .then(r => r.text())
       .then(html => document.getElementById("footer-placeholder").innerHTML = html);
   </script>

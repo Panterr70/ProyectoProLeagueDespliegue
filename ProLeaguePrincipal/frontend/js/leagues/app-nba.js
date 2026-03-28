@@ -1,17 +1,17 @@
-import { auth, db } from "./firebase-config.js";
-import { doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { auth, db } from "../config/firebase-config.js";
+import { doc, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ===============================
 // STATE & AUTH
 // ===============================
 const user = JSON.parse(localStorage.getItem("user"));
-if (!user || (!user.uid && !user.id)) window.location.href = "login.html";
+if (!user || (!user.uid && !user.id)) window.location.href = "../auth/login.html";
 
 // ===============================
 // UI FUNCTIONS
 // ===============================
 async function loadHeader() {
-  const html = await fetch("header.html").then(r => r.text());
+  const html = await fetch("../components/header.html").then(r => r.text());
   document.getElementById("header-placeholder").innerHTML = html;
   
   if (typeof google !== "undefined" && google.translate) {
@@ -31,14 +31,14 @@ async function loadHeader() {
       e.preventDefault();
       auth.signOut();
       localStorage.removeItem("user");
-      window.location.href = "login.html";
+      window.location.href = "../auth/login.html";
     });
   }
 }
 
 async function loadFooter() {
   document.getElementById("footer-placeholder").innerHTML =
-    await fetch("footer.html").then(r => r.text());
+    await fetch("../components/footer.html").then(r => r.text());
 }
 
 // INIT
@@ -90,9 +90,6 @@ function showToast(message, type = 'success', duration = 3500) {
     setTimeout(() => toast.remove(), 400);
   }, duration);
 }
-
-// ===== GOOGLE CHARTS =====
-google.charts.load("current", { packages: ["corechart"] });
 
 const teamLogos = {
   "Atlanta Hawks": "ATL.png","Boston Celtics": "BOS.png","Brooklyn Nets": "BKN.png",
@@ -187,6 +184,9 @@ async function cargarClasificacion() {
         tbody.appendChild(tr);
     });
 
+    // Render Chart.js charts with real standings data
+    renderCharts(allEntries);
+
   } catch(err) {
     console.error("Error cargando clasificación NBA:", err);
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px;">⚠️ Error cargando la clasificación</td></tr>`;
@@ -210,12 +210,6 @@ async function cargarEquipos() {
 
     mostrarEquipos(equipos);
 
-    google.charts.setOnLoadCallback(() => {
-      dibujarGraficoConferencia(equipos);
-      dibujarGraficoDivision(equipos);
-      dibujarGraficoCiudades(equipos);
-      dibujarGraficoJugadores(equipos);
-    });
   } catch (err) {
     console.error("Error cargando equipos NBA:", err);
   }
@@ -235,7 +229,7 @@ function mostrarEquipos(equipos) {
     card.innerHTML = `
       <div class="team-card-inner">
         <div class="team-card-front">
-          <img class="team-logo" src="logos/${logoSrc}" alt="${team.full_name}">
+          <img class="team-logo" src="../../logos/${logoSrc}" alt="${team.full_name}">
           <div class="team-name">${team.full_name}</div>
           <div class="team-info">Ciudad: ${team.city}</div>
           <div class="team-info">Conferencia: ${team.conference}</div>
@@ -259,14 +253,16 @@ function mostrarEquipos(equipos) {
       try {
         const uid = user.uid || user.id;
         const userRef = doc(db, "users", uid);
-        await updateDoc(userRef, {
-          favorites: arrayUnion({
-            league: "NBA",
-            teamId: team.id,
-            teamName: team.full_name
-          })
-        });
+        await setDoc(userRef, { favorites: arrayUnion({
+            league: "NBA", teamId: team.id, teamName: team.full_name }) }, { merge: true });
+        
+        const animStar = document.createElement("div");
+        animStar.textContent = "⭐";
+        animStar.className = "fav-anim-star";
+        card.querySelector(".team-card-front").appendChild(animStar);
+        setTimeout(() => animStar.remove(), 1000);
         showToast("¡Añadido a favoritos! ⭐", "success");
+      
       } catch (err) {
         console.error(err);
         showToast("Error al añadir a favoritos", "error");
@@ -279,7 +275,7 @@ function mostrarEquipos(equipos) {
     card.onclick = () => {
       const modal = document.getElementById("team-modal");
       modal.style.display = "flex";
-      document.getElementById("modal-logo").src = `logos/${logoSrc}`;
+      document.getElementById("modal-logo").src = `../../logos/${logoSrc}`;
       document.getElementById("modal-name").textContent = team.full_name;
       document.getElementById("modal-city").textContent = `Ciudad: ${team.city}`;
       document.getElementById("modal-conference").textContent = `Conferencia: ${team.conference}`;
@@ -374,79 +370,137 @@ function mostrarEquipos(equipos) {
   });
 }
 
-// ===== GRÁFICOS =====
-function dibujarGraficoConferencia(equipos){
-  const data = google.visualization.arrayToDataTable([
-    ["Conferencia", "Equipos"],
-    ["Este", equipos.filter(t=>t.conference==="East").length],
-    ["Oeste", equipos.filter(t=>t.conference==="West").length]
-  ]);
-  
-  const options = {
-    title: "Equipos por Conferencia",
-    backgroundColor: 'transparent',
-    titleTextStyle: { color: '#ffffff', fontSize: 16, fontName: 'Outfit' },
-    legend: { position: "none" },
-    hAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
-    vAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
-    colors: ['#ff3b3b', '#00f2ff'],
-    animation: { startup: true, duration: 1000, easing: 'out' }
-  };
-  
-  new google.visualization.ColumnChart(document.getElementById("chart_conferences")).draw(data, options);
-}
+// ===============================
+// GRAFICOS ESTATICOS (Chart.js)
+// ===============================
+let chartsInstance = {};
 
-function dibujarGraficoDivision(equipos){
-  const divisions = {};
-  equipos.forEach(t => divisions[t.division] = (divisions[t.division]||0)+1);
-  const data = google.visualization.arrayToDataTable([["División","Equipos"], ...Object.entries(divisions)]);
-  
-  const options = {
-    title: "Equipos por División",
-    backgroundColor: 'transparent',
-    titleTextStyle: { color: '#ffffff', fontSize: 16, fontName: 'Outfit' },
-    legend: { textStyle: { color: '#94a3b8' } },
-    pieHole: 0.4,
-    pieSliceBorderStyle: 'none',
-    colors: ['#00f2ff', '#7000ff', '#ff00c8', '#3b82f6', '#ff3b3b', '#fbbf24'],
-    animation: { startup: true, duration: 1000, easing: 'out' }
-  };
-  
-  new google.visualization.PieChart(document.getElementById("chart_divisions")).draw(data, options);
-}
+function renderCharts(entries) {
+    if(!entries || entries.length === 0) return;
 
-function dibujarGraficoCiudades(equipos){
-  const cityCounts = {};
-  equipos.forEach(t=>{ const c=t.city[0]; cityCounts[c]=(cityCounts[c]||0)+1; });
-  const data = google.visualization.arrayToDataTable([["Inicial Ciudad","Equipos"], ...Object.entries(cityCounts)]);
-  
-  const options = {
-    title: "Equipos por inicial de la ciudad",
-    backgroundColor: 'transparent',
-    titleTextStyle: { color: '#ffffff', fontSize: 16, fontName: 'Outfit' },
-    legend: { position: "none" },
-    hAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
-    vAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
-    colors: ['#7000ff'],
-    animation: { startup: true, duration: 1000, easing: 'out' }
-  };
-  
-  new google.visualization.BarChart(document.getElementById("chart_cities")).draw(data, options);
-}
+    Object.values(chartsInstance).forEach(chart => { if (chart) chart.destroy(); });
 
-function dibujarGraficoJugadores(equipos){
-  const data = google.visualization.arrayToDataTable([["Equipo","Jugadores"], ...equipos.map(t=>[t.full_name, t.numPlayers||0])]);
-  
-  const options = {
-    title: "Jugadores por Equipo",
-    backgroundColor: 'transparent',
-    titleTextStyle: { color: '#ffffff', fontSize: 16, fontName: 'Outfit' },
-    legend: { position: "none" },
-    hAxis: { textStyle: { color: '#94a3b8', fontSize: 10 } },
-    vAxis: { textStyle: { color: '#94a3b8' }, gridlines: { color: 'rgba(255,255,255,0.05)' } },
-    colors: ['#ff3b3b'],
-    animation: { startup: true, duration: 1000, easing: 'out' }
-  };
-  
-  new google.visualization.ColumnChart(document.getElementById("chart_players")).draw(data, options);
+    Chart.defaults.color = '#cbd5e1';
+    Chart.defaults.font.family = 'Space Grotesk, sans-serif';
+    const gridColor = 'rgba(255, 255, 255, 0.05)';
+    
+    const getStat = (entry, statName) => entry.stats.find(s => s.name === statName)?.value || 0;
+    
+    const sortedByWins = [...entries].sort((a,b) => getStat(b, 'winPercent') - getStat(a, 'winPercent'));
+    const top5 = sortedByWins.slice(0, 5);
+
+    function tf(name) {
+        if(!name) return '';
+        const parts = name.split(' ');
+        return parts.length > 1 ? parts[parts.length-1] : name;
+    }
+
+    if(document.getElementById('chart_top5')) {
+        chartsInstance.top5 = new Chart(document.getElementById('chart_top5'), {
+            type: 'bar',
+            data: {
+                labels: top5.map(e => tf(e.team.displayName || e.team.name)),
+                datasets: [{
+                    label: 'Victorias',
+                    data: top5.map(e => getStat(e, 'wins')),
+                    backgroundColor: 'rgba(0, 242, 255, 0.6)',
+                    borderColor: '#00f2ff',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { grid: { color: gridColor } }, x: { grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    if(document.getElementById('chart_global_winloss')) {
+        const totalWins = entries.reduce((acc, e) => acc + getStat(e, 'wins'), 0);
+        const totalLosses = entries.reduce((acc, e) => acc + getStat(e, 'losses'), 0);
+        chartsInstance.global = new Chart(document.getElementById('chart_global_winloss'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Victorias', 'Derrotas'],
+                datasets: [{
+                    data: [totalWins, totalLosses],
+                    backgroundColor: ['rgba(16, 185, 129, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                    borderColor: ['#10b981', '#ef4444'],
+                    borderWidth: 2,
+                    hoverOffset: 15
+                }]
+            },
+            options: { cutout: '70%', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    if(document.getElementById('chart_points')) {
+        const sortedByPts = [...entries].sort((a,b) => getStat(b, 'pointsFor') - getStat(a, 'pointsFor')).slice(0, 5);
+        chartsInstance.points = new Chart(document.getElementById('chart_points'), {
+            type: 'bar',
+            data: {
+                labels: sortedByPts.map(e => tf(e.team.displayName || e.team.name)),
+                datasets: [{
+                    label: 'Puntos A Favor',
+                    data: sortedByPts.map(e => getStat(e, 'pointsFor')),
+                    backgroundColor: 'rgba(251, 191, 36, 0.6)',
+                    borderColor: '#fbbf24',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }, {
+                    label: 'Puntos En Contra',
+                    data: sortedByPts.map(e => getStat(e, 'pointsAgainst')),
+                    backgroundColor: 'rgba(239, 68, 68, 0.4)',
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true, maintainAspectRatio: false,
+                scales: { x: { grid: { color: gridColor } }, y: { grid: { display: false } } }
+            }
+        });
+    }
+
+    if(document.getElementById('chart_radar')) {
+        chartsInstance.radar = new Chart(document.getElementById('chart_radar'), {
+            type: 'radar',
+            data: {
+                labels: ['Victorias', 'Rend. Local', 'Rend. Visita', 'Pts Fav(x10)', 'Racha'],
+                datasets: top5.slice(0, 3).map((e, idx) => {
+                    const colors = ['rgba(0, 242, 255,', 'rgba(112, 0, 255,', 'rgba(255, 0, 200,'];
+                    const hex = ['#00f2ff', '#7000ff', '#ff00c8'];
+                    return {
+                        label: tf(e.team.displayName || e.team.name),
+                        data: [
+                            getStat(e, 'wins'),
+                            getStat(e, 'homeWins') || (getStat(e, 'wins')/2),
+                            getStat(e, 'awayWins') || (getStat(e, 'wins')/2),
+                            (getStat(e, 'pointsFor') / 100),
+                            getStat(e, 'streak') || 0
+                        ],
+                        backgroundColor: colors[idx] + ' 0.2)',
+                        borderColor: hex[idx],
+                        pointBackgroundColor: hex[idx],
+                        borderWidth: 2
+                    }
+                })
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: gridColor },
+                        grid: { color: gridColor },
+                        pointLabels: { color: '#cbd5e1', font: {size: 10} },
+                        ticks: { display: false }
+                    }
+                }
+            }
+        });
+    }
 }

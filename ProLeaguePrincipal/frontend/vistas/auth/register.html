@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro - ProLeague</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body class="dynamic-body">
   <div class="dynamic-bg"></div>
 
   <main class="login-register-container">
     <section id="register-section">
-      <img src="logos/logo-png.png" alt="ProLeague Logo" class="auth-logo">
+      <img src="../../logos/logo-png.png" alt="ProLeague Logo" class="auth-logo">
       <h2>Regístrate</h2>
 
       <form id="register-form">
@@ -22,13 +22,13 @@
       </form>
 
       <p id="register-error"></p>
-      <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+      <p>¿Ya tienes cuenta? <a href="../auth/login.html">Inicia sesión</a></p>
     </section>
   </main>
 
   <div id="toast-container"></div>
   <script type="module">
-    import { auth, db } from "./firebase-config.js";
+    import { auth, db } from "../../js/config/firebase-config.js";
     import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -90,7 +90,7 @@
           favorites: []
         }));
 
-        setTimeout(() => { window.location.href = "home.html"; }, 1500);
+        setTimeout(() => { window.location.href = "../home/home.html"; }, 1500);
 
       } catch (err) {
         console.error("Registration Error:", err);

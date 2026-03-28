@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jugadores - ProLeague</title>
   <meta name="description" content="Busca jugadores de NBA y NFL. Consulta su equipo, posición y datos en ProLeague.">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="dynamic-body">
@@ -119,9 +119,9 @@
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
-  <script src="app-players.js"></script>
+  <script src="../../js/players/app-players.js"></script>
   <script>
-    fetch("header.html")
+    fetch("../components/header.html")
       .then(r => r.text())
       .then(html => {
         document.getElementById("header-placeholder").innerHTML = html;
@@ -131,13 +131,13 @@
         const chatLink = document.getElementById("nav-chat");
         const favLink = document.getElementById("nav-favorites");
         if (user) {
-          if (logoutLink) { logoutLink.style.display = "inline"; logoutLink.addEventListener("click", e => { e.preventDefault(); localStorage.removeItem("user"); window.location.href = "login.html"; }); }
+          if (logoutLink) { logoutLink.style.display = "inline"; logoutLink.addEventListener("click", e => { e.preventDefault(); localStorage.removeItem("user"); window.location.href = "../auth/login.html"; }); }
           if (profileLink) profileLink.style.display = "inline";
           if (chatLink) chatLink.style.display = "inline";
           if (favLink) favLink.style.display = "inline";
         }
       });
-    fetch("footer.html")
+    fetch("../components/footer.html")
       .then(r => r.text())
       .then(html => document.getElementById("footer-placeholder").innerHTML = html);
   </script>
