@@ -3474,3 +3474,357 @@ body {
   50% { transform: scale(1.3); }
   100% { transform: scale(1); }
 }
+
+/* ===================== */
+/* ANALYTICS & H2H */
+/* ===================== */
+.comparison-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.selector-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 30px;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+.player-selector {
+    background: rgba(20, 25, 35, 0.45);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+}
+
+.vs-badge {
+    font-size: 2.5em;
+    font-weight: 800;
+    color: var(--primary-color);
+    text-shadow: 0 0 15px var(--primary-glow);
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.comparison-results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.stats-table-container {
+    background: rgba(20, 25, 35, 0.45);
+    border-radius: 24px;
+    padding: 30px;
+    border: 1px solid var(--glass-border);
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+.stat-value.winner {
+    color: var(--primary-color);
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* ===================== */
+/* NEWS INTERACTIONS */
+/* ===================== */
+.news-interactions {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.interaction-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.interaction-btn:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
+.interaction-btn.liked {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    background: rgba(255, 0, 200, 0.1);
+}
+
+/* ===================== */
+/* COMMENTS SECTION */
+/* ===================== */
+.comments-container {
+    margin-top: 15px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    padding: 15px;
+    display: none;
+}
+
+.comments-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.comment-item {
+    font-size: 0.85em;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.comment-author {
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-right: 5px;
+}
+
+.comment-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.comment-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.9em;
+}
+
+.comment-submit {
+    background: var(--primary-color);
+    color: #000;
+    border: none;
+    padding: 0 15px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ===================== */
+/* DREAM TEAM (QUINTETO) */
+/* ===================== */
+.league-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 35px;
+}
+
+.tab-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    color: #94a3b8;
+    padding: 12px 30px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: var(--dark-bg);
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.court-container {
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 1000px;
+}
+
+.basketball-court {
+    background: radial-gradient(circle at center, rgba(255, 136, 0, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%),
+                url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 40px;
+    height: 550px;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,0,0,0.8);
+    transition: 0.5s ease-in-out;
+}
+
+.football-field {
+    background: radial-gradient(circle at center, rgba(34, 139, 34, 0.2) 0%, rgba(0, 0, 0, 0.7) 100%),
+                url('https://www.transparenttextures.com/patterns/dark-leather.png');
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 40px;
+    height: 550px;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,255,0,0.1);
+}
+
+.player-slot {
+    position: absolute;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 140px;
+    z-index: 5;
+}
+
+.slot-circle {
+    width: 75px;
+    height: 75px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+}
+
+.player-slot.active .slot-circle {
+    border-color: #fff;
+    box-shadow: 0 0 30px #fff;
+    transform: scale(1.1);
+}
+
+.player-info {
+    font-size: 0.9rem;
+    font-weight: 700;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #f8fafc;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.basketball-court .player-slot[data-pos="PG"] { top: 75%; left: 43%; }
+.basketball-court .player-slot[data-pos="SG"] { top: 55%; left: 10%; }
+.basketball-court .player-slot[data-pos="SF"] { top: 55%; left: 76%; }
+.basketball-court .player-slot[data-pos="PF"] { top: 30%; left: 20%; }
+.basketball-court .player-slot[data-pos="C"]  { top: 15%; left: 43%; }
+
+.football-field .player-slot[data-pos="QB"] { top: 75%; left: 43%; }
+.football-field .player-slot[data-pos="RB"] { top: 75%; left: 20%; }
+.football-field .player-slot[data-pos="WR1"] { top: 50%; left: 5%; }
+.football-field .player-slot[data-pos="WR2"] { top: 50%; left: 81%; }
+.football-field .player-slot[data-pos="TE"] { top: 25%; left: 65%; }
+
+.dt-selector {
+    max-width: 750px;
+    margin: 50px auto;
+}
+
+.search-group {
+    display: flex;
+    gap: 15px;
+    background: rgba(255,255,255,0.05);
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+}
+
+.dt-results-list {
+    list-style: none;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.dt-results-list li {
+    background: rgba(255,255,255,0.03);
+    padding: 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.dt-results-list li:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+/* PROFILE MINI CARDS */
+.dreamteam-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.dt-mini-card {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 20px;
+    padding: 18px 10px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: 0.3s;
+}
+
+.dt-mini-card:hover {
+    background: rgba(15, 23, 42, 0.8);
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+}
+
+.dt-mini-card span {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.dt-mini-card strong {
+    font-size: 1rem;
+    color: #fff;
+    display: block;
+    text-shadow: 0 0 10px var(--primary-glow);
+}

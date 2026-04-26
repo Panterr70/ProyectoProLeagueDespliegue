@@ -70,6 +70,26 @@ function mostrarDatosPerfil(userData) {
   document.getElementById("profile-img").src = userData.avatar
     ? (userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:3000${userData.avatar}`)
     : `https://ui-avatars.com/api/?name=${avatarBase}&background=random`;
+
+  // Mostrar Quinteto NBA
+  if (userData.dreamTeamNBA) {
+    for (const pos in userData.dreamTeamNBA) {
+      const el = document.getElementById(`nba-${pos}`);
+      if (el && userData.dreamTeamNBA[pos]) {
+        el.textContent = userData.dreamTeamNBA[pos].last_name;
+      }
+    }
+  }
+
+  // Mostrar Ofensiva NFL
+  if (userData.dreamTeamNFL) {
+    for (const pos in userData.dreamTeamNFL) {
+      const el = document.getElementById(`nfl-${pos}`);
+      if (el && userData.dreamTeamNFL[pos]) {
+        el.textContent = userData.dreamTeamNFL[pos].last_name;
+      }
+    }
+  }
 }
 loadUserProfile();
 

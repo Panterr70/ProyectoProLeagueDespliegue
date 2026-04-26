@@ -1,3 +1,11 @@
+import { db, auth } from "../config/firebase-config.js";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// =======================
+// SOCKET SETUP
+// =======================
+window.socket = typeof io !== 'undefined' ? io() : null;
+
 // =======================
 // TOAST UTILITY
 // =======================
@@ -398,6 +406,7 @@ async function initNews() {
   allItems.forEach((item, index) => {
     const category = item.category;
     const image = category === "NBA" ? "../../images/nba-logo.png" : "../../images/nfl-logo.png";
+    const newsId = btoa(item.link).substring(0, 30); // ID único basado en URL para Firestore
 
     const card = document.createElement("div");
     card.className = `news-card ${category.toLowerCase()}`;
@@ -413,12 +422,131 @@ async function initNews() {
           <a href="${item.link}" target="_blank">Leer más →</a>
           <small>${item.pubDate ? new Date(item.pubDate).toLocaleDateString() : ""}</small>
         </div>
+
+        <div class="news-interactions">
+          <button class="interaction-btn like-btn" data-id="${newsId}">
+             <span class="like-icon">🤍</span> <span class="like-count">0</span>
+          </button>
+          <button class="interaction-btn comment-btn" data-id="${newsId}">
+             💬 Comentar
+          </button>
+        </div>
+
+        <div class="comments-container" style="display: none;" id="comments-${newsId}">
+          <div class="comments-list"></div>
+          <div class="comment-input-group">
+            <input type="text" class="comment-input" placeholder="Escribe un comentario...">
+            <button class="comment-submit" data-id="${newsId}">Enviar</button>
+          </div>
+        </div>
       </div>
     `;
 
     newsList.appendChild(card);
     allNewsCards.push(card);
+    
+    setupNewsInteractions(card, newsId, item.title, category);
   });
+}
+
+function setupNewsInteractions(card, newsId, title, category) {
+    const likeBtn = card.querySelector(".like-btn");
+    const commentBtn = card.querySelector(".comment-btn");
+    const commentsContainer = card.querySelector(".comments-container");
+    const commentSubmit = card.querySelector(".comment-submit");
+    const commentInput = card.querySelector(".comment-input");
+    const commentsList = card.querySelector(".comments-list");
+
+    // Escuchar cambios en tiempo real
+    onSnapshot(doc(db, "news_interactions", newsId), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const likes = data.likes || [];
+            const comments = data.comments || [];
+
+            likeBtn.querySelector(".like-count").textContent = likes.length;
+            if (likes.includes(user.uid)) {
+                likeBtn.classList.add("liked");
+                likeBtn.querySelector(".like-icon").textContent = "❤️";
+            } else {
+                likeBtn.classList.remove("liked");
+                likeBtn.querySelector(".like-icon").textContent = "🤍";
+            }
+
+            commentsList.innerHTML = comments.map(c => `
+                <div class="comment-item">
+                    <span class="comment-author">${c.username}:</span> ${c.text}
+                </div>
+            `).join("");
+        }
+    }, (err) => {
+        // Silenciamos el spam si no hay permisos, el usuario debe actualizar las reglas
+        if (err.code === 'permission-denied') {
+            likeBtn.title = "Actualiza las reglas de Firestore para interactuar";
+        }
+    });
+
+    likeBtn.onclick = async () => {
+        const docRef = doc(db, "news_interactions", newsId);
+        const docSnap = await getDoc(docRef);
+        let likes = [];
+        
+        if (docSnap.exists()) {
+            likes = docSnap.data().likes || [];
+        }
+
+        if (likes.includes(user.uid)) {
+            // Quitar like
+            likes = likes.filter(id => id !== user.uid);
+        } else {
+            // Dar like
+            likes.push(user.uid);
+        }
+
+        if (!docSnap.exists()) {
+            await setDoc(docRef, { likes, comments: [] });
+        } else {
+            await updateDoc(docRef, { likes });
+        }
+    };
+
+    commentBtn.onclick = () => {
+        const isVisible = commentsContainer.style.display === "block";
+        commentsContainer.style.display = isVisible ? "none" : "block";
+    };
+
+    commentSubmit.onclick = async () => {
+        const text = commentInput.value.trim();
+        if (!text) return;
+
+        const docRef = doc(db, "news_interactions", newsId);
+        const newComment = {
+            uid: user.uid,
+            username: user.username || "Anonimo",
+            text: text,
+            date: new Date().toISOString()
+        };
+
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) {
+            await setDoc(docRef, { likes: [], comments: [newComment] });
+        } else {
+            await updateDoc(docRef, { comments: arrayUnion(newComment) });
+        }
+
+        commentInput.value = "";
+        showToast("¡Comentario publicado!", "success");
+
+        // Opcional: Emitir a socket.io si está cargado
+        if (window.socket && window.socket.emit) {
+            window.socket.emit("newsComment", {
+                username: user.username,
+                title: title,
+                text: text,
+                category: category
+            });
+        }
+    };
 }
 
 // Initial load

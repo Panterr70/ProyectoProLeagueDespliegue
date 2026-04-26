@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Quinteto Ideal - ProLeague</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="dynamic-body">
+  <div class="dynamic-bg"></div>
+
+  <!-- HEADER -->
+  <div id="header-placeholder"></div>
+
+  <main class="dreamteam-main">
+    <div class="analytics-header">
+      <h3>Mi Equipo Ideal</h3>
+      <p>Crea tu equipo de ensueño seleccionando a los mejores para cada posición.</p>
+    </div>
+
+    <!-- LEAGUE TABS -->
+    <div class="league-tabs">
+        <button class="tab-btn active" data-league="NBA">NBA (Quinteto)</button>
+        <button class="tab-btn" data-league="NFL">NFL (Ofensiva)</button>
+    </div>
+
+    <!-- PISTA / CAMPO CONTAINER -->
+    <section class="court-container">
+      <div id="sport-field" class="basketball-court">
+        <!-- Generado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- SELECTOR -->
+    <section class="dt-selector">
+      <div class="selector-card">
+        <h4 id="selector-title">Seleccionar Base (PG)</h4>
+        <div class="search-group">
+          <input type="text" id="dt-search-input" placeholder="Nombre del jugador...">
+          <button id="dt-search-btn" class="btn-primary">Buscar</button>
+        </div>
+        <ul id="dt-results" class="dt-results-list"></ul>
+      </div>
+    </section>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <button id="save-dreamteam" class="btn-primary" style="padding: 15px 50px; font-size: 1.2rem;">Guardar Quinteto</button>
+    </div>
+
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script type="module" src="../../js/user/dreamteam.js"></script>
+  <script>
+    fetch("../components/header.html")
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById("header-placeholder").innerHTML = html;
+      });
+
+    fetch("../components/footer.html")
+      .then(r => r.text())
+      .then(html => document.getElementById("footer-placeholder").innerHTML = html);
+  </script>
+</body>
+</html>

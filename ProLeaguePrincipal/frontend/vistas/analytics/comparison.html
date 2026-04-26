@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Versus Analytics - ProLeague</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dynamic-body">
+  <div class="dynamic-bg"></div>
+
+  <!-- HEADER -->
+  <div id="header-placeholder"></div>
+
+  <!-- MAIN -->
+  <main class="comparison-container">
+    <div class="analytics-header">
+      <h3>Player Versus</h3>
+      <p>Compara las estadísticas de los mejores jugadores de la NBA y NFL cara a cara.</p>
+    </div>
+
+    <!-- SELECTOR -->
+    <section class="selector-grid">
+      <div class="player-selector">
+        <label>Jugador 1</label>
+        <div class="search-box">
+          <input type="text" id="p1-search" placeholder="Ej: LeBron James...">
+          <ul id="p1-results" class="search-results"></ul>
+        </div>
+        <div id="p1-card-small" class="selected-player-card">
+          <!-- Info jugador seleccionado -->
+        </div>
+      </div>
+
+      <div class="vs-badge">VS</div>
+
+      <div class="player-selector">
+        <label>Jugador 2</label>
+        <div class="search-box">
+          <input type="text" id="p2-search" placeholder="Ej: Kevin Durant...">
+          <ul id="p2-results" class="search-results"></ul>
+        </div>
+        <div id="p2-card-small" class="selected-player-card">
+          <!-- Info jugador seleccionado -->
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="comparison-results" class="comparison-results" style="display: none;">
+      
+      <div class="stats-table-container">
+        <div id="stats-comparison-table">
+          <!-- Filas de estadísticas generadas por JS -->
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h4>Comparativa de Atributos</h4>
+        <div class="chart-box">
+          <canvas id="comparison-chart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <div id="no-data-msg" style="text-align:center; padding: 50px; color: #64748b;">
+      <p>Selecciona dos jugadores para ver la comparativa detallada.</p>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <div id="footer-placeholder"></div>
+
+  <!-- SCRIPTS -->
+  <script type="module" src="../../js/analytics/comparison.js"></script>
+  <script>
+    fetch("../components/header.html")
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById("header-placeholder").innerHTML = html;
+        if (typeof google !== "undefined" && google.translate) googleTranslateElementInit();
+      });
+
+    fetch("../components/footer.html")
+      .then(r => r.text())
+      .then(html => document.getElementById("footer-placeholder").innerHTML = html);
+  </script>
+</body>
+</html>

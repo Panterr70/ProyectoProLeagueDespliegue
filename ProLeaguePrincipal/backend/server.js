@@ -118,6 +118,20 @@ io.on("connection", (socket) => {
     io.to(room).emit("message", newMessage);
   });
 
+  socket.on("newsComment", (data) => {
+    const { username, title, text, category } = data;
+    const room = category.toLowerCase(); // 'nba' o 'nfl'
+    
+    const botMsg = {
+      user: "🤖 ProLeagueBot",
+      text: `¡${username} ha comentado en la noticia: "${title}"! 💬 "${text}"`,
+      time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+      room
+    };
+
+    io.to(room).emit("message", botMsg);
+  });
+
   socket.on("disconnect", () => {
     console.log("Cliente desconectado:", socket.id);
   });
@@ -247,6 +261,29 @@ app.get("/api/nba/players", async (req, res) => {
       error: "Error en la API de NBA",
       details: err.response?.data || err.message 
     });
+  }
+});
+
+// =======================
+// NBA - ESTADÍSTICAS POR JUGADOR
+// =======================
+app.get("/api/nba/stats", async (req, res) => {
+  const { playerId } = req.query;
+  if (!playerId) return res.status(400).json({ error: "playerId es requerido" });
+
+  try {
+    const response = await axios.get(
+      `https://api.balldontlie.io/v1/season_averages?season=2023&player_ids[]=${playerId}`,
+      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
+    );
+    
+    // Si no hay datos (jugador retirado o sin stats esta temporada), devolvemos null pero con status 200
+    const stats = response.data.data?.[0] || null;
+    res.json(stats);
+  } catch (err) {
+    console.warn(`⚠️ No se hallaron stats para jugador ${playerId}:`, err.message);
+    // Devolvemos null para que el frontend sepa que no hay datos sin romper la ejecución
+    res.json(null);
   }
 });
 

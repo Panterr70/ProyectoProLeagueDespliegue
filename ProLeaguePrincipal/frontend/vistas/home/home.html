@@ -86,7 +86,8 @@
   <div id="footer-placeholder"></div>
 
   <!-- HEADER / FOOTER LOAD -->
-  <script src="../../js/home/app-home.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="../../js/home/app-home.js"></script>
   <script>
     fetch("../components/header.html")
       .then(r => r.text())
