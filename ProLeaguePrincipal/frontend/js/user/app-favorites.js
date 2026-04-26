@@ -1,4 +1,5 @@
 import { auth, db } from "../config/firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, setDoc, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ===============================
@@ -54,16 +55,22 @@ const nflLogos = {
 // INIT
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (!user || (!user.uid && !user.id)) {
-    window.location.href = "../auth/login.html";
-    return;
-  }
-
   await loadHeader();
   await loadFooter();
 
-  cargarFavoritos(user.uid || user.id);
+  // Esperar a que Firebase detecte la sesión real
+  onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      cargarFavoritos(firebaseUser.uid);
+    } else {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user && (user.uid || user.id)) {
+        cargarFavoritos(user.uid || user.id);
+      } else {
+        window.location.href = "../auth/login.html";
+      }
+    }
+  });
 });
 
 // ===============================

@@ -1,5 +1,5 @@
 import { auth, db } from "../config/firebase-config.js";
-import { updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { updateProfile, updatePassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ===== TOAST UTILITY =====
@@ -27,30 +27,49 @@ if (!user || (!user.uid && !user.id)) {
 
 // Función para refrescar los datos del perfil desde Firestore
 async function loadUserProfile() {
-  try {
-    const uid = user.uid || user.id;
-    const userDoc = await getDoc(doc(db, "users", uid));
-    
-    if (!userDoc.exists()) throw new Error("No se pudo cargar el perfil");
-    
-    const userData = userDoc.data();
-    // Actualizar variable global y localStorage
-    user = { ...user, ...userData };
-    localStorage.setItem("user", JSON.stringify(user));
+  // Esperar a que Firebase Auth esté listo para evitar errores de permisos
+  onAuthStateChanged(auth, async (firebaseUser) => {
+    try {
+      const uid = firebaseUser ? firebaseUser.uid : (user.uid || user.id);
+      if (!uid) {
+        window.location.href = "../auth/login.html";
+        return;
+      }
 
-    // Mostrar datos en profile.html
-    document.getElementById("profile-username").textContent = user.username || "Usuario";
-    document.getElementById("profile-email").textContent = user.email || "email@email.com";
-    document.getElementById("profile-bio").value = user.bio || "";
+      const userDoc = await getDoc(doc(db, "users", uid));
+      
+      if (!userDoc.exists()) {
+        console.warn("El documento del usuario no existe en Firestore.");
+        // Si no existe, al menos mostramos lo del localStorage
+        mostrarDatosPerfil(user);
+        return;
+      }
+      
+      const userData = userDoc.data();
+      user = { ...user, ...userData };
+      localStorage.setItem("user", JSON.stringify(user));
+      mostrarDatosPerfil(user);
 
-    // Imagen del avatar (por ahora local o default)
-    document.getElementById("profile-img").src = user.avatar
-      ? (user.avatar.startsWith('http') ? user.avatar : `http://localhost:3000${user.avatar}`)
-      : "../../images/default-avatar.png";
-  } catch (err) {
-    console.error(err);
-    showToast("Error cargando perfil", 'error');
-  }
+    } catch (err) {
+      console.error("Error en loadUserProfile:", err);
+      if (err.code === 'permission-denied') {
+        showToast("Error de permisos en Firebase. Revisa las reglas de Firestore.", 'error');
+      } else {
+        showToast("Error cargando perfil", 'error');
+      }
+    }
+  });
+}
+
+function mostrarDatosPerfil(userData) {
+  document.getElementById("profile-username").textContent = userData.username || "Usuario";
+  document.getElementById("profile-email").textContent = userData.email || "email@email.com";
+  document.getElementById("profile-bio").value = userData.bio || "";
+
+  const avatarBase = userData.username || "User";
+  document.getElementById("profile-img").src = userData.avatar
+    ? (userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:3000${userData.avatar}`)
+    : `https://ui-avatars.com/api/?name=${avatarBase}&background=random`;
 }
 loadUserProfile();
 

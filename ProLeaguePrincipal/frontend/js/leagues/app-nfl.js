@@ -234,8 +234,16 @@ function mostrarEquipos(equipos){
     favBtn.className="fav-btn";
     favBtn.onclick = async e => {
       e.stopPropagation();
+      
+      // Intentar obtener UID de Firebase Auth primero, luego localStorage como fallback
+      const uid = auth.currentUser ? auth.currentUser.uid : (user.uid || user.id);
+
+      if (!uid) {
+        showToast("Debes iniciar sesión para añadir favoritos", "warning");
+        return;
+      }
+
       try {
-        const uid = user.uid || user.id;
         const userRef = doc(db, "users", uid);
         await setDoc(userRef, { favorites: arrayUnion({
             league: "NFL", teamId: team.id, teamName: team.full_name }) }, { merge: true });
@@ -248,8 +256,12 @@ function mostrarEquipos(equipos){
         showToast("¡Añadido a favoritos! ⭐", "success");
       
       } catch (err) {
-        console.error(err);
-        showToast("No se pudo añadir a favoritos", "error");
+        console.error("Error Firestore:", err);
+        if (err.code === "permission-denied") {
+          showToast("Error de permisos en Firebase. Revisa las reglas de Firestore.", "error");
+        } else {
+          showToast("No se pudo añadir a favoritos", "error");
+        }
       }
     };
     card.querySelector(".team-card-front").appendChild(favBtn);
