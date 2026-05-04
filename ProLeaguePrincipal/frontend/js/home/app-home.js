@@ -406,7 +406,7 @@ async function initNews() {
   allItems.forEach((item, index) => {
     const category = item.category;
     const image = category === "NBA" ? "../../images/nba-logo.png" : "../../images/nfl-logo.png";
-    const newsId = btoa(item.link).substring(0, 30); // ID único basado en URL para Firestore
+    const newsId = btoa(item.link).replace(/[^a-zA-Z0-9]/g, "").slice(-50); // ID único real (usamos el final del base64)
 
     const card = document.createElement("div");
     card.className = `news-card ${category.toLowerCase()}`;
@@ -478,6 +478,11 @@ function setupNewsInteractions(card, newsId, title, category) {
                     <span class="comment-author">${c.username}:</span> ${c.text}
                 </div>
             `).join("");
+            
+            // Auto-scroll al último comentario
+            setTimeout(() => {
+                commentsList.scrollTop = commentsList.scrollHeight;
+            }, 100);
         }
     }, (err) => {
         // Silenciamos el spam si no hay permisos, el usuario debe actualizar las reglas
@@ -565,8 +570,9 @@ function updateNavLinks() {
     
     logoutLink.addEventListener("click", e => {
       e.preventDefault();
+      auth.signOut();
       localStorage.removeItem("user");
-      window.location.href = "login.html";
+      window.location.href = "../auth/login.html";
     });
   }
 }

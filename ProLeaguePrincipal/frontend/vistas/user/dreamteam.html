@@ -32,13 +32,19 @@
       </div>
     </section>
 
+
     <!-- SELECTOR -->
     <section class="dt-selector">
       <div class="selector-card">
-        <h4 id="selector-title">Seleccionar Base (PG)</h4>
-        <div class="search-group">
-          <input type="text" id="dt-search-input" placeholder="Nombre del jugador...">
-          <button id="dt-search-btn" class="btn-primary">Buscar</button>
+        <h4 id="selector-title">Selecciona una posición en el campo</h4>
+        <div class="search-box-premium">
+          <input type="text" id="dt-search-input" placeholder="Busca a tu estrella...">
+          <button id="dt-search-btn" class="btn-search-glow">
+            <span>BUSCAR</span>
+          </button>
+        </div>
+        <div id="trending-suggestions" class="trending-suggestions-container">
+            <!-- Sugerencias de trending aquí -->
         </div>
         <ul id="dt-results" class="dt-results-list"></ul>
       </div>

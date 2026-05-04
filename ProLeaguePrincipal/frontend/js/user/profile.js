@@ -76,7 +76,8 @@ function mostrarDatosPerfil(userData) {
     for (const pos in userData.dreamTeamNBA) {
       const el = document.getElementById(`nba-${pos}`);
       if (el && userData.dreamTeamNBA[pos]) {
-        el.textContent = userData.dreamTeamNBA[pos].last_name;
+        const p = userData.dreamTeamNBA[pos];
+        el.textContent = `${p.first_name.charAt(0)}. ${p.last_name}`;
       }
     }
   }
@@ -86,10 +87,36 @@ function mostrarDatosPerfil(userData) {
     for (const pos in userData.dreamTeamNFL) {
       const el = document.getElementById(`nfl-${pos}`);
       if (el && userData.dreamTeamNFL[pos]) {
-        el.textContent = userData.dreamTeamNFL[pos].last_name;
+        const p = userData.dreamTeamNFL[pos];
+        el.textContent = `${p.first_name.charAt(0)}. ${p.last_name}`;
       }
     }
   }
+
+  // Mostrar Favoritos
+  renderFavoritos(userData.favorites || []);
+}
+
+function renderFavoritos(favorites) {
+  const container = document.getElementById("favorites-container");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (favorites.length === 0) {
+    container.innerHTML = "<p style='color: #94a3b8; font-size: 0.9rem;'>Aún no tienes equipos favoritos.</p>";
+    return;
+  }
+
+  favorites.forEach(fav => {
+    const logoUrl = fav.logo || `../../logos/logo-png.png`;
+    const favItem = document.createElement("div");
+    favItem.className = "fav-item-mini";
+    favItem.innerHTML = `
+        <img src="${logoUrl}" alt="${fav.teamName}" class="fav-mini-logo" title="${fav.teamName}" onerror="this.src='../../logos/logo-png.png'">
+        <span style="font-size: 0.6rem; color: #fff; margin-top: 5px; text-align:center;">${fav.teamName}</span>
+    `;
+    container.appendChild(favItem);
+  });
 }
 loadUserProfile();
 

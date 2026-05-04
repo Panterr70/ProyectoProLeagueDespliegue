@@ -244,9 +244,14 @@ function mostrarEquipos(equipos){
       }
 
       try {
+        const logoSrc = teamLogos[team.full_name] || `${team.abbreviation}.png`;
         const userRef = doc(db, "users", uid);
         await setDoc(userRef, { favorites: arrayUnion({
-            league: "NFL", teamId: team.id, teamName: team.full_name }) }, { merge: true });
+            league: "NFL", 
+            teamId: team.id, 
+            teamName: team.full_name,
+            logo: `../../logos/${logoSrc}` 
+        }) }, { merge: true });
         
         const animStar = document.createElement("div");
         animStar.textContent = "⭐";

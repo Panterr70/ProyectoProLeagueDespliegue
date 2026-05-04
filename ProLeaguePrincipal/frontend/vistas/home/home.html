@@ -42,6 +42,18 @@
       <div class="slider-dots" id="slider-dots"></div>
     </section>
 
+    <!-- TENDENCIAS DE LA COMUNIDAD (NUEVO WOW) -->
+    <section class="trending-section">
+      <div class="trending-header">
+        <span class="trending-tag">🔥 TENDENCIAS</span>
+        <h2>Favoritos de la Comunidad</h2>
+        <p>Los jugadores más elegidos en los Dream Teams de ProLeague</p>
+      </div>
+      <div id="trending-container" class="trending-grid">
+        <div class="loading-trending">Analizando Dream Teams...</div>
+      </div>
+    </section>
+
     <!-- SCOREBOARD (Partidos Recientes) -->
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 40px 0; max-width: 1400px; margin: 0 auto;">
       <h3 style="color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Últimos Resultados</h3>
@@ -88,6 +100,7 @@
   <!-- HEADER / FOOTER LOAD -->
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="../../js/home/app-home.js"></script>
+  <script type="module" src="../../js/analytics/trending.js"></script>
   <script>
     fetch("../components/header.html")
       .then(r => r.text())

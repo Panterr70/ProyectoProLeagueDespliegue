@@ -26,7 +26,7 @@
           <h2>NBA Live Chat</h2>
         </div>
         <div class="chat-messages" id="nba-messages">
-          <!-- Mensajes dinámicos -->
+          <div class="loading-chat">Cargando historial...</div>
         </div>
         <form class="chat-form" id="nba-form">
           <input type="text" id="nba-input" placeholder="Comenta la jornada NBA..." autocomplete="off">
@@ -41,7 +41,7 @@
           <h2>NFL Live Chat</h2>
         </div>
         <div class="chat-messages" id="nfl-messages">
-          <!-- Mensajes dinámicos -->
+          <div class="loading-chat">Cargando historial...</div>
         </div>
         <form class="chat-form" id="nfl-form">
           <input type="text" id="nfl-input" placeholder="Debate sobre la NFL..." autocomplete="off">
@@ -56,19 +56,17 @@
   <div id="footer-placeholder"></div>
 
   <!-- SCRIPTS -->
-  <script src="../../js/chat/chat.js"></script>
+  <script type="module" src="../../js/chat/chat.js"></script>
   <script>
     // Cargar Header y Footer
     fetch("../components/header.html")
       .then(r => r.text())
       .then(html => {
         document.getElementById("header-placeholder").innerHTML = html;
-        if (typeof google !== "undefined" && google.translate) googleTranslateElementInit();
 
         const user = JSON.parse(localStorage.getItem("user"));
         const logoutLink = document.getElementById("nav-logout");
         
-        // Chat protegido: si no hay usuario, redirigir a login
         if (!user) {
           window.location.href = "../auth/login.html";
         }

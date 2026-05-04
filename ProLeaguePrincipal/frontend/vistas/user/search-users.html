@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comunidad - ProLeague</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="dynamic-body">
+  <div class="dynamic-bg"></div>
+
+  <!-- HEADER -->
+  <div id="header-placeholder"></div>
+
+  <main class="community-main">
+    <div class="community-hero">
+      <div class="hero-content">
+        <h1>Comunidad ProLeague</h1>
+        <p>Conecta con otros entusiastas, descubre sus quintetos ideales y comparte tu pasión por el deporte.</p>
+      </div>
+    </div>
+
+    <!-- USER SEARCH BAR CENTRADA -->
+    <section class="user-search-container">
+      <div class="search-box-social">
+        <input type="text" id="user-search-input" placeholder="Nombre de usuario a buscar...">
+        <button id="user-search-btn" class="btn-search">
+            <span class="search-icon">🔍</span> BUSCAR
+        </button>
+      </div>
+    </section>
+
+    <!-- RESULTS GRID -->
+    <section class="user-results-section">
+      <div id="user-results-grid" class="user-grid">
+        <!-- Tarjetas dinámicas -->
+      </div>
+      <div id="search-placeholder" class="empty-social-state">
+          <div class="social-icon-bg">👥</div>
+          <h3>Busca a tus amigos</h3>
+          <p>Encuentra a otros usuarios para ver sus equipos de ensueño y favoritos.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script type="module" src="../../js/user/search-users.js"></script>
+  <script>
+    fetch("../components/header.html")
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById("header-placeholder").innerHTML = html;
+      });
+
+    fetch("../components/footer.html")
+      .then(r => r.text())
+      .then(html => document.getElementById("footer-placeholder").innerHTML = html);
+  </script>
+</body>
+</html>

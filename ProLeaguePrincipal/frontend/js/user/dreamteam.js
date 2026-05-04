@@ -1,5 +1,5 @@
 import { db, auth } from "../config/firebase-config.js";
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 let currentUser = null;
@@ -62,6 +62,59 @@ function initUI() {
         };
     });
     renderField();
+    loadTrendingSuggestions();
+}
+
+async function loadTrendingSuggestions() {
+    const suggestionContainer = document.getElementById("trending-suggestions");
+    if (!suggestionContainer) return;
+    
+    suggestionContainer.innerHTML = "<p style='font-size:0.8rem; color:#94a3b8;'>Cargando sugerencias...</p>";
+
+    try {
+        const usersSnapshot = await getDocs(collection(db, "users"));
+        const counts = {};
+        const teamKey = CONFIG[currentLeague].teamKey;
+
+        usersSnapshot.forEach(doc => {
+            const team = doc.data()[teamKey];
+            if (team) {
+                Object.values(team).forEach(p => {
+                    if (p && p.last_name) {
+                        const name = `${p.first_name} ${p.last_name}`;
+                        counts[name] = (counts[name] || 0) + 1;
+                    }
+                });
+            }
+        });
+
+        const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 4);
+        
+        suggestionContainer.innerHTML = "";
+        if (sorted.length > 0) {
+            const hint = document.createElement("span");
+            hint.style.width = "100%";
+            hint.style.textAlign = "center";
+            hint.style.fontSize = "0.75rem";
+            hint.style.color = "#94a3b8";
+            hint.style.marginBottom = "5px";
+            hint.textContent = "🔥 POPULARES:";
+            suggestionContainer.appendChild(hint);
+
+            sorted.forEach(([name]) => {
+                const chip = document.createElement("div");
+                chip.className = "suggestion-chip";
+                chip.textContent = name;
+                chip.onclick = () => {
+                    searchInput.value = name;
+                    searchBtn.click();
+                };
+                suggestionContainer.appendChild(chip);
+            });
+        }
+    } catch (e) {
+        suggestionContainer.innerHTML = "";
+    }
 }
 
 function renderField() {
