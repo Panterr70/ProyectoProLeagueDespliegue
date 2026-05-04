@@ -1,4 +1,5 @@
 import { db } from "../config/firebase-config.js";
+import { API_BASE_URL } from "../config/config.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const searchInput = document.getElementById("user-search-input");

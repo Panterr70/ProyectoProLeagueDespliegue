@@ -1,4 +1,5 @@
 import { auth, db } from "../config/firebase-config.js";
+import { API_BASE_URL } from "../config/config.js";
 import { doc, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ===============================
@@ -126,7 +127,7 @@ async function cargarClasificacion() {
   }
 
   try {
-    const res = await fetch("http://localhost:3000/api/nba/standings");
+    const res = await fetch(`${API_BASE_URL}/api/nba/standings`);
     const data = await res.json();
 
     let allEntries = [];
@@ -197,7 +198,7 @@ async function cargarClasificacion() {
 
 async function cargarEquipos() {
   try {
-    const res = await fetch("http://localhost:3000/api/nba/teams");
+    const res = await fetch(`${API_BASE_URL}/api/nba/teams`);
     const equipos = await res.json();
 
     equipos.forEach(team => {
@@ -318,7 +319,7 @@ function mostrarEquipos(equipos) {
         newBtn.disabled = true;
         
         try {
-          const res = await fetch(`http://localhost:3000/api/nba/players?teamId=${team.id}`);
+          const res = await fetch(`${API_BASE_URL}/api/nba/players?teamId=${team.id}`);
           const players = await res.json();
           
           newBtn.style.display = "none";

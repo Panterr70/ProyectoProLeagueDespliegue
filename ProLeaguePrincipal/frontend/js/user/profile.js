@@ -1,4 +1,5 @@
 import { auth, db } from "../config/firebase-config.js";
+import { API_BASE_URL } from "../config/config.js";
 import { updateProfile, updatePassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -68,7 +69,7 @@ function mostrarDatosPerfil(userData) {
 
   const avatarBase = userData.username || "User";
   document.getElementById("profile-img").src = userData.avatar
-    ? (userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:3000${userData.avatar}`)
+    ? (userData.avatar.startsWith('http') ? userData.avatar : `${API_BASE_URL}${userData.avatar}`)
     : `https://ui-avatars.com/api/?name=${avatarBase}&background=random`;
 
   // Mostrar Quinteto NBA
@@ -172,7 +173,7 @@ document.getElementById("save-profile").addEventListener("click", async () => {
       const formData = new FormData();
       formData.append("avatar", avatarInput.files[0]);
 
-      const upRes = await fetch(`http://localhost:3000/api/auth/upload-avatar/${uid}`, {
+      const upRes = await fetch(`${API_BASE_URL}/api/auth/upload-avatar/${uid}`, {
         method: "POST",
         body: formData
       });
@@ -195,7 +196,7 @@ document.getElementById("save-profile").addEventListener("click", async () => {
     // Actualizar vista
     document.getElementById("profile-img").src = avatarUrl.startsWith('http') 
         ? avatarUrl 
-        : `http://localhost:3000${avatarUrl}`;
+        : `${API_BASE_URL}${avatarUrl}`;
     
     showToast("¡Perfil actualizado con éxito!", 'success');
   } catch (err) {

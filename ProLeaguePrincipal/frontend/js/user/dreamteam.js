@@ -1,4 +1,5 @@
 import { db, auth } from "../config/firebase-config.js";
+import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -156,7 +157,7 @@ searchBtn.onclick = async () => {
 
     try {
         const path = CONFIG[currentLeague].apiPath;
-        const res = await fetch(`http://localhost:3000/api/${path}/players?search=${query}`);
+        const res = await fetch(`${API_BASE_URL}/api/${path}/players?search=${query}`);
         const players = await res.json();
 
         resultsList.innerHTML = "";

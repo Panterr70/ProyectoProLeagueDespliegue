@@ -1,4 +1,5 @@
 import { db } from "../config/firebase-config.js";
+import { API_BASE_URL, SOCKET_URL } from "../config/config.js";
 import { 
     collection, 
     addDoc, 
@@ -10,7 +11,7 @@ import {
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const socket = io("http://localhost:3000");
+const socket = io(SOCKET_URL);
 
 const userObj = JSON.parse(localStorage.getItem("user"));
 const username = userObj ? userObj.username : "Anónimo";
