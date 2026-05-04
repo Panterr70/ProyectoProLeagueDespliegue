@@ -1,5 +1,6 @@
 import { db } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
+import { API_BASE_URL } from "../config/config.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const searchInput = document.getElementById("user-search-input");
@@ -73,7 +74,7 @@ function renderUsers(snapshot, searchTerm = "") {
         card.className = "user-card-social";
         
         const avatarUrl = data.avatar 
-            ? (data.avatar.startsWith('http') ? data.avatar : `http://localhost:3000${data.avatar}`)
+            ? (data.avatar.startsWith('http') ? data.avatar : `${API_BASE_URL}${data.avatar}`)
             : `https://ui-avatars.com/api/?name=${data.username}&background=random`;
 
         card.innerHTML = `

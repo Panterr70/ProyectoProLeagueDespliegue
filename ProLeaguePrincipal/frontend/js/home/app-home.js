@@ -1,4 +1,5 @@
 import { db, auth } from "../config/firebase-config.js";
+import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // =======================
@@ -225,8 +226,8 @@ async function cargarScoreboard() {
 
   try {
     const [nbaRes, nflRes] = await Promise.all([
-      fetch("http://localhost:3000/api/nba/games").catch(() => null),
-      fetch("http://localhost:3000/api/nfl/games").catch(() => null)
+      fetch(`${API_BASE_URL}/api/nba/games`).catch(() => null),
+      fetch(`${API_BASE_URL}/api/nfl/games`).catch(() => null)
     ]);
 
     let games = [];
@@ -385,7 +386,7 @@ const RSS_FEEDS = [
 
 async function loadRSS(feed) {
   try {
-    const res = await fetch(`http://localhost:3000/api/news?category=${feed.category.toLowerCase()}`);
+    const res = await fetch(`${API_BASE_URL}/api/news?category=${feed.category.toLowerCase()}`);
     if (!res.ok) throw new Error("Error al cargar noticias");
     
     const items = await res.json();

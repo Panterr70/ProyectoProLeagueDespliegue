@@ -40,8 +40,9 @@ app.post("/api/auth/upload-avatar/:uid", upload.single("avatar"), (req, res) => 
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "*", // Ajustar en producción si es necesario
+    origin: "*", // En producción, permitir todo o especificar vercel.app
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
@@ -50,7 +51,11 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
 
 // Rutas

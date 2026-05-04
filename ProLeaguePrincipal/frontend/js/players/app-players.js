@@ -122,8 +122,8 @@ async function loadTeamsAndPlayers(league) {
   countText.textContent = `Cargando equipos de ${league}...`;
   
   try {
-    const endpoint = league === 'NBA' ? '/api/nba/teams' : '/api/nfl/teams';
-    const res = await fetch(`http://localhost:3000${endpoint}`);
+    const path = league.toLowerCase();
+    const res = await fetch(`${API_BASE_URL}/api/${path}/teams`);
     if (!res.ok) throw new Error('Error cargando equipos');
 
     allTeams = await res.json();

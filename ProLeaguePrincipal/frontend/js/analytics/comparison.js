@@ -1,4 +1,5 @@
 import { db } from "../config/firebase-config.js";
+import { API_BASE_URL } from "../config/config.js";
 
 let player1 = null;
 let player2 = null;
@@ -45,7 +46,7 @@ async function selectPlayer(player, pNumber, league) {
     // Fetch detailed stats
     let stats = null;
     if (league === 'NBA') {
-        const res = await fetch(`http://localhost:3000/api/nba/stats?playerId=${player.id}`);
+        const res = await fetch(`${API_BASE_URL}/api/nba/stats?playerId=${player.id}`);
         stats = await res.json();
     }
 

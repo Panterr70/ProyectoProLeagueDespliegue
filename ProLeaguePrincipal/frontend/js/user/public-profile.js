@@ -1,4 +1,5 @@
 import { db } from "../config/firebase-config.js";
+import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -51,7 +52,7 @@ function renderProfile() {
     publicBio.textContent = userData.bio || "Este usuario prefiere mantener el misterio...";
     
     publicAvatar.src = userData.avatar 
-        ? (userData.avatar.startsWith('http') ? userData.avatar : `http://localhost:3000${userData.avatar}`)
+        ? (userData.avatar.startsWith('http') ? userData.avatar : `${API_BASE_URL}${userData.avatar}`)
         : `https://ui-avatars.com/api/?name=${userData.username}&background=random`;
     
     renderField();
