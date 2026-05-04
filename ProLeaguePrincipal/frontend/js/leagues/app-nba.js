@@ -35,6 +35,16 @@ async function loadHeader() {
       window.location.href = "../auth/login.html";
     });
   }
+
+  // Lógica de Menú Móvil
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('nav-menu');
+  if(menuBtn && menu) {
+    menuBtn.onclick = () => {
+      menu.classList.toggle('active');
+      menuBtn.classList.toggle('active');
+    };
+  }
 }
 
 async function loadFooter() {

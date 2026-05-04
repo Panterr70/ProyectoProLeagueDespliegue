@@ -144,6 +144,16 @@ async function loadHeaderFooter() {
       });
     }
 
+    // Lógica de Menú Móvil
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('nav-menu');
+    if(menuBtn && menu) {
+      menuBtn.onclick = () => {
+        menu.classList.toggle('active');
+        menuBtn.classList.toggle('active');
+      };
+    }
+
     const footerHtml = await fetch("../components/footer.html").then(r => r.text());
     document.getElementById("footer-placeholder").innerHTML = footerHtml;
   } catch (err) {

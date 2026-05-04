@@ -52,6 +52,16 @@
       .then(r => r.text())
       .then(html => {
         document.getElementById("header-placeholder").innerHTML = html;
+        
+        // Activar menú móvil
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('nav-menu');
+        if(menuBtn && menu) {
+          menuBtn.onclick = () => {
+            menu.classList.toggle('active');
+            menuBtn.classList.toggle('active');
+          };
+        }
       });
 
     fetch("../components/footer.html")
