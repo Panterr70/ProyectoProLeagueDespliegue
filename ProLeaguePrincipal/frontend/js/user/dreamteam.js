@@ -22,13 +22,15 @@ const CONFIG = {
         fieldClass: "basketball-court",
         positions: ["PG", "SG", "SF", "PF", "C"],
         posNames: { PG: "Base (PG)", SG: "Escolta (SG)", SF: "Alero (SF)", PF: "Ala-Pívot (PF)", C: "Pívot (C)" },
-        apiPath: "nba"
+        apiPath: "nba",
+        teamKey: "dreamTeamNBA"
     },
     NFL: {
         fieldClass: "football-field",
         positions: ["QB", "RB", "WR1", "WR2", "TE"],
         posNames: { QB: "Quarterback", RB: "Running Back", WR1: "Wide Receiver 1", WR2: "Wide Receiver 2", TE: "Tight End" },
-        apiPath: "nfl"
+        apiPath: "nfl",
+        teamKey: "dreamTeamNFL"
     }
 };
 

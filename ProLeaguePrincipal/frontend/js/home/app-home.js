@@ -5,7 +5,7 @@ import { doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot } from "https://
 // =======================
 // SOCKET SETUP
 // =======================
-window.socket = typeof io !== 'undefined' ? io() : null;
+window.socket = typeof io !== 'undefined' ? io(API_BASE_URL) : null;
 
 // =======================
 // TOAST UTILITY

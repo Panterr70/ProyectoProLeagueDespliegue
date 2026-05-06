@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/config.js";
 const form = document.getElementById("login-form");
 const errorEl = document.getElementById("login-error");
 

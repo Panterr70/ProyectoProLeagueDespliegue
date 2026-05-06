@@ -41,9 +41,18 @@ async function initTrendingPlayers() {
         container.innerHTML = "";
 
         // Renderizar NBA
-        renderLeagueTrending(container, "NBA", topNBA, "nba-color");
+        if (topNBA.length > 0) {
+            renderLeagueTrending(container, "NBA", topNBA, "nba-color");
+        }
+        
         // Renderizar NFL
-        renderLeagueTrending(container, "NFL", topNFL, "nfl-color");
+        if (topNFL.length > 0) {
+            renderLeagueTrending(container, "NFL", topNFL, "nfl-color");
+        }
+
+        if (topNBA.length === 0 && topNFL.length === 0) {
+            container.innerHTML = "<p class='loading-trending'>Aún no hay suficientes datos de la comunidad.</p>";
+        }
 
     } catch (error) {
         console.error("Error cargando tendencias:", error);
@@ -56,7 +65,13 @@ function renderLeagueTrending(container, league, players, colorClass) {
 
     const sectionTitle = document.createElement("div");
     sectionTitle.className = "trending-league-title";
-    sectionTitle.innerHTML = `<h3>Top Picks ${league}</h3>`;
+    sectionTitle.style.gridColumn = "1 / -1";
+    sectionTitle.style.marginTop = league === "NFL" ? "40px" : "0";
+    sectionTitle.style.textAlign = "left";
+    sectionTitle.style.borderBottom = `2px solid ${league === 'NBA' ? 'var(--nba-red)' : 'var(--nfl-blue)'}`;
+    sectionTitle.style.paddingBottom = "10px";
+    sectionTitle.style.marginBottom = "20px";
+    sectionTitle.innerHTML = `<h3 style="display:flex; align-items:center; gap:10px;">${league === 'NBA' ? '🏀' : '🏈'} Top Picks ${league}</h3>`;
     container.appendChild(sectionTitle);
 
     players.forEach(([name, count], index) => {

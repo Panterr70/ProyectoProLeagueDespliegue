@@ -188,7 +188,7 @@ html {
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 40px;
+  gap: 22px;
   margin: 0;
   padding: 0;
 }
@@ -198,10 +198,11 @@ html {
   text-decoration: none;
   color: var(--text-secondary);
   font-weight: 500;
-  font-size: 0.95em;
+  font-size: 0.9em;
   padding: 8px 0;
   transition: all 0.3s ease;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 /* Hover underline animation */

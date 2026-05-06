@@ -175,6 +175,10 @@ document.getElementById("save-profile").addEventListener("click", async () => {
   const bio = document.getElementById("profile-bio").value;
   const avatarInput = document.getElementById("avatar-input");
   const uid = user.uid || user.id;
+  if (!uid) {
+    showToast("Error: No se encontró el ID de usuario. Reintenta iniciando sesión.", 'error');
+    return;
+  }
   let avatarUrl = user.avatar || null;
 
   try {

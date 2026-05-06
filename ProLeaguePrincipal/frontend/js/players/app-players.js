@@ -1,12 +1,8 @@
+import { API_BASE_URL } from "../config/config.js";
+
 // ===================================
 // TOAST NOTIFICATION SYSTEM
 // ===================================
-/**
- * Muestra un toast notification premium.
- * @param {string} message - Mensaje a mostrar
- * @param {'success'|'error'|'info'|'warning'} type - Tipo de toast
- * @param {number} duration - Duración en ms (default 3500)
- */
 function showToast(message, type = 'success', duration = 3500) {
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -108,6 +104,7 @@ function setLeague(league) {
 
   loadTeamsAndPlayers(league);
 }
+window.setLeague = setLeague;
 
 document.querySelectorAll('.league-tab').forEach(tab => {
   tab.addEventListener('click', () => setLeague(tab.dataset.league));
@@ -166,7 +163,7 @@ async function fetchPlayers() {
     if (searchTerm) query.append('search', searchTerm);
     if (selectedTeamId) query.append('teamId', selectedTeamId);
 
-    const res = await fetch(`http://localhost:3000${endpoint}?${query.toString()}`);
+    const res = await fetch(`${API_BASE_URL}${endpoint}?${query.toString()}`);
     if (!res.ok) throw new Error('Error en la búsqueda');
 
     const players = await res.json();
