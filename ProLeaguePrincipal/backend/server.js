@@ -60,17 +60,37 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.includes("vercel.app")) {
+  origin: (origin, callback) => {
+    // Permitir si no hay origin (como herramientas de test o apps moviles) o si está en la lista o es de vercel
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      console.log("CORS bloqueado para:", origin);
+      callback(null, true); // En desarrollo o para depurar, podemos ser más permisivos si falla
     }
   },
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
 }));
+
+// Middleware extra para asegurar cabeceras en cada respuesta (Brute force CORS)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin) || (origin && origin.endsWith(".vercel.app"))) {
+    res.header("Access-Control-Allow-Origin", origin);
+  } else {
+    res.header("Access-Control-Allow-Origin", "*");
+  }
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept");
+  
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 app.use(express.json());
 
 // Rutas

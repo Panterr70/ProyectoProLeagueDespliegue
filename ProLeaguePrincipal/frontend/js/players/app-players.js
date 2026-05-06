@@ -70,7 +70,7 @@ const nflLogos = {
 };
 
 // ===============================
-// STATE
+// STATE & CACHE
 // ===============================
 const user = JSON.parse(localStorage.getItem("user"));
 if (!user) window.location.href = "login.html";
@@ -80,6 +80,7 @@ let allPlayers = [];         // todos los jugadores cargados
 let allTeams = [];           // equipos de la liga actual
 let searchTerm = '';
 let selectedTeamId = '';
+const searchCache = new Map(); // Cache para evitar peticiones repetidas
 
 // ===============================
 // LEAGUE TABS
@@ -154,6 +155,12 @@ async function fetchPlayers() {
     return;
   }
 
+  const cacheKey = `${currentLeague}-${searchTerm}-${selectedTeamId}`;
+  if (searchCache.has(cacheKey)) {
+    renderPlayers(searchCache.get(cacheKey));
+    return;
+  }
+
   showLoadingSkeletons(grid);
   countText.textContent = `Buscando...`;
 
@@ -164,18 +171,29 @@ async function fetchPlayers() {
     if (selectedTeamId) query.append('teamId', selectedTeamId);
 
     const res = await fetch(`${API_BASE_URL}${endpoint}?${query.toString()}`);
+    
+    if (res.status === 429) {
+      showToast("Demasiadas peticiones. Espera unos segundos...", 'warning');
+      countText.textContent = "Límite de API alcanzado. Espera 30s.";
+      grid.innerHTML = `<div class="players-error"><span>⏳</span><p>La API está saturada. Por favor, espera un momento antes de volver a buscar.</p></div>`;
+      return;
+    }
+
     if (!res.ok) throw new Error('Error en la búsqueda');
 
     const players = await res.json();
     
-    // Mapear nombres de equipos para los logos
+    // Mapear nombres de equipos para los logos y nombres
     players.forEach(p => {
-      const team = allTeams.find(t => t.id === (p.team?.id || p.team_id));
-      p._teamName = team ? (team.full_name || team.name) : (p.team?.full_name || 'Desconocido');
-      p._teamId = team ? team.id : null;
+      const teamId = p.team?.id || p.team_id;
+      const team = allTeams.find(t => t.id === teamId);
+      
+      p._teamName = team ? (team.full_name || team.name) : (p.team?.full_name || p.team?.name || 'Agente Libre');
+      p._teamId = teamId;
       p._league = currentLeague;
     });
 
+    searchCache.set(cacheKey, players);
     renderPlayers(players);
   } catch (err) {
     console.error('Fetch error:', err);
