@@ -29,7 +29,7 @@
   <div id="toast-container"></div>
   <script type="module">
     import { auth, db } from "../../js/config/firebase-config.js";
-    import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // TOAST UTILITY
@@ -53,31 +53,39 @@
 
     registerForm.addEventListener("submit", async e => {
       e.preventDefault();
-      const username = document.getElementById("register-username").value;
-      const email = document.getElementById("register-email").value;
+      const username = document.getElementById("register-username").value.trim();
+      const email = document.getElementById("register-email").value.trim();
       const password = document.getElementById("register-password").value;
+
+      // Validación extra frontend
+      if (password.length < 6) {
+        showToast("La contraseña debe tener al menos 6 caracteres", 'warning');
+        return;
+      }
 
       try {
         // 1. Crear usuario en Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 2. Actualizar perfil con el nombre de usuario
+        // 2. Enviar email de verificación (QoL: Validación de existencia real)
+        await sendEmailVerification(user);
+        showToast("Correo de verificación enviado. ¡Revisa tu bandeja!", 'info');
+
+        // 3. Actualizar perfil con el nombre de usuario
         await updateProfile(user, { displayName: username });
 
-        // 3. Guardar datos adicionales en Firestore
-        try {
-          await setDoc(doc(db, "users", user.uid), {
-            username: username,
-            email: email,
-            createdAt: new Date().toISOString(),
-            bio: "¡Hola! Soy nuevo en ProLeague.",
-            favorites: []
-          });
-        } catch (dbErr) {
-          console.error("Firestore Error:", dbErr);
-          showToast("Usuario creado en Auth, pero error en Firestore. ¿Está activado?", 'warning');
-        }
+        // 4. Guardar datos adicionales en Firestore
+        const sessionId = Date.now().toString();
+        await setDoc(doc(db, "users", user.uid), {
+          username: username,
+          email: email,
+          createdAt: new Date().toISOString(),
+          bio: "¡Hola! Soy nuevo en ProLeague.",
+          favorites: [],
+          lastLogin: new Date().toISOString(),
+          currentSessionId: sessionId
+        });
 
         showToast("¡Cuenta creada con éxito! 🎉", 'success');
         
@@ -87,10 +95,11 @@
           email: user.email,
           username: username,
           bio: "¡Hola! Soy nuevo en ProLeague.",
-          favorites: []
+          favorites: [],
+          sessionId: sessionId
         }));
 
-        setTimeout(() => { window.location.href = "../home/home.html"; }, 1500);
+        setTimeout(() => { window.location.href = "../home/home.html"; }, 2000);
 
       } catch (err) {
         console.error("Registration Error:", err);
@@ -98,8 +107,10 @@
           showToast("El correo ya está registrado", 'error');
         } else if (err.code === 'auth/weak-password') {
           showToast("La contraseña es muy débil", 'warning');
+        } else if (err.code === 'auth/invalid-email') {
+          showToast("El formato del correo no es válido", 'error');
         } else {
-          showToast("Error al crear la cuenta", 'error');
+          showToast("Error al crear la cuenta: " + err.message, 'error');
         }
       }
     });

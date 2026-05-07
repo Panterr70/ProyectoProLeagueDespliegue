@@ -1,6 +1,10 @@
 import { auth, db } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
 import { doc, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initSessionGuard } from "../auth/session-guard.js";
+
+// Inicializar protección de sesión única
+initSessionGuard();
 
 // ===============================
 // STATE & AUTH

@@ -78,14 +78,26 @@
           // Continuamos aunque falle Firestore para no bloquear el login si Auth fue bien
         }
 
-        // 3. Guardar en localStorage para compatibilidad con el resto de la web
+        // 3. Generar y guardar Session ID (QoL: Control de sesión única)
+        const sessionId = Date.now().toString();
+        try {
+          await setDoc(doc(db, "users", user.uid), {
+            lastLogin: new Date().toISOString(),
+            currentSessionId: sessionId
+          }, { merge: true });
+        } catch (dbErr) {
+          console.error("Error updating session:", dbErr);
+        }
+
+        // 4. Guardar en localStorage para compatibilidad con el resto de la web
         const userObj = {
           uid: user.uid,
           email: user.email,
           username: userData.username || user.displayName || "Usuario",
           bio: userData.bio || "",
           avatar: userData.avatar || "",
-          favorites: userData.favorites || []
+          favorites: userData.favorites || [],
+          sessionId: sessionId // Guardamos el ID de esta pestaña
         };
         localStorage.setItem("user", JSON.stringify(userObj));
 
