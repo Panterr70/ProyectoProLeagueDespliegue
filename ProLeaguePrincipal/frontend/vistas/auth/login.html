@@ -67,6 +67,13 @@
 
         const user = userCredential.user;
 
+        // 1.5 Verificar si el email está validado (QoL: Seguridad)
+        if (!user.emailVerified) {
+          showToast("Tu correo no ha sido verificado. Por favor, verifícalo para entrar.", 'warning', 6000);
+          await auth.signOut();
+          return; // Detener el flujo de login
+        }
+
         // 2. Obtener datos adicionales desde Firestore
         let userData = {};
         try {

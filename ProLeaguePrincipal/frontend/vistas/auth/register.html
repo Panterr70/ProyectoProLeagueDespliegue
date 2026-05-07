@@ -87,19 +87,9 @@
           currentSessionId: sessionId
         });
 
-        showToast("¡Cuenta creada con éxito! 🎉", 'success');
+        showToast("¡Cuenta creada! Revisa tu email para verificarla antes de entrar.", 'info', 5000);
         
-        // Guardar para sesión actual
-        localStorage.setItem("user", JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-          username: username,
-          bio: "¡Hola! Soy nuevo en ProLeague.",
-          favorites: [],
-          sessionId: sessionId
-        }));
-
-        setTimeout(() => { window.location.href = "../home/home.html"; }, 2000);
+        setTimeout(() => { window.location.href = "../auth/login.html"; }, 3000);
 
       } catch (err) {
         console.error("Registration Error:", err);
