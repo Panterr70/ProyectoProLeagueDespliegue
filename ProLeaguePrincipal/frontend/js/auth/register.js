@@ -39,8 +39,13 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    alert("Cuenta creada correctamente. Ahora puedes iniciar sesión.");
-    window.location.href = "../auth/login.html"; // redirige al login
+    if (window.showToast) {
+      window.showToast("Cuenta creada correctamente. Ahora puedes iniciar sesión.", "success");
+    }
+    
+    setTimeout(() => {
+      window.location.href = "../auth/login.html"; // redirige al login
+    }, 2000);
 
   } catch (err) {
     console.error(err);

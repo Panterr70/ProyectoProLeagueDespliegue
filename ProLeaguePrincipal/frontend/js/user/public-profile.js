@@ -1,6 +1,5 @@
-import { db } from "../config/firebase-config.js";
-import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { showToast } from "../utils/toast.js";
 
 const urlParams = new URLSearchParams(window.location.search);
 const profileId = urlParams.get('id');
@@ -39,8 +38,10 @@ async function init() {
             renderProfile();
             initTabs();
         } else {
-            alert("Usuario no encontrado");
-            window.location.href = "search-users.html";
+            showToast("Usuario no encontrado", "error");
+            setTimeout(() => {
+                window.location.href = "search-users.html";
+            }, 2000);
         }
     } catch (err) {
         console.error(err);

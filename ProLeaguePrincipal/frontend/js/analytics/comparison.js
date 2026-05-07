@@ -1,5 +1,5 @@
-import { db } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
+import { showToast } from "../utils/toast.js";
 
 let player1 = null;
 let player2 = null;
@@ -66,7 +66,7 @@ async function selectPlayer(player, pNumber, league) {
 
     if (player1 && player2) {
         if (!player1.stats || !player2.stats) {
-            alert("Uno de los jugadores seleccionados no tiene estadísticas disponibles para esta temporada (puede que esté retirado).");
+            showToast("Uno de los jugadores seleccionados no tiene estadísticas disponibles para esta temporada.", "info");
         }
         performComparison();
     }

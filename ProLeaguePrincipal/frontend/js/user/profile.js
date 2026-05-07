@@ -30,6 +30,10 @@ const nflLogos = {
 import { updateProfile, updatePassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// Variable para rastrear cambios sin guardar [QoL-01]
+let isDirty = false;
+const markDirty = () => { isDirty = true; };
+
 // ===== TOAST UTILITY =====
 function showToast(message, type = 'success', duration = 3500) {
   let container = document.getElementById('toast-container');
@@ -195,6 +199,20 @@ document.getElementById("avatar-input").addEventListener("change", () => {
   const file = document.getElementById("avatar-input").files[0];
   if (file) {
     document.getElementById("profile-img").src = URL.createObjectURL(file);
+    markDirty(); // Cambio detectado
+  }
+});
+
+// Detectar cambios en inputs y bio [QoL-01]
+document.getElementById("profile-bio").addEventListener("input", markDirty);
+document.getElementById("new-username").addEventListener("input", markDirty);
+document.getElementById("new-password").addEventListener("input", markDirty);
+
+// Prevenir salida si hay cambios [QoL-01]
+window.addEventListener("beforeunload", (e) => {
+  if (isDirty) {
+    e.preventDefault();
+    e.returnValue = ""; // Requerido por navegadores modernos
   }
 });
 
@@ -235,6 +253,8 @@ document.getElementById("save-profile").addEventListener("click", async () => {
     user.bio = bio;
     localStorage.setItem("user", JSON.stringify(user));
     
+    isDirty = false; // Cambios guardados con éxito
+
     // Actualizar vista
     document.getElementById("profile-img").src = avatarUrl.startsWith('http') 
         ? avatarUrl 
@@ -275,6 +295,7 @@ document.getElementById("change-credentials").addEventListener("click", async ()
     }
 
     localStorage.setItem("user", JSON.stringify(user));
+    isDirty = false; // Cambios guardados con éxito
     showToast("Credenciales actualizadas", 'success');
 
   } catch (err) {

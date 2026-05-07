@@ -2,12 +2,22 @@ import { db, auth } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { showToast } from "../utils/toast.js";
 
 let currentUser = null;
 let currentLeague = "NBA";
 let currentPos = null;
 let dreamTeamNBA = { PG: null, SG: null, SF: null, PF: null, C: null };
 let dreamTeamNFL = { QB: null, RB: null, WR1: null, WR2: null, TE: null };
+
+// Registro de cambios sin guardar [QoL-01]
+let isDirty = false;
+window.addEventListener("beforeunload", (e) => {
+    if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+    }
+});
 
 const sportField = document.getElementById("sport-field");
 const selectorTitle = document.getElementById("selector-title");
@@ -150,7 +160,7 @@ function renderField() {
 }
 
 searchBtn.onclick = async () => {
-    if (!currentPos) return alert("Selecciona primero una posición en el campo.");
+    if (!currentPos) return showToast("Selecciona primero una posición en el campo.", "warning");
     const query = searchInput.value.trim();
     if (query.length < 3) return;
 
@@ -173,6 +183,7 @@ searchBtn.onclick = async () => {
                 li.onclick = () => {
                     const team = currentLeague === "NBA" ? dreamTeamNBA : dreamTeamNFL;
                     team[currentPos] = p;
+                    isDirty = true; // Cambio detectado [QoL-01]
                     renderField();
                     resultsList.innerHTML = "";
                     searchInput.value = "";
@@ -195,9 +206,10 @@ saveBtn.onclick = async () => {
             dreamTeamNBA,
             dreamTeamNFL
         });
-        alert("¡Equipos guardados correctamente!");
+        isDirty = false; // Guardado con éxito [QoL-01]
+        showToast("¡Equipos guardados correctamente!", "success");
     } catch (e) {
-        alert("Error al guardar.");
+        showToast("Error al guardar.", "error");
     } finally {
         saveBtn.disabled = false;
     }

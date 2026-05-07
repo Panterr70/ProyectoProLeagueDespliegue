@@ -1,5 +1,6 @@
 import { db, auth } from "../config/firebase-config.js";
 import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { showToast } from "../utils/toast.js";
 
 /**
  * [AUTH03] Session Guard
@@ -22,12 +23,8 @@ export function initSessionGuard() {
             if (remoteSessionId && remoteSessionId !== userData.sessionId) {
                 console.warn("Nueva sesión detectada en otro dispositivo. Cerrando sesión local...");
                 
-                // Mostrar aviso si existe toast utility
-                if (window.showToast) {
-                    window.showToast("Se ha iniciado sesión en otro dispositivo. Cerrando sesión...", "warning", 5000);
-                } else {
-                    alert("Se ha iniciado sesión en otro dispositivo. Cerrando sesión...");
-                }
+                // Mostrar aviso premium [QoL-01]
+                showToast("Se ha iniciado sesión en otro dispositivo. Cerrando sesión...", "warning", 5000);
 
                 // Esperar un poco para que el usuario vea el mensaje y cerrar
                 setTimeout(() => {
