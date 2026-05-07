@@ -16,7 +16,10 @@
 
       <form id="login-form">
         <input type="text" id="login-username" placeholder="Usuario o email" required>
-        <input type="password" id="login-password" placeholder="Contraseña" required>
+        <div class="password-container" style="position: relative; width: 100%;">
+          <input type="password" id="login-password" placeholder="Contraseña" required style="width: 100%;">
+          <button type="button" id="toggle-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 1.2rem; padding: 5px;">👁️</button>
+        </div>
         <button type="submit">Entrar</button>
       </form>
 
@@ -48,6 +51,14 @@
     }
 
     const loginForm = document.getElementById("login-form");
+    const togglePassword = document.getElementById("toggle-password");
+    const passwordInput = document.getElementById("login-password");
+
+    togglePassword.addEventListener("click", () => {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      togglePassword.textContent = type === "password" ? "👁️" : "🙈";
+    });
 
     loginForm.addEventListener("submit", async e => {
       e.preventDefault();
