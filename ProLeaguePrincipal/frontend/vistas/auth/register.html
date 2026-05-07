@@ -89,7 +89,10 @@
 
         showToast("¡Cuenta creada! Revisa tu email para verificarla antes de entrar.", 'info', 5000);
         
-        setTimeout(() => { window.location.href = "../auth/login.html"; }, 3000);
+        // Cerrar sesión inmediatamente para que no entre al Home automáticamente
+        await auth.signOut();
+        
+        setTimeout(() => { window.location.href = "./login.html"; }, 3000);
 
       } catch (err) {
         console.error("Registration Error:", err);
