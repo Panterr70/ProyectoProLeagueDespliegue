@@ -28,7 +28,7 @@
   <script type="module">
     import { auth, db } from "../../js/config/firebase-config.js";
     import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // TOAST UTILITY
     window.showToast = function(message, type = 'success', duration = 3500) {
