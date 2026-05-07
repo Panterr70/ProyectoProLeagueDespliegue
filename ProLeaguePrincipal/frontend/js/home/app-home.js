@@ -78,7 +78,21 @@ function getSbLogoImg(teamName, isNBA) {
 // AUTH & STATE
 // =======================
 const user = JSON.parse(localStorage.getItem("user"));
-if (!user) window.location.href = "login.html";
+if (!user) {
+  window.location.href = "../auth/login.html";
+} else {
+  // Comprobar verificación en segundo plano (QoL: Seguridad extra)
+  auth.onAuthStateChanged(async (firebaseUser) => {
+    if (firebaseUser) {
+      await firebaseUser.reload();
+      if (!firebaseUser.emailVerified) {
+        console.warn("Usuario no verificado detectado en Home. Redirigiendo...");
+        localStorage.removeItem("user");
+        window.location.href = "../auth/login.html";
+      }
+    }
+  });
+}
 
 let currentFilter = "all";
 

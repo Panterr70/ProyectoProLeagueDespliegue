@@ -65,13 +65,18 @@
           return;
         }
 
-        const user = userCredential.user;
+        let user = userCredential.user;
+
+        // Forzar recarga del usuario para obtener el estado de verificación más reciente
+        await user.reload();
+        user = auth.currentUser; 
 
         // 1.5 Verificar si el email está validado (QoL: Seguridad)
         if (!user.emailVerified) {
           showToast("Tu correo no ha sido verificado. Por favor, verifícalo para entrar.", 'warning', 6000);
           await auth.signOut();
-          return; // Detener el flujo de login
+          localStorage.removeItem("user"); // Limpiar por si acaso
+          return; 
         }
 
         // 2. Obtener datos adicionales desde Firestore
