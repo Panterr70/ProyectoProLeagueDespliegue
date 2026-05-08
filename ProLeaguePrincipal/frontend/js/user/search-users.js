@@ -2,58 +2,74 @@ import { db } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+
 const searchInput = document.getElementById("user-search-input");
 const searchBtn = document.getElementById("user-search-btn");
 const resultsGrid = document.getElementById("user-results-grid");
+
+let allUsersCache = []; // Cache para filtrado en vivo
 
 // Obtener el ID del usuario actual para no mostrarlo
 const currentUser = JSON.parse(localStorage.getItem("user"));
 const currentUserId = currentUser ? currentUser.uid : null;
 
+// Filtrado en vivo (Real-time Filtering)
+searchInput.addEventListener("input", (e) => {
+    const searchTerm = e.target.value.trim().toLowerCase();
+    renderUsers(allUsersCache, searchTerm);
+});
 
+// El botón de buscar ahora solo fuerza una recarga de datos de Firebase si se desea
 searchBtn.onclick = async () => {
-    const searchTerm = searchInput.value.trim().toLowerCase();
-    
-    searchBtn.disabled = true;
-    searchBtn.textContent = "...";
+    await fetchAndCacheUsers();
+};
 
+async function fetchAndCacheUsers() {
+    const placeholder = document.getElementById("search-placeholder");
+    
+    // Mostrar Skeletons mientras carga
+    showSkeletons();
+    
     try {
         const usersRef = collection(db, "users");
         const querySnapshot = await getDocs(usersRef);
         
-        // Filtrado dinámico: encuentra cualquier coincidencia en el nombre
-        renderUsers(querySnapshot, searchTerm);
+        allUsersCache = [];
+        querySnapshot.forEach(doc => {
+            allUsersCache.push({ id: doc.id, ...doc.data() });
+        });
+
+        renderUsers(allUsersCache, searchInput.value.trim().toLowerCase());
     } catch (err) {
         console.error("Error buscando usuarios:", err);
         resultsGrid.innerHTML = `<div class="empty-state"><p>Error al conectar con la comunidad.</p></div>`;
-    } finally {
-        searchBtn.disabled = false;
-        searchBtn.textContent = "BUSCAR";
     }
-};
+}
+
+function showSkeletons() {
+    resultsGrid.innerHTML = "";
+    for (let i = 0; i < 6; i++) {
+        const skeleton = document.createElement("div");
+        skeleton.className = "user-card-social skeleton";
+        skeleton.style.height = "280px";
+        resultsGrid.appendChild(skeleton);
+    }
+}
 
 async function init() {
-    try {
-        const usersRef = collection(db, "users");
-        const querySnapshot = await getDocs(usersRef);
-        // Mostramos todos (o los primeros) pero sin filtro de término
-        renderUsers(querySnapshot, "");
-    } catch (err) {
-        console.error("Error cargando usuarios iniciales:", err);
-    }
+    await fetchAndCacheUsers();
 }
 
 init();
 
-function renderUsers(snapshot, searchTerm = "") {
+function renderUsers(users, searchTerm = "") {
     const placeholder = document.getElementById("search-placeholder");
     resultsGrid.innerHTML = "";
     
     let matchCount = 0;
 
-    snapshot.forEach((doc) => {
-        const data = doc.data();
-        const userId = doc.id;
+    users.forEach((data) => {
+        const userId = data.id;
         
         // Evitar mostrarse a uno mismo
         if (userId === currentUserId) return;
@@ -81,7 +97,12 @@ function renderUsers(snapshot, searchTerm = "") {
                 <img src="${avatarUrl}" alt="Avatar" class="user-card-avatar">
             </div>
             <div class="user-card-body">
-                <h4>${data.username}</h4>
+                <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
+                    <h4>${data.username}</h4>
+                    <button class="copy-btn-mini" data-copy="${data.username}" title="Copiar nombre">
+                        📋
+                    </button>
+                </div>
                 <p class="user-card-bio">${data.bio ? (data.bio.substring(0, 50) + "...") : "Fan de ProLeague"}</p>
                 <div class="user-card-stats">
                     <span>🏀 ${data.dreamTeamNBA ? 'Con equipo' : 'Sin NBA'}</span>
@@ -90,6 +111,17 @@ function renderUsers(snapshot, searchTerm = "") {
                 <a href="public-profile.html?id=${userId}" class="btn-secondary">VER PERFIL</a>
             </div>
         `;
+
+        // Lógica de copiar
+        const copyBtn = card.querySelector('.copy-btn-mini');
+        copyBtn.onclick = (e) => {
+            e.preventDefault();
+            navigator.clipboard.writeText(data.username);
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = "✅";
+            setTimeout(() => copyBtn.innerHTML = originalText, 1500);
+        };
+
         resultsGrid.appendChild(card);
     });
 
@@ -100,3 +132,4 @@ function renderUsers(snapshot, searchTerm = "") {
         if (placeholder) placeholder.style.display = "none";
     }
 }
+

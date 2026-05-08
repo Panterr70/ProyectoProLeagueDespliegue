@@ -1,5 +1,8 @@
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { db } from "../config/firebase-config.js";
+import { API_BASE_URL } from "../config/config.js";
 import { showToast } from "../utils/toast.js";
+
 
 const urlParams = new URLSearchParams(window.location.search);
 const profileId = urlParams.get('id');
@@ -108,6 +111,7 @@ function renderFavorites() {
     }
 
 
+
     favorites.forEach(fav => {
         const teamName = fav.team_name || fav.name || fav.full_name || "Equipo";
         const logoUrl = fav.logo || fav.logo_url || `../../logos/logo-png.png`;
@@ -121,4 +125,22 @@ function renderFavorites() {
     });
 }
 
+// Lógica de compartir perfil
+const shareBtn = document.getElementById("copy-profile-link");
+if (shareBtn) {
+    shareBtn.onclick = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            const originalText = shareBtn.innerHTML;
+            shareBtn.innerHTML = "✅ ¡Copiado!";
+            showToast("Enlace de perfil copiado al portapapeles", "success");
+            setTimeout(() => shareBtn.innerHTML = originalText, 2000);
+        }).catch(err => {
+            console.error("Error al copiar enlace:", err);
+            showToast("No se pudo copiar el enlace", "error");
+        });
+    };
+}
+
 init();
+

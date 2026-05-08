@@ -159,13 +159,40 @@ function renderField() {
     });
 }
 
-searchBtn.onclick = async () => {
-    if (!currentPos) return showToast("Selecciona primero una posición en el campo.", "warning");
+
+let searchDebounce;
+searchInput.addEventListener("input", () => {
     const query = searchInput.value.trim();
+    clearTimeout(searchDebounce);
+    
+    if (query.length === 0) {
+        resultsList.innerHTML = "";
+        return;
+    }
+    
     if (query.length < 3) return;
 
-    searchBtn.disabled = true;
-    searchBtn.innerHTML = '<i class="loader"></i>';
+    searchDebounce = setTimeout(() => {
+        performSearch(query);
+    }, 500);
+});
+
+searchBtn.onclick = () => performSearch(searchInput.value.trim());
+
+async function performSearch(query) {
+    if (!currentPos) return showToast("Selecciona primero una posición en el campo.", "warning");
+    if (!query) return;
+
+    // Mostrar Skeletons
+    resultsList.innerHTML = "";
+    for (let i = 0; i < 3; i++) {
+        const skel = document.createElement("li");
+        skel.className = "skeleton";
+        skel.style.height = "45px";
+        skel.style.marginBottom = "8px";
+        skel.style.borderRadius = "8px";
+        resultsList.appendChild(skel);
+    }
 
     try {
         const path = CONFIG[currentLeague].apiPath;
@@ -173,31 +200,37 @@ searchBtn.onclick = async () => {
         const players = await res.json();
 
         resultsList.innerHTML = "";
-        if (Array.isArray(players)) {
+        if (Array.isArray(players) && players.length > 0) {
             players.slice(0, 6).forEach(p => {
                 const li = document.createElement("li");
+                li.className = "search-result-item";
                 li.innerHTML = `
-                    <span>${p.first_name} ${p.last_name}</span>
-                    <small>${p.team.abbreviation}</small>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:700;">${p.first_name} ${p.last_name}</span>
+                        <small style="opacity:0.7;">${p.team.full_name}</small>
+                    </div>
+                    <span class="add-player-icon">+</span>
                 `;
                 li.onclick = () => {
                     const team = currentLeague === "NBA" ? dreamTeamNBA : dreamTeamNFL;
                     team[currentPos] = p;
-                    isDirty = true; // Cambio detectado [QoL-01]
+                    isDirty = true; 
                     renderField();
                     resultsList.innerHTML = "";
                     searchInput.value = "";
+                    showToast(`${p.last_name} añadido al equipo`, "success");
                 };
                 resultsList.appendChild(li);
             });
+        } else {
+            resultsList.innerHTML = "<p style='text-align:center; padding:10px; font-size:0.9rem; opacity:0.6;'>No se encontraron jugadores.</p>";
         }
     } catch (e) {
         console.error(e);
-    } finally {
-        searchBtn.disabled = false;
-        searchBtn.textContent = "BUSCAR";
+        resultsList.innerHTML = "<p style='color:red; text-align:center;'>Error en la búsqueda.</p>";
     }
-};
+}
+
 
 saveBtn.onclick = async () => {
     try {

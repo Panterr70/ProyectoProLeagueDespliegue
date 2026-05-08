@@ -225,15 +225,17 @@ function filterNews(term = "", category = "all") {
 // =======================
 const newsList = document.getElementById("news-list");
 
+
 function showSkeletons() {
   newsList.innerHTML = "";
   for (let i = 0; i < 4; i++) {
     const skel = document.createElement("div");
     skel.className = "news-card skeleton";
-    skel.style.height = "250px";
+    skel.style.minHeight = "250px";
     newsList.appendChild(skel);
   }
 }
+
 
 // =======================
 // SCOREBOARD

@@ -251,6 +251,7 @@ function createPlayerCard(player, index) {
   card.dataset.league = league;
 
   card.innerHTML = `
+
     <div class="player-card-sport-bar" style="background: ${sportColor};"></div>
     <div class="player-card-content">
       <div class="player-logo-wrap">
@@ -261,7 +262,10 @@ function createPlayerCard(player, index) {
       </div>
       <div class="player-info">
         <span class="player-league-badge" style="background:${sportColor}22; color:${sportColor}; border:1px solid ${sportColor}44;">${league}</span>
-        <h3 class="player-name">${fullName}</h3>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <h3 class="player-name">${fullName}</h3>
+          <button class="copy-btn-mini" data-copy="${fullName}" title="Copiar nombre">📋</button>
+        </div>
         <p class="player-team">${teamName || '—'}</p>
         <div class="player-tags">
           ${position !== '—' ? `<span class="player-tag">${position}</span>` : ''}
@@ -270,6 +274,17 @@ function createPlayerCard(player, index) {
       <button class="player-detail-btn" title="Ver detalles">→</button>
     </div>
   `;
+
+  // Lógica de copiar
+  const copyBtn = card.querySelector('.copy-btn-mini');
+  copyBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(fullName);
+    const originalText = copyBtn.innerHTML;
+    copyBtn.innerHTML = "✅";
+    setTimeout(() => copyBtn.innerHTML = originalText, 1500);
+  });
+
 
   card.querySelector('.player-detail-btn').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -283,15 +298,19 @@ function createPlayerCard(player, index) {
 // ===============================
 // SKELETON LOADER
 // ===============================
+
 function showLoadingSkeletons(grid) {
   grid.innerHTML = '';
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 8; i++) {
     const skel = document.createElement('div');
     skel.className = 'player-card skeleton';
-    skel.style.height = '120px';
+    skel.innerHTML = `
+      <div style="height: 120px;"></div>
+    `;
     grid.appendChild(skel);
   }
 }
+
 
 // ===============================
 // PLAYER MODAL
