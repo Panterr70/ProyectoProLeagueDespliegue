@@ -2,6 +2,7 @@ import { auth, db } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
 import { doc, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initSessionGuard } from "../auth/session-guard.js";
+import { initHeaderLogic } from "../utils/header-logic.js";
 
 // Inicializar protección de sesión única
 initSessionGuard();
@@ -19,37 +20,10 @@ async function loadHeader() {
   const html = await fetch("../components/header.html").then(r => r.text());
   document.getElementById("header-placeholder").innerHTML = html;
   
-  if (typeof google !== "undefined" && google.translate) {
-      googleTranslateElementInit();
-  }
-  
-  const logoutLink = document.getElementById("nav-logout");
-  const profileLink = document.getElementById("nav-profile");
-  
-  if (user) {
-    if (logoutLink) logoutLink.style.display = "inline";
-    if (profileLink) profileLink.style.display = "inline";
-  }
-
-  if (logoutLink) {
-    logoutLink.addEventListener("click", e => {
-      e.preventDefault();
-      auth.signOut();
-      localStorage.removeItem("user");
-      window.location.href = "../auth/login.html";
-    });
-  }
-
-  // Lógica de Menú Móvil
-  const menuBtn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('nav-menu');
-  if(menuBtn && menu) {
-    menuBtn.onclick = () => {
-      menu.classList.toggle('active');
-      menuBtn.classList.toggle('active');
-    };
-  }
+  // Inicializar lógica de tema, logout y usuario
+  initHeaderLogic();
 }
+
 
 async function loadFooter() {
   document.getElementById("footer-placeholder").innerHTML =

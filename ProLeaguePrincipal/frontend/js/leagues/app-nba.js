@@ -2,6 +2,7 @@ import { db, auth } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initSessionGuard } from "../auth/session-guard.js";
+import { initHeaderLogic } from "../utils/header-logic.js";
 
 // Inicializar protección de sesión única
 initSessionGuard();
@@ -16,66 +17,39 @@ if (!user || (!user.uid && !user.id)) window.location.href = "../auth/login.html
 // UI FUNCTIONS
 // ===============================
 async function loadHeader() {
-  const html = await fetch("../components/header.html").then(r => r.text());
-  document.getElementById("header-placeholder").innerHTML = html;
-  
-  if (typeof google !== "undefined" && google.translate) {
-      googleTranslateElementInit();
-  }
-  
-  const logoutLink = document.getElementById("nav-logout");
-  const profileLink = document.getElementById("nav-profile");
-  
-  if (user) {
-    if (logoutLink) logoutLink.style.display = "inline";
-    if (profileLink) profileLink.style.display = "inline";
-  }
-
-  if (logoutLink) {
-    logoutLink.addEventListener("click", e => {
-      e.preventDefault();
-      auth.signOut();
-      localStorage.removeItem("user");
-      window.location.href = "../auth/login.html";
-    });
-  }
-
-  // Lógica de Menú Móvil
-  const menuBtn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('nav-menu');
-  if(menuBtn && menu) {
-    menuBtn.onclick = () => {
-      menu.classList.toggle('active');
-      menuBtn.classList.toggle('active');
-    };
+  try {
+    const html = await fetch("../components/header.html").then(r => r.text());
+    const placeholder = document.getElementById("header-placeholder");
+    if (placeholder) {
+      placeholder.innerHTML = html;
+      initHeaderLogic();
+    }
+  } catch (err) {
+    console.error("Error cargando header:", err);
   }
 }
 
 async function loadFooter() {
-  document.getElementById("footer-placeholder").innerHTML =
-    await fetch("../components/footer.html").then(r => r.text());
+  try {
+    const html = await fetch("../components/footer.html").then(r => r.text());
+    const placeholder = document.getElementById("footer-placeholder");
+    if (placeholder) placeholder.innerHTML = html;
+  } catch (err) {
+    console.error("Error cargando footer:", err);
+  }
 }
 
-// INIT
-document.addEventListener("DOMContentLoaded", async () => {
+// INITIALIZATION
+(async function init() {
   await loadHeader();
   await loadFooter();
 
   const nbaSection = document.getElementById("nba-section");
   if(nbaSection) nbaSection.style.display = "block";
 
-  // ===== CARGAR CLASIFICACIÓN Y EQUIPOS =====
   await cargarClasificacion();
   await cargarEquipos();
-
-  // ===== MODAL =====
-  const modal = document.getElementById("team-modal");
-  if(modal) {
-    document.getElementById("modal-close").onclick = () => modal.style.display = "none";
-    window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
-  }
-});
-
+})();
 
 // ===============================
 // TOAST NOTIFICATION SYSTEM

@@ -1,9 +1,6 @@
 import { db } from "../config/firebase-config.js";
 import { API_BASE_URL, SOCKET_URL } from "../config/config.js";
 import { initSessionGuard } from "../auth/session-guard.js";
-
-// Inicializar protección de sesión única [AUTH-02]
-initSessionGuard();
 import { 
     collection, 
     addDoc, 
@@ -15,22 +12,66 @@ import {
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const socket = io(SOCKET_URL);
+// Inicializar protección de sesión única
+initSessionGuard();
 
+const socket = io(SOCKET_URL);
 const userObj = JSON.parse(localStorage.getItem("user"));
 const username = userObj ? userObj.username : "Anónimo";
 
-const nbaMessagesDiv = document.getElementById("nba-messages");
-const nbaForm = document.getElementById("nba-form");
-const nbaInput = document.getElementById("nba-input");
+// DOM Elements
+const chatMessages = document.getElementById("chat-messages-container");
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+const currentRoomName = document.getElementById("current-room-name");
+const channelItems = document.querySelectorAll(".channel-item");
+const sidebarUsername = document.getElementById("sidebar-username");
+const sidebarAvatar = document.getElementById("sidebar-avatar");
 
-const nflMessagesDiv = document.getElementById("nfl-messages");
-const nflForm = document.getElementById("nfl-form");
-const nflInput = document.getElementById("nfl-input");
+let currentRoom = "general";
 
-// 1. CARGAR HISTORIAL DESDE FIRESTORE
+// 1. INIT
+document.addEventListener("DOMContentLoaded", () => {
+    if (userObj) {
+        sidebarUsername.textContent = username;
+        sidebarAvatar.textContent = username.charAt(0).toUpperCase();
+    }
+    
+    setupChannels();
+    switchRoom("general");
+});
+
+function setupChannels() {
+    channelItems.forEach(item => {
+        item.onclick = () => {
+            const room = item.getAttribute("data-room");
+            if (room === currentRoom) return;
+
+            // Update UI
+            channelItems.forEach(i => i.classList.remove("active"));
+            item.classList.add("active");
+            
+            switchRoom(room);
+        };
+    });
+}
+
+async function switchRoom(newRoom) {
+    // Socket leave/join
+    socket.emit("leaveRoom", currentRoom);
+    currentRoom = newRoom;
+    socket.emit("joinRoom", currentRoom);
+
+    // UI Updates
+    currentRoomName.textContent = newRoom;
+    chatInput.placeholder = `Enviar mensaje a #${newRoom}...`;
+    chatMessages.innerHTML = `<div class="loading-chat">Cargando #${newRoom}...</div>`;
+
+    await loadChatHistory(newRoom);
+}
+
+// 2. FIRESTORE HISTORY
 async function loadChatHistory(room) {
-    const container = room === "nba" ? nbaMessagesDiv : nflMessagesDiv;
     try {
         const q = query(
             collection(db, "messages"),
@@ -40,33 +81,38 @@ async function loadChatHistory(room) {
         );
 
         const querySnapshot = await getDocs(q);
-        container.innerHTML = "";
+        chatMessages.innerHTML = "";
         
+        if (querySnapshot.empty) {
+            chatMessages.innerHTML = `<div class="loading-chat">No hay mensajes en #${room}. ¡Sé el primero!</div>`;
+        }
+
         querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            addMessageToDOM(data, room);
+            addMessageToDOM(doc.data());
         });
+        
+        scrollToBottom();
     } catch (error) {
-        console.error("Error Firestore:", error);
+        console.error("Error historial:", error);
     }
 }
 
-loadChatHistory("nba");
-loadChatHistory("nfl");
-
-// 2. SOCKET.IO (Real-time y Bot)
-socket.on("connect", () => {
-    socket.emit("joinRoom", "nba");
-    socket.emit("joinRoom", "nfl");
-});
-
+// 3. SOCKET EVENTS
 socket.on("message", (msg) => {
-    addMessageToDOM(msg, msg.room);
+    if (msg.room === currentRoom) {
+        // Eliminar mensaje de "no hay mensajes" si existe
+        const emptyMsg = chatMessages.querySelector(".loading-chat");
+        if (emptyMsg) emptyMsg.remove();
+        
+        addMessageToDOM(msg);
+        scrollToBottom();
+    }
 });
 
-// 3. ENVIAR MENSAJE
-async function sendMessage(room, input) {
-    const text = input.value.trim();
+// 4. SEND MESSAGE
+chatForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
     if (!text) return;
 
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -74,54 +120,45 @@ async function sendMessage(room, input) {
     const messageData = {
         user: username,
         text: text,
-        room: room,
+        room: currentRoom,
         time: time,
         timestamp: serverTimestamp()
     };
 
     try {
+        chatInput.value = "";
+        // Optimismo: añadir al DOM localmente o esperar al socket
+        // Usaremos el socket para asegurar sincronización
         await addDoc(collection(db, "messages"), messageData);
-        socket.emit("chatMessage", { room, user: username, text, time });
-        input.value = "";
-        input.focus();
+        socket.emit("chatMessage", { room: currentRoom, user: username, text, time });
     } catch (error) {
-        console.error("Error enviando mensaje:", error);
+        console.error("Error envío:", error);
     }
-}
+};
 
-nbaForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    sendMessage("nba", nbaInput);
-});
-
-nflForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    sendMessage("nfl", nflInput);
-});
-
-function addMessageToDOM(msg, room) {
-    const container = room === "nba" ? nbaMessagesDiv : nflMessagesDiv;
-    if (!container) return;
-
-    const div = document.createElement("div");
-    div.classList.add("message");
+function addMessageToDOM(msg) {
+    const isMine = msg.user === username;
+    const isBot = msg.user.includes("Bot");
     
-    if (msg.user === username) {
-        div.classList.add("my-message");
-    } else if (msg.user.includes("Bot")) {
-        div.classList.add("bot-message");
-    } else {
-        div.classList.add("other-message");
-    }
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `msg-v2 ${isMine ? 'mine' : ''} ${isBot ? 'bot-msg' : ''}`;
     
-    div.innerHTML = `
-        <div class="meta">
-            <span class="username">${msg.user === username ? "Tú" : msg.user}</span>
-            <span class="time">${msg.time || "--:--"}</span>
+    const initial = msg.user.charAt(0).toUpperCase();
+    
+    msgDiv.innerHTML = `
+        <div class="msg-avatar">${initial}</div>
+        <div class="msg-body">
+            <div class="msg-meta">
+                <span class="name">${isMine ? 'Tú' : msg.user}</span>
+                <span class="time">${msg.time || '--:--'}</span>
+            </div>
+            <div class="msg-text">${msg.text}</div>
         </div>
-        <p class="text">${msg.text}</p>
     `;
     
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
+    chatMessages.appendChild(msgDiv);
+}
+
+function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }

@@ -6,83 +6,104 @@
   <title>Chat en Vivo - ProLeague</title>
   <link rel="stylesheet" href="../../css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <!-- Socket.io CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 </head>
 <body class="dynamic-body">
+
   <div class="dynamic-bg"></div>
 
   <!-- HEADER -->
   <div id="header-placeholder"></div>
 
-  <!-- MAIN -->
-  <main class="chat-main">
-    <div class="chat-container">
-      
-      <!-- NBA SECTION -->
-      <section class="chat-section chat-nba" id="nba-chat-section">
-        <div class="chat-header">
-          <img src="../../images/nba-logo.png" alt="NBA" class="chat-logo">
-          <h2>NBA Live Chat</h2>
-        </div>
-        <div class="chat-messages" id="nba-messages">
-          <div class="loading-chat">Cargando historial...</div>
-        </div>
-        <form class="chat-form" id="nba-form">
-          <input type="text" id="nba-input" placeholder="Comenta la jornada NBA..." autocomplete="off">
-          <button type="submit">Enviar</button>
-        </form>
-      </section>
 
-      <!-- NFL SECTION -->
-      <section class="chat-section chat-nfl" id="nfl-chat-section">
-        <div class="chat-header">
-          <img src="../../images/nfl-logo.png" alt="NFL" class="chat-logo">
-          <h2>NFL Live Chat</h2>
+  <!-- MAIN -->
+  <main class="chat-main-v2">
+    <div class="chat-layout">
+      
+      <!-- SIDEBAR -->
+      <aside class="chat-sidebar">
+        <div class="sidebar-header">
+          <h3>Canales</h3>
         </div>
-        <div class="chat-messages" id="nfl-messages">
-          <div class="loading-chat">Cargando historial...</div>
+        <ul class="channel-list">
+          <li class="channel-item active" data-room="general">
+            <span class="channel-hash">#</span> general
+          </li>
+          <li class="channel-item" data-room="nba">
+            <span class="channel-hash">#</span> nba-chat
+          </li>
+          <li class="channel-item" data-room="nfl">
+            <span class="channel-hash">#</span> nfl-chat
+          </li>
+          <li class="channel-item" data-room="rumores">
+            <span class="channel-hash">#</span> rumores
+          </li>
+        </ul>
+        
+        <div class="sidebar-user">
+          <div class="user-avatar-mini" id="sidebar-avatar">U</div>
+          <div class="user-info">
+            <span id="sidebar-username">Usuario</span>
+            <small>En línea 🟢</small>
+          </div>
         </div>
-        <form class="chat-form" id="nfl-form">
-          <input type="text" id="nfl-input" placeholder="Debate sobre la NFL..." autocomplete="off">
-          <button type="submit">Enviar</button>
+      </aside>
+
+      <!-- CHAT CONTENT -->
+      <section class="chat-content">
+        <div class="chat-view-header">
+          <div class="header-info">
+            <span class="header-hash">#</span>
+            <h2 id="current-room-name">general</h2>
+          </div>
+          <div class="header-actions">
+             <span id="user-count">... personas</span>
+          </div>
+        </div>
+
+        <div class="chat-messages-v2" id="chat-messages-container">
+          <div class="loading-chat">Selecciona un canal para empezar...</div>
+        </div>
+
+        <form class="chat-form-v2" id="chat-form">
+          <div class="input-wrapper">
+            <input type="text" id="chat-input" placeholder="Enviar mensaje a #general..." autocomplete="off">
+            <button type="submit" id="send-btn">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
         </form>
+
       </section>
 
     </div>
   </main>
+
 
   <!-- FOOTER -->
   <div id="footer-placeholder"></div>
 
   <!-- SCRIPTS -->
   <script type="module" src="../../js/chat/chat.js"></script>
-  <script>
-    // Cargar Header y Footer
+  <script type="module">
+    import { initHeaderLogic } from "../../js/utils/header-logic.js";
+
+    // Cargar Header
     fetch("../components/header.html")
       .then(r => r.text())
       .then(html => {
         document.getElementById("header-placeholder").innerHTML = html;
-
-        const user = JSON.parse(localStorage.getItem("user"));
-        const logoutLink = document.getElementById("nav-logout");
-        
-        if (!user) {
-          window.location.href = "../auth/login.html";
-        }
-
-        if (user && logoutLink) logoutLink.style.display = "inline";
-        
-        if (logoutLink) logoutLink.addEventListener("click", e => {
-          e.preventDefault();
-          localStorage.removeItem("user");
-          window.location.href = "../auth/login.html";
-        });
+        initHeaderLogic();
       });
 
+    // Cargar Footer
     fetch("../components/footer.html")
       .then(r => r.text())
-      .then(html => document.getElementById("footer-placeholder").innerHTML = html);
+      .then(html => {
+        document.getElementById("footer-placeholder").innerHTML = html;
+      });
   </script>
+
 </body>
 </html>
