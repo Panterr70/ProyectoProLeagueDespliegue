@@ -203,18 +203,59 @@ setInterval(() => {
   });
 }, 45000); // Cada 45 segundos
 
+
+// =======================
+// API CACHE SYSTEM (Fix for 429 Errors)
+// =======================
+const apiCache = {
+  nbaTeams: { data: null, timestamp: 0 },
+  nflTeams: { data: null, timestamp: 0 },
+  nbaGames: { data: null, timestamp: 0 },
+  nflGames: { data: null, timestamp: 0 },
+  players: new Map() // Cache para búsquedas frecuentes
+};
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hora de caché
+
+// Helper para peticiones con caché
+async function fetchWithCache(cacheKey, url, axiosConfig) {
+  const now = Date.now();
+  const cacheEntry = apiCache[cacheKey];
+
+  // Si tenemos datos en caché y no han expirado, devolverlos
+  if (cacheEntry && cacheEntry.data && (now - cacheEntry.timestamp < CACHE_DURATION)) {
+    console.log(`📦 Sirviendo ${cacheKey} desde caché.`);
+    return cacheEntry.data;
+  }
+
+  try {
+    const response = await axios.get(url, axiosConfig);
+    const data = response.data.data;
+    
+    // Guardar en caché
+    apiCache[cacheKey] = { data, timestamp: now };
+    console.log(`✅ ${cacheKey} actualizado desde API.`);
+    return data;
+  } catch (err) {
+    if (err.response?.status === 429 && cacheEntry && cacheEntry.data) {
+      console.warn(`⚠️ API saturada (429). Rescatando ${cacheKey} de la última caché disponible.`);
+      return cacheEntry.data;
+    }
+    throw err;
+  }
+}
+
 // =======================
 // NBA - EQUIPOS
 // =======================
 app.get("/api/nba/teams", async (req, res) => {
   try {
-    const response = await axios.get("https://api.balldontlie.io/v1/teams", {
+    const data = await fetchWithCache("nbaTeams", "https://api.balldontlie.io/v1/teams", {
       headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` },
     });
-    res.json(response.data.data);
+    res.json(data || []);
   } catch (err) {
-    console.error("❌ Error NBA Teams API:", err.response?.status, err.response?.data || err.message);
-    res.status(500).json({ error: "Error obteniendo equipos NBA" });
+    console.error("❌ Error NBA Teams API:", err.message);
+    res.status(500).json([]); // Devolvemos array vacío para evitar errores de .forEach en el front
   }
 });
 
@@ -223,22 +264,30 @@ app.get("/api/nba/teams", async (req, res) => {
 // =======================
 app.get("/api/nfl/teams", async (req, res) => {
   try {
-    const response = await axios.get(
-      "https://api.balldontlie.io/nfl/v1/teams",
-      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } },
-    );
-    res.json(response.data.data);
+    const data = await fetchWithCache("nflTeams", "https://api.balldontlie.io/nfl/v1/teams", {
+      headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` },
+    });
+    res.json(data || []);
   } catch (err) {
-    console.error("❌ Error NFL Teams API:", err.response?.status, err.response?.data || err.message);
-    res.status(500).json({ error: "Error obteniendo equipos NFL" });
+    console.error("❌ Error NFL Teams API:", err.message);
+    res.status(500).json([]);
   }
 });
 
 // =======================
-// NFL - JUGADORES POR EQUIPO O BÚSQUEDA
+// NFL - JUGADORES (Con Caché básica por búsqueda)
 // =======================
 app.get("/api/nfl/players", async (req, res) => {
   const { teamId, search } = req.query;
+  const cacheKey = `nfl-p-${teamId || 'no'}-${search || 'no'}`;
+  const now = Date.now();
+
+  if (apiCache.players.has(cacheKey)) {
+    const entry = apiCache.players.get(cacheKey);
+    if (now - entry.timestamp < 300000) { // 5 min para jugadores
+      return res.json(entry.data);
+    }
+  }
   
   try {
     const params = new URLSearchParams();
@@ -251,37 +300,43 @@ app.get("/api/nfl/players", async (req, res) => {
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
 
+    apiCache.players.set(cacheKey, { data: response.data.data, timestamp: now });
     res.json(response.data.data);
   } catch (err) {
-    console.error("❌ Error NFL Players API:", err.response?.status, err.response?.data || err.message);
-    res.status(err.response?.status || 500).json({ 
-      error: "Error en la API de NFL",
-      details: err.response?.data || err.message 
-    });
+    if (err.response?.status === 429 && apiCache.players.has(cacheKey)) {
+      return res.json(apiCache.players.get(cacheKey).data);
+    }
+    // Devolvemos 200 con array vacío para que el front no detecte "Error de Servidor"
+    // y simplemente muestre que no hay resultados momentáneamente.
+    res.json([]); 
   }
 });
+
+
 // =======================
-// NBA - CLASIFICACIÓN
+// NBA - CLASIFICACIÓN (ESPN no suele dar 429, pero lo dejamos igual)
 // =======================
 app.get("/api/nba/standings", async (req, res) => {
   try {
-    const response = await axios.get(
-      "https://site.api.espn.com/apis/v2/sports/basketball/nba/standings"
-    );
-
-    // Enviamos los datos crudos al frontend
+    const response = await axios.get("https://site.api.espn.com/apis/v2/sports/basketball/nba/standings");
     res.json(response.data);
   } catch (err) {
-    console.error("Error obteniendo clasificación NBA:", err.message);
-    res.status(500).json({ error: "No se pudo cargar la clasificación NBA" });
+    res.status(500).json({ error: "No se pudo cargar" });
   }
 });
 
 // =======================
-// NBA - JUGADORES POR EQUIPO O BÚSQUEDA
+// NBA - JUGADORES
 // =======================
 app.get("/api/nba/players", async (req, res) => {
   const { teamId, search } = req.query;
+  const cacheKey = `nba-p-${teamId || 'no'}-${search || 'no'}`;
+  const now = Date.now();
+
+  if (apiCache.players.has(cacheKey)) {
+    const entry = apiCache.players.get(cacheKey);
+    if (now - entry.timestamp < 300000) return res.json(entry.data);
+  }
 
   try {
     const params = new URLSearchParams();
@@ -294,35 +349,29 @@ app.get("/api/nba/players", async (req, res) => {
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
 
+    apiCache.players.set(cacheKey, { data: response.data.data, timestamp: now });
     res.json(response.data.data);
   } catch (err) {
-    console.error("❌ Error NBA Players API:", err.response?.status, err.response?.data || err.message);
-    res.status(err.response?.status || 500).json({ 
-      error: "Error en la API de NBA",
-      details: err.response?.data || err.message 
-    });
+    if (err.response?.status === 429 && apiCache.players.has(cacheKey)) {
+      return res.json(apiCache.players.get(cacheKey).data);
+    }
+    res.json([]);
   }
 });
 
+
 // =======================
-// NBA - ESTADÍSTICAS POR JUGADOR
+// NBA - ESTADÍSTICAS
 // =======================
 app.get("/api/nba/stats", async (req, res) => {
   const { playerId } = req.query;
-  if (!playerId) return res.status(400).json({ error: "playerId es requerido" });
-
   try {
     const response = await axios.get(
       `https://api.balldontlie.io/v1/season_averages?season=2023&player_ids[]=${playerId}`,
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
-    
-    // Si no hay datos (jugador retirado o sin stats esta temporada), devolvemos null pero con status 200
-    const stats = response.data.data?.[0] || null;
-    res.json(stats);
+    res.json(response.data.data?.[0] || null);
   } catch (err) {
-    console.warn(`⚠️ No se hallaron stats para jugador ${playerId}:`, err.message);
-    // Devolvemos null para que el frontend sepa que no hay datos sin romper la ejecución
     res.json(null);
   }
 });
@@ -332,31 +381,32 @@ app.get("/api/nba/stats", async (req, res) => {
 // =======================
 app.get("/api/nba/games", async (req, res) => {
   try {
+    const now = Date.now();
+    if (apiCache.nbaGames.data && (now - apiCache.nbaGames.timestamp < CACHE_DURATION)) {
+      return res.json(apiCache.nbaGames.data);
+    }
+
     const today = new Date();
-    // NBA: para asegurar que entran en 1 página de 100, sacamos últimos 10 días (aprox 70 partidos)
     const startDateDate = new Date(today.getTime() - (10 * 24 * 60 * 60 * 1000));
     const startDate = startDateDate.toISOString().split('T')[0];
     const endDate = today.toISOString().split('T')[0];
 
-    const params = new URLSearchParams({
-      "start_date": startDate,
-      "end_date": endDate,
-      "per_page": 100 
-    });
-
     const response = await axios.get(
-      `https://api.balldontlie.io/v1/games?${params}`,
+      `https://api.balldontlie.io/v1/games?start_date=${startDate}&end_date=${endDate}&per_page=100`,
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
 
     let games = response.data.data.filter(g => g.status === "Final");
     games.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const result = games.slice(0, 15);
 
-    res.json(games.slice(0, 15));
-
+    apiCache.nbaGames = { data: result, timestamp: now };
+    res.json(result);
   } catch (err) {
-    console.error("Error obteniendo resultados de partidos NBA:", err.message);
-    res.status(500).json({ error: "No se pudieron cargar los últimos partidos" });
+    if (err.response?.status === 429 && apiCache.nbaGames.data) {
+      return res.json(apiCache.nbaGames.data);
+    }
+    res.status(500).json([]);
   }
 });
 
@@ -365,14 +415,10 @@ app.get("/api/nba/games", async (req, res) => {
 // =======================
 app.get("/api/nfl/standings", async (req, res) => {
   try {
-    const response = await axios.get(
-      "https://site.api.espn.com/apis/v2/sports/football/nfl/standings"
-    );
-
+    const response = await axios.get("https://site.api.espn.com/apis/v2/sports/football/nfl/standings");
     res.json(response.data);
   } catch (err) {
-    console.error("Error obteniendo clasificación NFL:", err.message);
-    res.status(500).json({ error: "No se pudo cargar la clasificación NFL" });
+    res.status(500).json({ error: "Error NFL" });
   }
 });
 
@@ -381,30 +427,30 @@ app.get("/api/nfl/standings", async (req, res) => {
 // =======================
 app.get("/api/nfl/games", async (req, res) => {
   try {
-    const today = new Date();
-    // NFL temporal: para traer los verdaderos últimos partidos de la temporada que acaba en 2026
-    // pedimos directamente la fase de postemporada.
-    const params = new URLSearchParams({
-      "seasons[]": 2025,
-      "postseason": true,
-      "per_page": 100 
-    });
+    const now = Date.now();
+    if (apiCache.nflGames.data && (now - apiCache.nflGames.timestamp < CACHE_DURATION)) {
+      return res.json(apiCache.nflGames.data);
+    }
 
     const response = await axios.get(
-      `https://api.balldontlie.io/nfl/v1/games?${params}`,
+      `https://api.balldontlie.io/nfl/v1/games?seasons[]=2025&postseason=true&per_page=100`,
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
 
     let games = response.data.data.filter(g => g.status === "Final");
     games.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const result = games.slice(0, 15);
 
-    res.json(games.slice(0, 15));
-
+    apiCache.nflGames = { data: result, timestamp: now };
+    res.json(result);
   } catch (err) {
-    console.error("Error obteniendo resultados NFL:", err.message);
-    res.status(500).json({ error: "No se pudieron cargar los últimos partidos de NFL" });
+    if (err.response?.status === 429 && apiCache.nflGames.data) {
+      return res.json(apiCache.nflGames.data);
+    }
+    res.status(500).json([]);
   }
 });
+
 // Puerto
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {

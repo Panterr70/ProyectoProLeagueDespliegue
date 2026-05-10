@@ -174,14 +174,19 @@ searchInput.addEventListener("input", () => {
 
     searchDebounce = setTimeout(() => {
         performSearch(query);
-    }, 500);
+    }, 800); // Aumentamos a 800ms para ser más conservadores con la API
 });
 
 searchBtn.onclick = () => performSearch(searchInput.value.trim());
 
 async function performSearch(query) {
     if (!currentPos) return showToast("Selecciona primero una posición en el campo.", "warning");
-    if (!query) return;
+    if (!query || query.length < 3) return;
+
+    // Bloquear UI para evitar spam
+    searchBtn.disabled = true;
+    const originalBtnText = searchBtn.textContent;
+    searchBtn.textContent = "...";
 
     // Mostrar Skeletons
     resultsList.innerHTML = "";
@@ -223,13 +228,22 @@ async function performSearch(query) {
                 resultsList.appendChild(li);
             });
         } else {
-            resultsList.innerHTML = "<p style='text-align:center; padding:10px; font-size:0.9rem; opacity:0.6;'>No se encontraron jugadores.</p>";
+            resultsList.innerHTML = `
+                <div style="text-align:center; padding:15px; opacity:0.7;">
+                    <p style="font-size:0.9rem; margin-bottom:5px;">No se encontraron jugadores.</p>
+                    <small style="font-size:0.75rem; color:var(--primary-color);">La API podría estar saturada, reintenta en unos segundos.</small>
+                </div>
+            `;
         }
     } catch (e) {
         console.error(e);
         resultsList.innerHTML = "<p style='color:red; text-align:center;'>Error en la búsqueda.</p>";
+    } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = originalBtnText;
     }
 }
+
 
 
 saveBtn.onclick = async () => {

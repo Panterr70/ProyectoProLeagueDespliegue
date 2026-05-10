@@ -107,17 +107,38 @@ function showToast(message, type = 'success', duration = 3500) {
 }
 
 const teamLogos = {
-  "Atlanta Hawks": "ATL.png","Boston Celtics": "BOS.png","Brooklyn Nets": "BKN.png",
-  "Charlotte Hornets": "CHA.png","Chicago Bulls": "CHI.png","Cleveland Cavaliers": "CLE.png",
-  "Dallas Mavericks": "DAL.png","Denver Nuggets": "DEN.png","Detroit Pistons": "DET.png",
-  "Golden State Warriors": "GSW.png","Houston Rockets": "HOU.png","Indiana Pacers": "IND.png",
-  "Los Angeles Clippers": "LAC.png","Los Angeles Lakers": "LAL.png","Memphis Grizzlies": "MEM.png",
-  "Miami Heat": "MIA.png","Milwaukee Bucks": "MIL.png","Minnesota Timberwolves": "MIN.png",
-  "New Orleans Pelicans": "NOP.png","New York Knicks": "NYK.png","Oklahoma City Thunder": "OKC.png",
-  "Orlando Magic": "ORL.png","Philadelphia 76ers": "PHI.png","Phoenix Suns": "PHX.png",
-  "Portland Trail Blazers": "POR.png","Sacramento Kings": "SAC.png","San Antonio Spurs": "SAS.png",
-  "Toronto Raptors": "TOR.png","Utah Jazz": "UTA.png","Washington Wizards": "WIZ.png"
+  "Atlanta Hawks": "ATL.png",
+  "Boston Celtics": "BOS.png",
+  "Brooklyn Nets": "BKN.png",
+  "Charlotte Hornets": "CHA.png",
+  "Chicago Bulls": "CHI.png",
+  "Cleveland Cavaliers": "CLE.png",
+  "Dallas Mavericks": "DAL.png",
+  "Denver Nuggets": "DEN.png",
+  "Detroit Pistons": "DET.png",
+  "Golden State Warriors": "GSW.png",
+  "Houston Rockets": "HOU.png",
+  "Indiana Pacers": "IND.png",
+  "Los Angeles Clippers": "LAC.png",
+  "Los Angeles Lakers": "LAL.png",
+  "Memphis Grizzlies": "MEM.png",
+  "Miami Heat": "MIA.png",
+  "Milwaukee Bucks": "MIL.png",
+  "Minnesota Timberwolves": "MIN.png",
+  "New Orleans Pelicans": "NOP.png",
+  "New York Knicks": "NYK.png",
+  "Oklahoma City Thunder": "OKC.png",
+  "Orlando Magic": "ORL.png",
+  "Philadelphia 76ers": "PHI.png",
+  "Phoenix Suns": "PHX.png",
+  "Portland Trail Blazers": "POR.png",
+  "Sacramento Kings": "SAC.png",
+  "San Antonio Spurs": "SAS.png",
+  "Toronto Raptors": "TOR.png",
+  "Utah Jazz": "UTA.png",
+  "Washington Wizards": "WIZ.png"
 };
+
 
 // ===== FUNCIONES =====
 async function cargarClasificacion() {

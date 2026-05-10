@@ -106,18 +106,40 @@ function showToast(message, type = 'success', duration = 3500) {
 
 // Cargar equipos NFL
 const teamLogos = {
-  "Arizona Cardinals":"NFL_ARI.png","Atlanta Falcons":"NFL_ATL.png","Baltimore Ravens":"NFL_BAL.png",
-  "Buffalo Bills":"NFL_BUF.png","Carolina Panthers":"NFL_CAR.png","Chicago Bears":"NFL_CHI.svg",
-  "Cincinnati Bengals":"NFL_CIN.png","Cleveland Browns":"NFL_CLE.png","Dallas Cowboys":"NFL_DAL.svg",
-  "Denver Broncos":"NFL_DEN.svg","Detroit Lions":"NFL_DET.png","Green Bay Packers":"NFL_GB.png",
-  "Houston Texans":"NFL_HOU.png","Indianapolis Colts":"NFL_IND.svg","Jacksonville Jaguars":"NFL_JAX.png",
-  "Kansas City Chiefs":"NFL_KC.png","Las Vegas Raiders":"NFL_LV.png","Los Angeles Chargers":"NFL_LAC.png",
-  "Los Angeles Rams":"NFL_LAR.png","Miami Dolphins":"NFL_MIA.png","Minnesota Vikings":"NFL_MIN.png",
-  "New England Patriots":"NFL_NE.png","New Orleans Saints":"NFL_NO.png","New York Giants":"NFL_NYG.png",
-  "New York Jets":"NFL_NYJ.svg","Philadelphia Eagles":"NFL_PHI.png","Pittsburgh Steelers":"NFL_PIT.png",
-  "San Francisco 49ers":"NFL_SF.svg","Seattle Seahawks":"NFL_SEA.png","Tampa Bay Buccaneers":"NFL_TB.svg",
-  "Tennessee Titans":"NFL_TEN.svg","Washington Commanders":"NFL_WAS.png"
+  "Arizona Cardinals": "NFL_ARI.png",
+  "Atlanta Falcons": "NFL_ATL.png",
+  "Baltimore Ravens": "NFL_BAL.png",
+  "Buffalo Bills": "NFL_BUF.png",
+  "Carolina Panthers": "NFL_CAR.png",
+  "Chicago Bears": "NFL_CHI.svg",
+  "Cincinnati Bengals": "NFL_CIN.png",
+  "Cleveland Browns": "NFL_CLE.png",
+  "Dallas Cowboys": "NFL_DAL.svg",
+  "Denver Broncos": "NFL_DEN.svg",
+  "Detroit Lions": "NFL_DET.png",
+  "Green Bay Packers": "NFL_GB.png",
+  "Houston Texans": "NFL_HOU.png",
+  "Indianapolis Colts": "NFL_IND.svg",
+  "Jacksonville Jaguars": "NFL_JAX.png",
+  "Kansas City Chiefs": "NFL_KC.png",
+  "Las Vegas Raiders": "NFL_LV.png",
+  "Los Angeles Chargers": "NFL_LAC.png",
+  "Los Angeles Rams": "NFL_LAR.png",
+  "Miami Dolphins": "NFL_MIA.png",
+  "Minnesota Vikings": "NFL_MIN.png",
+  "New England Patriots": "NFL_NE.png",
+  "New Orleans Saints": "NFL_NO.png",
+  "New York Giants": "NFL_NYG.png",
+  "New York Jets": "NFL_NYJ.svg",
+  "Philadelphia Eagles": "NFL_PHI.png",
+  "Pittsburgh Steelers": "NFL_PIT.png",
+  "San Francisco 49ers": "NFL_SF.svg",
+  "Seattle Seahawks": "NFL_SEA.png",
+  "Tampa Bay Buccaneers": "NFL_TB.svg",
+  "Tennessee Titans": "NFL_TEN.svg",
+  "Washington Commanders": "NFL_WAS.png"
 };
+
 
 // Cargar Clasificación NFL
 async function cargarClasificacion() {

@@ -20,11 +20,16 @@ async function searchPlayers(query, resultUl, pNumber) {
     }
 
     try {
-        // Buscamos primero en NBA
-        const res = await fetch(`http://localhost:3000/api/nba/players?search=${query}`);
+        // Usar API_BASE_URL en lugar de localhost para evitar fallos en despliegue
+        const res = await fetch(`${API_BASE_URL}/api/nba/players?search=${query}`);
         const players = await res.json();
 
         resultUl.innerHTML = "";
+        if (!Array.isArray(players) || players.length === 0) {
+            resultUl.innerHTML = "<li style='opacity:0.6; pointer-events:none;'>Sin resultados</li>";
+            return;
+        }
+
         players.slice(0, 5).forEach(p => {
             const li = document.createElement("li");
             li.textContent = `${p.first_name} ${p.last_name} (${p.team.abbreviation})`;
@@ -32,9 +37,11 @@ async function searchPlayers(query, resultUl, pNumber) {
             resultUl.appendChild(li);
         });
     } catch (err) {
-        console.error(err);
+        console.error("Error en búsqueda:", err);
+        resultUl.innerHTML = "<li style='color:red;'>Error de conexión</li>";
     }
 }
+
 
 p1Search.oninput = (e) => searchPlayers(e.target.value, p1Results, 1);
 p2Search.oninput = (e) => searchPlayers(e.target.value, p2Results, 2);
