@@ -162,3 +162,38 @@ function addMessageToDOM(msg) {
 function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
+// ==========================================
+// QoL: BOTÓN FLOTANTE PARA BAJAR EL CHAT
+// ==========================================
+const scrollDownBtn = document.createElement("button");
+scrollDownBtn.innerHTML = "⬇️";
+scrollDownBtn.className = "scroll-down-btn";
+scrollDownBtn.style.cssText = `
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: all 0.3s;
+`;
+
+document.querySelector(".chat-view").appendChild(scrollDownBtn);
+
+scrollDownBtn.onclick = scrollToBottom;
+
+chatMessages.addEventListener("scroll", () => {
+    // Mostrar si el usuario ha subido más de 100px desde el fondo
+    const isAtBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 100;
+    scrollDownBtn.style.display = isAtBottom ? "none" : "flex";
+});

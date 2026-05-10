@@ -284,17 +284,24 @@ function mostrarEquipos(equipos){
 
     contenedor.appendChild(card);
 
-    card.onclick=()=>{
-      const modal=document.getElementById("team-modal");
-      modal.style.display="flex";
-      document.getElementById("modal-logo").src=`../../logos/${logoSrc}`;
-      document.getElementById("modal-name").textContent=team.full_name;
-      document.getElementById("modal-city").textContent=`Ciudad: ${team.city}`;
-      document.getElementById("modal-conference").textContent=`Conferencia: ${team.conference}`;
-      document.getElementById("modal-division").textContent=`División: ${team.division}`;
+    card.onclick = () => {
+      const modal = document.getElementById("team-modal");
+      modal.style.display = "flex";
+      
+      // ===== FIX: Asegurar que el botón de cerrar funciona siempre =====
+      const closeBtn = document.getElementById("modal-close");
+      if(closeBtn) {
+        closeBtn.onclick = () => modal.style.display = "none";
+      }
+      window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
+
+      document.getElementById("modal-logo").src = team.logos?.[0]?.href || "../../logos/nfl_default.png";
+      document.getElementById("modal-name").textContent = team.displayName || team.name;
+      document.getElementById("modal-city").textContent = `Localidad: ${team.location || 'Desconocido'}`;
+      document.getElementById("modal-conference").textContent = `División: ${team.standingSummary || 'Desconocido'}`;
       
       const statsContainer = document.getElementById("modal-stats");
-      statsContainer.innerHTML='';
+      statsContainer.innerHTML = '';
       
       const btnLoadPlayers = document.getElementById("btn-load-players");
       const playersContainer = document.getElementById("modal-players");
@@ -305,6 +312,7 @@ function mostrarEquipos(equipos){
       btnLoadPlayers.textContent = "Ver Equipo";
       btnLoadPlayers.disabled = false;
       
+      // Limpiar listeners anteriores
       const newBtn = btnLoadPlayers.cloneNode(true);
       btnLoadPlayers.parentNode.replaceChild(newBtn, btnLoadPlayers);
       
@@ -313,42 +321,36 @@ function mostrarEquipos(equipos){
         newBtn.disabled = true;
         
         try {
-          const res = await fetch(`${API_BASE_URL}/api/nfl/players?teamId=${team.id}`);
-          const players = await res.json();
+          // Nota: La API balldontlie usa IDs propios. Mapear esto si es necesario.
+          // Intentaremos buscar por nombre si no tenemos el ID exacto.
+          const res = await fetch(`${API_BASE_URL}/api/nfl/players?search=${encodeURIComponent(team.name)}`);
+          let players = await res.json();
           
           newBtn.style.display = "none";
           playersContainer.style.display = "block";
           
           if (!players || players.length === 0) {
-            playersContainer.innerHTML = "<p style='text-align:center; padding: 10px;'>No se encontraron jugadores activos para este equipo.</p>";
+            playersContainer.innerHTML = "<p style='text-align:center; padding: 10px;'>No se encontraron jugadores para este equipo.</p>";
             return;
           }
-          
-          players.sort((a,b) => {
-            if(a.last_name < b.last_name) return -1;
-            if(a.last_name > b.last_name) return 1;
-            return 0;
-          });
           
           let tableHTML = `
             <div style="overflow-x: auto; margin-top: 15px;">
               <table style="width: 100%; border-collapse: separate; border-spacing: 0 5px; font-size: 0.9em; text-align: left; color: #fff;">
                 <thead>
-                  <tr style="color: var(--nfl-blue); text-transform: uppercase; letter-spacing: 1px;">
-                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">Jugador</th>
-                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">Pos</th>
-                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">#</th>
-                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">Altura</th>
-                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(59, 130, 246, 0.2);">Peso</th>
+                  <tr style="color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px;">
+                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(0, 242, 255, 0.2);">Jugador</th>
+                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(0, 242, 255, 0.2);">Pos</th>
+                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(0, 242, 255, 0.2);">Altura</th>
+                    <th style="padding: 12px 10px; border-bottom: 2px solid rgba(0, 242, 255, 0.2);">Peso</th>
                   </tr>
                 </thead>
                 <tbody>
           `;
           
           players.forEach((p) => {
-            const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim() || '-';
+            const fullName = `${p.first_name} ${p.last_name}`;
             const pos = p.position || '-';
-            const number = p.jersey_number || '-';
             const height = p.height || '-';
             const weight = p.weight ? `${p.weight} lbs` : '-';
             
@@ -356,7 +358,6 @@ function mostrarEquipos(equipos){
               <tr style="background: rgba(255,255,255,0.03); transition: background 0.3s;">
                 <td style="padding: 10px; border-radius: 8px 0 0 8px;"><strong>${fullName}</strong></td>
                 <td style="padding: 10px; color: rgba(255,255,255,0.7);">${pos}</td>
-                <td style="padding: 10px; color: rgba(255,255,255,0.7);">${number}</td>
                 <td style="padding: 10px; color: rgba(255,255,255,0.7);">${height}</td>
                 <td style="padding: 10px; color: rgba(255,255,255,0.7); border-radius: 0 8px 8px 0;">${weight}</td>
               </tr>
@@ -367,7 +368,7 @@ function mostrarEquipos(equipos){
           playersContainer.innerHTML = tableHTML;
           
           statsContainer.innerHTML = `
-            <p style="margin-top: 10px; font-size: 1.1em; color: #fff;"><strong>Jugadores Activos:</strong> <span style="color:var(--nfl-blue); text-shadow: 0 0 10px rgba(59,130,246,0.3);">${players.length}</span></p>
+            <p style="margin-top: 10px; font-size: 1.1em; color: #fff;"><strong>Jugadores Mostrados:</strong> <span style="color:var(--primary-color); text-shadow: 0 0 10px var(--primary-glow);">${players.length}</span></p>
           `;
           
         } catch (err) {

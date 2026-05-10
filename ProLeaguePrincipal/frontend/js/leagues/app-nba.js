@@ -301,6 +301,14 @@ function mostrarEquipos(equipos) {
     card.onclick = () => {
       const modal = document.getElementById("team-modal");
       modal.style.display = "flex";
+      
+      // ===== FIX: Asegurar que el botón de cerrar funciona siempre =====
+      const closeBtn = document.getElementById("modal-close");
+      if(closeBtn) {
+        closeBtn.onclick = () => modal.style.display = "none";
+      }
+      window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
+
       document.getElementById("modal-logo").src = `../../logos/${logoSrc}`;
       document.getElementById("modal-name").textContent = team.full_name;
       document.getElementById("modal-city").textContent = `Ciudad: ${team.city}`;
@@ -329,13 +337,13 @@ function mostrarEquipos(equipos) {
         
         try {
           const res = await fetch(`${API_BASE_URL}/api/nba/players?teamId=${team.id}`);
-          const players = await res.json();
+          let players = await res.json();
           
           newBtn.style.display = "none";
           playersContainer.style.display = "block";
           
           if (!players || players.length === 0) {
-            playersContainer.innerHTML = "<p style='text-align:center; padding: 10px;'>No se encontraron jugadores activos para este equipo.</p>";
+            playersContainer.innerHTML = "<p style='text-align:center; padding: 10px;'>No se encontraron jugadores para este equipo.</p>";
             return;
           }
           
@@ -383,7 +391,7 @@ function mostrarEquipos(equipos) {
           playersContainer.innerHTML = tableHTML;
           
           statsContainer.innerHTML = `
-            <p style="margin-top: 10px; font-size: 1.1em; color: #fff;"><strong>Jugadores Activos:</strong> <span style="color:var(--primary-color); text-shadow: 0 0 10px var(--primary-glow);">${players.length}</span></p>
+            <p style="margin-top: 10px; font-size: 1.1em; color: #fff;"><strong>Jugadores Mostrados:</strong> <span style="color:var(--primary-color); text-shadow: 0 0 10px var(--primary-glow);">${players.length}</span></p>
           `;
           
         } catch (err) {
@@ -393,6 +401,7 @@ function mostrarEquipos(equipos) {
         }
       };
     };
+
   });
 }
 

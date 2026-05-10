@@ -1,9 +1,12 @@
+import { API_BASE_URL } from "../config/config.js";
+import { auth } from "../config/firebase-config.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
 // =======================
 // SI YA ESTÁ LOGUEADO
 // =======================
 const existingUser = JSON.parse(localStorage.getItem("user"));
 if (existingUser) {
-  // Redirigir al home si ya está logueado
   window.location.href = "../home/home.html";
 }
 
@@ -26,6 +29,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
+    // 1. Registro en el Backend (Node.js)
     const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -39,12 +43,22 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
+    // 2. Registro en Firebase (para las reglas de seguridad)
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Usuario creado en Firebase Auth");
+    } catch (fbErr) {
+      console.warn("Error secundario en Firebase Auth:", fbErr.message);
+      // Nota: Si el usuario ya existe en Firebase pero no en tu DB, 
+      // esto dará error, pero el flujo principal sigue.
+    }
+
     if (window.showToast) {
       window.showToast("Cuenta creada correctamente. Ahora puedes iniciar sesión.", "success");
     }
     
     setTimeout(() => {
-      window.location.href = "../auth/login.html"; // redirige al login
+      window.location.href = "../auth/login.html";
     }, 2000);
 
   } catch (err) {

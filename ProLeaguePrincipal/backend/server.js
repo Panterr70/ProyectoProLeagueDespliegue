@@ -9,6 +9,7 @@ import { exec } from "child_process";
 import { pool as db } from "./db.js";
 
 import newsRoutes from "./routes/news.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 import multer from "multer";
 import fs from "fs";
 
@@ -95,6 +96,7 @@ app.use(express.json());
 
 // Rutas
 app.use("/api/news", newsRoutes);
+app.use("/api/auth", authRoutes);
 
 // Ruta principal
 app.get("/", (req, res) => {
@@ -344,13 +346,18 @@ app.get("/api/nba/players", async (req, res) => {
     if (search) params.append("search", search);
     params.append("per_page", 100);
 
+    console.log(`🔍 Buscando jugadores: teamId=${teamId}, search=${search}`);
+
     const response = await axios.get(
       `https://api.balldontlie.io/v1/players?${params}`,
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
 
-    apiCache.players.set(cacheKey, { data: response.data.data, timestamp: now });
-    res.json(response.data.data);
+    const players = response.data.data;
+    console.log(`✅ Encontrados ${players.length} jugadores.`);
+    
+    apiCache.players.set(cacheKey, { data: players, timestamp: now });
+    res.json(players);
   } catch (err) {
     if (err.response?.status === 429 && apiCache.players.has(cacheKey)) {
       return res.json(apiCache.players.get(cacheKey).data);
@@ -365,9 +372,10 @@ app.get("/api/nba/players", async (req, res) => {
 // =======================
 app.get("/api/nba/stats", async (req, res) => {
   const { playerId } = req.query;
+  const currentSeason = 2025; // Temporada actual para el año 2026
   try {
     const response = await axios.get(
-      `https://api.balldontlie.io/v1/season_averages?season=2023&player_ids[]=${playerId}`,
+      `https://api.balldontlie.io/v1/season_averages?season=${currentSeason}&player_ids[]=${playerId}`,
       { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
     );
     res.json(response.data.data?.[0] || null);

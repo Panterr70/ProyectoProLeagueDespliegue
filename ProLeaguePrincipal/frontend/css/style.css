@@ -858,6 +858,21 @@ html {
   transition: all 0.3s ease;
 }
 
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* QoL: Área táctil extendida para móviles sin afectar lo visual */
+  padding: 10px;
+  margin: -10px;
+}
+
 .dot.active {
   background: var(--primary-color);
   box-shadow: 0 0 10px var(--primary-color);
@@ -4730,6 +4745,8 @@ body {
   display: flex;
   flex-direction: column;
   background: rgba(10, 10, 15, 0.2);
+  height: 100%;
+  min-height: 0; /* Fix crítico: Evita que el contenedor crezca más allá de la pantalla */
 }
 
 .chat-view-header {

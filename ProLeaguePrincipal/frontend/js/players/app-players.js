@@ -155,7 +155,22 @@ async function fetchPlayers() {
     return;
   }
 
-  const cacheKey = `${currentLeague}-${searchTerm}-${selectedTeamId}`;
+  // BÚSQUEDA INTELIGENTE: Si el usuario escribe "Lakers", buscamos el equipo en vez del jugador
+  let effectiveSearchTerm = searchTerm;
+  let effectiveTeamId = selectedTeamId;
+
+  if (searchTerm && !selectedTeamId) {
+    const termLower = searchTerm.toLowerCase();
+    const matchedTeam = allTeams.find(t => 
+      (t.full_name || t.name || '').toLowerCase().includes(termLower)
+    );
+    if (matchedTeam) {
+      effectiveTeamId = matchedTeam.id;
+      effectiveSearchTerm = ''; // No buscar nombre de jugador, solo cargar el equipo
+    }
+  }
+
+  const cacheKey = `${currentLeague}-${effectiveSearchTerm}-${effectiveTeamId}`;
   if (searchCache.has(cacheKey)) {
     renderPlayers(searchCache.get(cacheKey));
     return;
@@ -167,8 +182,8 @@ async function fetchPlayers() {
   try {
     const endpoint = currentLeague === 'NBA' ? '/api/nba/players' : '/api/nfl/players';
     const query = new URLSearchParams();
-    if (searchTerm) query.append('search', searchTerm);
-    if (selectedTeamId) query.append('teamId', selectedTeamId);
+    if (effectiveSearchTerm) query.append('search', effectiveSearchTerm);
+    if (effectiveTeamId) query.append('teamId', effectiveTeamId);
 
     const res = await fetch(`${API_BASE_URL}${endpoint}?${query.toString()}`);
     

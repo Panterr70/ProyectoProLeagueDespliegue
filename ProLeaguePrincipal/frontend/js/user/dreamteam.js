@@ -221,6 +221,18 @@ async function performSearch(query) {
                     team[currentPos] = p;
                     isDirty = true; 
                     renderField();
+                    
+                    // Efecto visual premium: Destello verde en la casilla elegida
+                    const activeSlot = document.querySelector(`.player-slot[data-pos="${currentPos}"]`);
+                    if(activeSlot) {
+                        activeSlot.style.boxShadow = "0 0 20px #22c55e, inset 0 0 15px #22c55e";
+                        activeSlot.style.borderColor = "#22c55e";
+                        setTimeout(() => {
+                            activeSlot.style.boxShadow = "";
+                            activeSlot.style.borderColor = "";
+                        }, 800);
+                    }
+
                     resultsList.innerHTML = "";
                     searchInput.value = "";
                     showToast(`${p.last_name} añadido al equipo`, "success");
@@ -261,3 +273,44 @@ saveBtn.onclick = async () => {
         saveBtn.disabled = false;
     }
 };
+
+// ==========================================
+// NUEVAS FUNCIONES PREMIUM (QoL)
+// ==========================================
+
+// 1. Botón Dinámico de "Limpiar Quinteto"
+const clearBtn = document.createElement("button");
+clearBtn.innerHTML = "🗑️ Limpiar";
+clearBtn.className = saveBtn.className; // Hereda el estilo
+clearBtn.style.backgroundColor = "rgba(255, 59, 59, 0.1)";
+clearBtn.style.border = "1px solid #ff3b3b";
+clearBtn.style.color = "#ff3b3b";
+clearBtn.style.marginLeft = "15px";
+
+// Insertar justo después del botón de guardar
+saveBtn.parentNode.insertBefore(clearBtn, saveBtn.nextSibling);
+
+clearBtn.onclick = async () => {
+    // Usamos el nuevo modal premium en lugar del navegador
+    const isConfirmed = await window.showConfirm(`¿Estás seguro de que quieres vaciar tu quinteto actual de la ${currentLeague}?`);
+    
+    if (isConfirmed) {
+        const team = currentLeague === "NBA" ? dreamTeamNBA : dreamTeamNFL;
+        Object.keys(team).forEach(pos => team[pos] = null);
+        isDirty = true;
+        renderField();
+        showToast("Quinteto vaciado. No olvides darle a Guardar.", "info");
+    }
+};
+
+// 2. Atajo de teclado rápido (Ctrl+S / Cmd+S)
+document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault(); // Evita que se abra la ventana de "Guardar Página" del navegador
+        if (isDirty) {
+            saveBtn.click();
+        } else {
+            showToast("No hay cambios que guardar.", "info");
+        }
+    }
+});
