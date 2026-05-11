@@ -99,8 +99,10 @@ async function loadChatHistory(room) {
 
 // 3. SOCKET EVENTS
 socket.on("message", (msg) => {
+    // Si el mensaje es mío, ya lo añadí con el UI Optimista
+    if (msg.user === username) return;
+
     if (msg.room === currentRoom) {
-        // Eliminar mensaje de "no hay mensajes" si existe
         const emptyMsg = chatMessages.querySelector(".loading-chat");
         if (emptyMsg) emptyMsg.remove();
         
@@ -109,7 +111,7 @@ socket.on("message", (msg) => {
     }
 });
 
-// 4. SEND MESSAGE
+
 chatForm.onsubmit = async (e) => {
     e.preventDefault();
     const text = chatInput.value.trim();
@@ -125,16 +127,24 @@ chatForm.onsubmit = async (e) => {
         timestamp: serverTimestamp()
     };
 
+    // OPTIMISTIC UI
+    addMessageToDOM({
+        user: username,
+        text: text,
+        time: time
+    });
+    scrollToBottom();
+    chatInput.value = "";
+
     try {
-        chatInput.value = "";
-        // Optimismo: añadir al DOM localmente o esperar al socket
-        // Usaremos el socket para asegurar sincronización
-        await addDoc(collection(db, "messages"), messageData);
+        addDoc(collection(db, "messages"), messageData).catch(err => console.error("Error backup:", err));
         socket.emit("chatMessage", { room: currentRoom, user: username, text, time });
     } catch (error) {
         console.error("Error envío:", error);
     }
 };
+
+
 
 function addMessageToDOM(msg) {
     const isMine = msg.user === username;

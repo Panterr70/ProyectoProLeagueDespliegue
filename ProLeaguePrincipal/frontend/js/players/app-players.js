@@ -216,7 +216,10 @@ function createPlayerCard(player, index) {
       <div class="player-logo-wrap">
         ${logoPath
           ? `<img src="${logoPath}" alt="${teamName}" class="player-team-logo" onerror="this.style.display='none'">`
-          : `<div class="player-logo-placeholder" style="color:${sportColor}">${league === 'NBA' ? '🏀' : '🏈'}</div>`
+          : `<div class="player-logo-placeholder" style="color:${sportColor}; background:${sportColor}11;">
+               ${league === 'NBA' ? '🏀' : '🏈'}
+               <span class="vintage-badge">Vintage</span>
+             </div>`
         }
       </div>
       <div class="player-info">
@@ -225,13 +228,15 @@ function createPlayerCard(player, index) {
           <h3 class="player-name">${fullName}</h3>
           <button class="copy-btn-mini" data-copy="${fullName}" title="Copiar nombre">📋</button>
         </div>
-        <p class="player-team">${teamName || '—'}</p>
+        <p class="player-team">${teamName || 'Agente Libre'}</p>
         <div class="player-tags">
           ${position !== '—' ? `<span class="player-tag">${position}</span>` : ''}
+          ${!logoPath ? `<span class="player-tag vintage-tag">Equipo Histórico</span>` : ''}
         </div>
       </div>
       <button class="player-detail-btn" title="Ver detalles">→</button>
     </div>
+
   `;
 
   // Lógica de copiar

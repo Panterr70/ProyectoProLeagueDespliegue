@@ -306,7 +306,7 @@ app.get("/api/nfl/players", async (req, res) => {
 
   if (apiCache.players.has(cacheKey)) {
     const entry = apiCache.players.get(cacheKey);
-    if (now - entry.timestamp < 300000) return res.json(entry.data);
+    if (now - entry.timestamp < 1800000) return res.json(entry.data); // 30 min
   }
   
   try {
@@ -334,11 +334,14 @@ app.get("/api/nfl/players", async (req, res) => {
     res.json(players);
   } catch (err) {
     console.error("❌ Error NFL Players:", err.message);
-    if (err.response?.status === 429 && apiCache.players.has(cacheKey)) {
+    // RECUPERACIÓN DE EMERGENCIA
+    if (apiCache.players.has(cacheKey)) {
+      console.warn(`🚑 Rescatando datos de caché para ${cacheKey} tras error.`);
       return res.json(apiCache.players.get(cacheKey).data);
     }
     res.json([]); 
   }
+
 });
 
 
@@ -365,34 +368,45 @@ app.get("/api/nba/players", async (req, res) => {
 
   if (apiCache.players.has(cacheKey)) {
     const entry = apiCache.players.get(cacheKey);
-    if (now - entry.timestamp < 300000) return res.json(entry.data);
+    if (now - entry.timestamp < 1800000) return res.json(entry.data); // 30 min
   }
 
   try {
+    let url = "https://api.balldontlie.io/v1/players";
     const params = new URLSearchParams();
-    if (teamId) params.append("team_ids[]", teamId);
-    if (search) params.append("search", search);
-    params.append("per_page", 100);
 
-    console.log(`🔍 Buscando jugadores: teamId=${teamId}, search=${search}`);
+    // Si hay teamId y no hay búsqueda de nombre, usamos el endpoint de plantilla (más fiable)
+    if (teamId && !search) {
+      url = `https://api.balldontlie.io/v1/teams/${teamId}/players`;
+    } else {
+      if (teamId) params.append("team_ids[]", teamId);
+      if (search) params.append("search", search);
+      params.append("per_page", 100);
+      url = `${url}?${params.toString()}`;
+    }
 
-    const response = await axios.get(
-      `https://api.balldontlie.io/v1/players?${params}`,
-      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
-    );
+    console.log(`🏀 Buscando NBA: ${url}`);
+
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` }
+    });
 
     const players = response.data.data;
-    console.log(`✅ Encontrados ${players.length} jugadores.`);
-    
     apiCache.players.set(cacheKey, { data: players, timestamp: now });
     res.json(players);
   } catch (err) {
-    if (err.response?.status === 429 && apiCache.players.has(cacheKey)) {
+    console.error("❌ Error NBA Players:", err.message);
+    // RECUPERACIÓN DE EMERGENCIA: Si hay error 429 o cualquier error de red,
+    // buscamos si tenemos algo en caché aunque haya expirado.
+    if (apiCache.players.has(cacheKey)) {
+      console.warn(`🚑 Rescatando datos de caché para ${cacheKey} tras error.`);
       return res.json(apiCache.players.get(cacheKey).data);
     }
     res.json([]);
   }
+
 });
+
 
 
 // =======================
