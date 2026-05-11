@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../config/config.js";
 import { auth } from "../config/firebase-config.js";
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { showToast } from "../utils/toast.js";
 
 // =======================
 // SI YA ESTÁ LOGUEADO
@@ -53,9 +54,7 @@ form.addEventListener("submit", async (e) => {
       // esto dará error, pero el flujo principal sigue.
     }
 
-    if (window.showToast) {
-      window.showToast("Cuenta creada correctamente. Ahora puedes iniciar sesión.", "success");
-    }
+    showToast("Cuenta creada correctamente. Ahora puedes iniciar sesión.", "success");
     
     setTimeout(() => {
       window.location.href = "../auth/login.html";

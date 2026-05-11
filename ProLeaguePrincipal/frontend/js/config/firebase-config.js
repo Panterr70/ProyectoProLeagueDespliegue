@@ -1,3 +1,14 @@
+/**
+ * firebase-config.js — Configuración de Firebase
+ * 
+ * Inicializa Firebase App, Authentication y Cloud Firestore.
+ * Se usa en el frontend para:
+ * - Autenticación (registro, login, verificación email)
+ * - Firestore (perfiles, favoritos, dream teams, chat, interacciones)
+ * 
+ * @author Andoni Villanueva
+ */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";

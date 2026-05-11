@@ -3,6 +3,8 @@ import { API_BASE_URL } from "../config/config.js";
 import { doc, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initSessionGuard } from "../auth/session-guard.js";
 import { initHeaderLogic } from "../utils/header-logic.js";
+import { showToast } from "../utils/toast.js";
+import { nflLogos as teamLogos } from "../config/logos-config.js";
 
 // Inicializar protección de sesión única
 initSessionGuard();
@@ -49,73 +51,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
+// Cargar equipos NFL
 // ===============================
-// TOAST NOTIFICATION SYSTEM
-// ===============================
-function showToast(message, type = 'success', duration = 3500) {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML = `
-    <span class="toast-icon">${icons[type] || '📢'}</span>
-    <span class="toast-message">${message}</span>
-    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
-  `;
-  container.appendChild(toast);
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => toast.classList.add('toast-visible'));
-  });
-  setTimeout(() => {
-    toast.classList.remove('toast-visible');
-    toast.classList.add('toast-hiding');
-    setTimeout(() => toast.remove(), 400);
-  }, duration);
-}
 
 // Cargar equipos NFL
-const teamLogos = {
-  "Arizona Cardinals": "NFL_ARI.png",
-  "Atlanta Falcons": "NFL_ATL.png",
-  "Baltimore Ravens": "NFL_BAL.png",
-  "Buffalo Bills": "NFL_BUF.png",
-  "Carolina Panthers": "NFL_CAR.png",
-  "Chicago Bears": "NFL_CHI.svg",
-  "Cincinnati Bengals": "NFL_CIN.png",
-  "Cleveland Browns": "NFL_CLE.png",
-  "Dallas Cowboys": "NFL_DAL.svg",
-  "Denver Broncos": "NFL_DEN.svg",
-  "Detroit Lions": "NFL_DET.png",
-  "Green Bay Packers": "NFL_GB.png",
-  "Houston Texans": "NFL_HOU.png",
-  "Indianapolis Colts": "NFL_IND.svg",
-  "Jacksonville Jaguars": "NFL_JAX.png",
-  "Kansas City Chiefs": "NFL_KC.png",
-  "Las Vegas Raiders": "NFL_LV.png",
-  "Los Angeles Chargers": "NFL_LAC.png",
-  "Los Angeles Rams": "NFL_LAR.png",
-  "Miami Dolphins": "NFL_MIA.png",
-  "Minnesota Vikings": "NFL_MIN.png",
-  "New England Patriots": "NFL_NE.png",
-  "New Orleans Saints": "NFL_NO.png",
-  "New York Giants": "NFL_NYG.png",
-  "New York Jets": "NFL_NYJ.svg",
-  "Philadelphia Eagles": "NFL_PHI.png",
-  "Pittsburgh Steelers": "NFL_PIT.png",
-  "San Francisco 49ers": "NFL_SF.svg",
-  "Seattle Seahawks": "NFL_SEA.png",
-  "Tampa Bay Buccaneers": "NFL_TB.svg",
-  "Tennessee Titans": "NFL_TEN.svg",
-  "Washington Commanders": "NFL_WAS.png"
-};
-
-
-// Cargar Clasificación NFL
+// ===============================
 async function cargarClasificacion() {
   const tbody = document.querySelector("#standings-table tbody");
   const table = document.getElementById("standings-table");

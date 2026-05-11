@@ -1,3 +1,16 @@
+/**
+ * dreamteam.js — Constructor de Dream Team
+ * 
+ * Permite al usuario crear su quinteto ideal NBA (PG, SG, SF, PF, C)
+ * y su ofensiva ideal NFL (QB, RB, WR1, WR2, TE) con un campo visual.
+ * Los datos se guardan en Firestore y se usan para el análisis trending.
+ * 
+ * Incluye: búsqueda de jugadores, sugerencias trending, protección
+ * de cambios sin guardar (beforeunload), y atajo Ctrl+S.
+ * 
+ * @author Andoni Villanueva
+ */
+
 import { db, auth } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";

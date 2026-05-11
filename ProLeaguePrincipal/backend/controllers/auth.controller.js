@@ -1,3 +1,15 @@
+/**
+ * auth.controller.js — Controlador de autenticación
+ * 
+ * Gestiona registro, login, actualización de perfil y consulta de usuarios
+ * contra la base de datos MySQL. Las contraseñas se hashean con bcrypt.
+ * 
+ * Nota: Este controlador se complementa con Firebase Auth en el frontend
+ * para la verificación de email y la protección de sesión única.
+ * 
+ * @author Andoni Villanueva
+ */
+
       import bcrypt from "bcrypt";
       import { pool as db } from "../db.js"; // renombramos pool como db aquí
 

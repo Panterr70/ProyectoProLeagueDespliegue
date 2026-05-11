@@ -1,3 +1,13 @@
+/**
+ * db.js — Conexión a la base de datos MySQL
+ * 
+ * Pool de conexiones para la autenticación de usuarios.
+ * Los datos de usuario avanzados (favoritos, dream teams, etc.)
+ * se gestionan en Firebase Cloud Firestore desde el frontend.
+ * 
+ * @author Andoni Villanueva
+ */
+
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 

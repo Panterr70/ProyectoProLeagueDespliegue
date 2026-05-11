@@ -1,23 +1,30 @@
-CREATE DATABASE proleague;
+-- ========================================
+-- ProLeague - Schema de Base de Datos
+-- Autor: Andoni Villanueva
+-- ========================================
+
+CREATE DATABASE IF NOT EXISTS proleague;
 USE proleague;
 
+-- Tabla principal de usuarios (autenticación backend)
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
+  bio TEXT DEFAULT NULL,
+  avatar VARCHAR(255) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-DELETE FROM users WHERE id > 0;
 
-
-select * from users;
-
-SET SQL_SAFE_UPDATES = 0;
-DELETE FROM users;
-SET SQL_SAFE_UPDATES = 1; 
-
-
-CREATE USER 'proleague'@'localhost' IDENTIFIED BY '123456';
-GRANT ALL PRIVILEGES ON proleague.* TO 'proleague'@'localhost';
-FLUSH PRIVILEGES;
+-- Tabla de equipos favoritos (legacy — migrado a Firestore)
+CREATE TABLE IF NOT EXISTS favorites (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  league VARCHAR(10) NOT NULL,
+  team_id VARCHAR(50) NOT NULL,
+  team_name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_fav (user_id, league, team_id)
+);

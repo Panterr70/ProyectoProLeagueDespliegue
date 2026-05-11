@@ -10,8 +10,6 @@ export function initHeaderLogic() {
   const userInitials = document.getElementById('user-initials');
   const userName = document.getElementById('user-nav-name');
   const logoutBtn = document.getElementById('nav-logout-btn');
-  const themeToggle = document.getElementById('theme-toggle');
-  const themeIcon = document.getElementById('theme-icon');
 
   // 1. Lógica de Menú Móvil
   if(menuBtn && menu) {

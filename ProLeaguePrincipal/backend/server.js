@@ -1,3 +1,21 @@
+/**
+ * server.js — Servidor principal de ProLeague
+ * 
+ * Arquitectura: Express + Socket.io + MySQL + APIs externas
+ * 
+ * Funciones principales:
+ * - API REST proxy para datos de BallDontLie (equipos, jugadores, stats NBA/NFL)
+ * - API REST proxy para clasificaciones ESPN (standings NBA/NFL)
+ * - Proxy RSS para noticias deportivas (ESPN)
+ * - Chat en tiempo real con WebSockets (Socket.io)
+ * - Bot automático (ProLeagueBot)
+ * - Autenticación de usuarios (registro, login, perfil) contra MySQL
+ * - Subida de avatares (Multer)
+ * - Sistema de caché para evitar errores 429 (Too Many Requests)
+ * 
+ * @author Andoni Villanueva
+ */
+
 import express from "express";
 import axios from "axios";
 import cors from "cors";

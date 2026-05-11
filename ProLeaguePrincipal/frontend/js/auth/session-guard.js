@@ -1,3 +1,13 @@
+/**
+ * session-guard.js — Protección de sesión única
+ * 
+ * Escucha cambios en Firestore (campo currentSessionId del usuario).
+ * Si detecta un login desde otro dispositivo, cierra la sesión local
+ * automáticamente mostrando un aviso toast al usuario.
+ * 
+ * @author Andoni Villanueva
+ */
+
 import { db, auth } from "../config/firebase-config.js";
 import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { showToast } from "../utils/toast.js";

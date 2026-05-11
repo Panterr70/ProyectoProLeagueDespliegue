@@ -2,6 +2,8 @@ import { db, auth } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initSessionGuard } from "../auth/session-guard.js";
+import { showToast } from "../utils/toast.js";
+import { SB_NBA_LOGOS, SB_NFL_LOGOS } from "../config/logos-config.js";
 
 // Inicializar protección de sesión única
 initSessionGuard();
@@ -12,102 +14,8 @@ initSessionGuard();
 window.socket = typeof io !== 'undefined' ? io(API_BASE_URL) : null;
 
 // =======================
-// TOAST UTILITY
-// =======================
-function showToast(message, type = 'success', duration = 3500) {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML = `
-    <span class="toast-icon">${icons[type] || '📢'}</span>
-    <span class="toast-message">${message}</span>
-    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
-  `;
-  container.appendChild(toast);
-  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast-visible')));
-  setTimeout(() => {
-    toast.classList.remove('toast-visible');
-    toast.classList.add('toast-hiding');
-    setTimeout(() => toast.remove(), 400);
-  }, duration);
-}
-
-// =======================
 // LOGO MAPS (Scoreboard)
 // =======================
-const SB_NBA_LOGOS = {
-  "Atlanta Hawks": "ATL.png",
-  "Boston Celtics": "BOS.png",
-  "Brooklyn Nets": "BKN.png",
-  "Charlotte Hornets": "CHA.png",
-  "Chicago Bulls": "CHI.png",
-  "Cleveland Cavaliers": "CLE.png",
-  "Dallas Mavericks": "DAL.png",
-  "Denver Nuggets": "DEN.png",
-  "Detroit Pistons": "DET.png",
-  "Golden State Warriors": "GSW.png",
-  "Houston Rockets": "HOU.png",
-  "Indiana Pacers": "IND.png",
-  "Los Angeles Clippers": "LAC.png",
-  "Los Angeles Lakers": "LAL.png",
-  "Memphis Grizzlies": "MEM.png",
-  "Miami Heat": "MIA.png",
-  "Milwaukee Bucks": "MIL.png",
-  "Minnesota Timberwolves": "MIN.png",
-  "New Orleans Pelicans": "NOP.png",
-  "New York Knicks": "NYK.png",
-  "Oklahoma City Thunder": "OKC.png",
-  "Orlando Magic": "ORL.png",
-  "Philadelphia 76ers": "PHI.png",
-  "Phoenix Suns": "PHX.png",
-  "Portland Trail Blazers": "POR.png",
-  "Sacramento Kings": "SAC.png",
-  "San Antonio Spurs": "SAS.png",
-  "Toronto Raptors": "TOR.png",
-  "Utah Jazz": "UTA.png",
-  "Washington Wizards": "WIZ.png"
-};
-const SB_NFL_LOGOS = {
-  "Arizona Cardinals": "NFL_ARI.png",
-  "Atlanta Falcons": "NFL_ATL.png",
-  "Baltimore Ravens": "NFL_BAL.png",
-  "Buffalo Bills": "NFL_BUF.png",
-  "Carolina Panthers": "NFL_CAR.png",
-  "Chicago Bears": "NFL_CHI.svg",
-  "Cincinnati Bengals": "NFL_CIN.png",
-  "Cleveland Browns": "NFL_CLE.png",
-  "Dallas Cowboys": "NFL_DAL.svg",
-  "Denver Broncos": "NFL_DEN.svg",
-  "Detroit Lions": "NFL_DET.png",
-  "Green Bay Packers": "NFL_GB.png",
-  "Houston Texans": "NFL_HOU.png",
-  "Indianapolis Colts": "NFL_IND.svg",
-  "Jacksonville Jaguars": "NFL_JAX.png",
-  "Kansas City Chiefs": "NFL_KC.png",
-  "Las Vegas Raiders": "NFL_LV.png",
-  "Los Angeles Chargers": "NFL_LAC.png",
-  "Los Angeles Rams": "NFL_LAR.png",
-  "Miami Dolphins": "NFL_MIA.png",
-  "Minnesota Vikings": "NFL_MIN.png",
-  "New England Patriots": "NFL_NE.png",
-  "New Orleans Saints": "NFL_NO.png",
-  "New York Giants": "NFL_NYG.png",
-  "New York Jets": "NFL_NYJ.svg",
-  "Philadelphia Eagles": "NFL_PHI.png",
-  "Pittsburgh Steelers": "NFL_PIT.png",
-  "San Francisco 49ers": "NFL_SF.svg",
-  "Seattle Seahawks": "NFL_SEA.png",
-  "Tampa Bay Buccaneers": "NFL_TB.svg",
-  "Tennessee Titans": "NFL_TEN.svg",
-  "Washington Commanders": "NFL_WAS.png"
-};
-
 
 function getSbLogoImg(teamName, isNBA) {
   const map = isNBA ? SB_NBA_LOGOS : SB_NFL_LOGOS;

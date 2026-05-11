@@ -3,6 +3,8 @@ import { API_BASE_URL } from "../config/config.js";
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initSessionGuard } from "../auth/session-guard.js";
 import { initHeaderLogic } from "../utils/header-logic.js";
+import { showToast } from "../utils/toast.js";
+import { nbaLogos as teamLogos } from "../config/logos-config.js";
 
 // Inicializar protección de sesión única
 initSessionGuard();
@@ -52,69 +54,12 @@ async function loadFooter() {
 })();
 
 // ===============================
-// TOAST NOTIFICATION SYSTEM
+// MAPAS DE LOGOS
 // ===============================
-function showToast(message, type = 'success', duration = 3500) {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML = `
-    <span class="toast-icon">${icons[type] || '📢'}</span>
-    <span class="toast-message">${message}</span>
-    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
-  `;
-  container.appendChild(toast);
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => toast.classList.add('toast-visible'));
-  });
-  setTimeout(() => {
-    toast.classList.remove('toast-visible');
-    toast.classList.add('toast-hiding');
-    setTimeout(() => toast.remove(), 400);
-  }, duration);
-}
 
-const teamLogos = {
-  "Atlanta Hawks": "ATL.png",
-  "Boston Celtics": "BOS.png",
-  "Brooklyn Nets": "BKN.png",
-  "Charlotte Hornets": "CHA.png",
-  "Chicago Bulls": "CHI.png",
-  "Cleveland Cavaliers": "CLE.png",
-  "Dallas Mavericks": "DAL.png",
-  "Denver Nuggets": "DEN.png",
-  "Detroit Pistons": "DET.png",
-  "Golden State Warriors": "GSW.png",
-  "Houston Rockets": "HOU.png",
-  "Indiana Pacers": "IND.png",
-  "Los Angeles Clippers": "LAC.png",
-  "Los Angeles Lakers": "LAL.png",
-  "Memphis Grizzlies": "MEM.png",
-  "Miami Heat": "MIA.png",
-  "Milwaukee Bucks": "MIL.png",
-  "Minnesota Timberwolves": "MIN.png",
-  "New Orleans Pelicans": "NOP.png",
-  "New York Knicks": "NYK.png",
-  "Oklahoma City Thunder": "OKC.png",
-  "Orlando Magic": "ORL.png",
-  "Philadelphia 76ers": "PHI.png",
-  "Phoenix Suns": "PHX.png",
-  "Portland Trail Blazers": "POR.png",
-  "Sacramento Kings": "SAC.png",
-  "San Antonio Spurs": "SAS.png",
-  "Toronto Raptors": "TOR.png",
-  "Utah Jazz": "UTA.png",
-  "Washington Wizards": "WIZ.png"
-};
-
-
-// ===== FUNCIONES =====
+// ===============================
+// FUNCIONES
+// ===============================
 async function cargarClasificacion() {
   const tbody = document.querySelector("#standings-table tbody");
   const table = document.getElementById("standings-table");
