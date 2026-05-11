@@ -73,14 +73,17 @@
     <section class="profile-security">
       <h3>Seguridad</h3>
 
-      <div class="security-fields">
-        <input type="text" id="new-username" placeholder="Nuevo nombre de usuario">
-        <input type="password" id="new-password" placeholder="Nueva contraseña">
-      </div>
+      <form id="security-form" onsubmit="return false;">
+        <div class="security-fields">
+          <input type="text" id="new-username" placeholder="Nuevo nombre de usuario" autocomplete="username">
+          <input type="password" id="new-password" placeholder="Nueva contraseña" autocomplete="new-password">
+        </div>
 
-      <button id="change-credentials" class="btn-danger">
-        Actualizar credenciales
-      </button>
+        <button type="button" id="change-credentials" class="btn-danger">
+          Actualizar credenciales
+        </button>
+      </form>
+
     </section>
 
   </main>

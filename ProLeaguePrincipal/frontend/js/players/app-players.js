@@ -182,8 +182,19 @@ function createPlayerCard(player, index) {
   const league = player._league || currentLeague;
   const teamName = player._teamName || '';
   const logoMap = league === 'NBA' ? nbaLogos : nflLogos;
-  const logoFile = logoMap[teamName];
+  
+  // Búsqueda robusta de logo
+  let logoFile = logoMap[teamName];
+  if (!logoFile && teamName) {
+    // Si no hay match exacto, buscamos si alguna clave del mapa está contenida en el nombre o viceversa
+    const key = Object.keys(logoMap).find(k => 
+      teamName.includes(k) || k.includes(teamName)
+    );
+    if (key) logoFile = logoMap[key];
+  }
+
   const logoPath = logoFile ? `../../logos/${logoFile}` : null;
+
   const isNBA = league === 'NBA';
   const sportColor = isNBA ? '#ff3b3b' : '#3b82f6';
 

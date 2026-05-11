@@ -503,15 +503,25 @@ function setupNewsInteractions(card, newsId, title, category) {
             date: new Date().toISOString()
         };
 
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-            await setDoc(docRef, { likes: [], comments: [newComment] });
-        } else {
-            await updateDoc(docRef, { comments: arrayUnion(newComment) });
+        try {
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) {
+                await setDoc(docRef, { likes: [], comments: [newComment] });
+            } else {
+                await updateDoc(docRef, { comments: arrayUnion(newComment) });
+            }
+
+            commentInput.value = "";
+            showToast("¡Comentario publicado!", "success");
+        } catch (err) {
+            console.error("Error al comentar:", err);
+            if (err.code === 'permission-denied') {
+                showToast("Error: No tienes permisos para comentar. Revisa las reglas de Firestore.", "error");
+            } else {
+                showToast("No se pudo publicar el comentario", "error");
+            }
         }
 
-        commentInput.value = "";
-        showToast("¡Comentario publicado!", "success");
 
         // Opcional: Emitir a socket.io si está cargado
         if (window.socket && window.socket.emit) {

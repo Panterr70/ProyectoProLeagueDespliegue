@@ -17,8 +17,11 @@ export const nbaLogos = {
     "New Orleans Pelicans": "NOP.png", "New York Knicks": "NYK.png", "Oklahoma City Thunder": "OKC.png",
     "Orlando Magic": "ORL.png", "Philadelphia 76ers": "PHI.png", "Phoenix Suns": "PHX.png",
     "Portland Trail Blazers": "POR.png", "Sacramento Kings": "SAC.png", "San Antonio Spurs": "SAS.png",
-    "Toronto Raptors": "TOR.png", "Utah Jazz": "UTA.png", "Washington Wizards": "WIZ.png"
+    "Toronto Raptors": "TOR.png", "Utah Jazz": "UTA.png", "Washington Wizards": "WIZ.png",
+    // Alias e históricos
+    "Washington Bullets": "WIZ.png", "Baltimore Bullets": "WIZ.png", "Seattle SuperSonics": "OKC.png"
 };
+
 
 export const nflLogos = {
     "Arizona Cardinals": "NFL_ARI.png", "Atlanta Falcons": "NFL_ATL.png", "Baltimore Ravens": "NFL_BAL.png",
@@ -31,8 +34,11 @@ export const nflLogos = {
     "New England Patriots": "NFL_NE.png", "New Orleans Saints": "NFL_NO.png", "New York Giants": "NFL_NYG.png",
     "New York Jets": "NFL_NYJ.svg", "Philadelphia Eagles": "NFL_PHI.png", "Pittsburgh Steelers": "NFL_PIT.png",
     "San Francisco 49ers": "NFL_SF.svg", "Seattle Seahawks": "NFL_SEA.png", "Tampa Bay Buccaneers": "NFL_TB.svg",
-    "Tennessee Titans": "NFL_TEN.svg", "Washington Commanders": "NFL_WAS.png"
+    "Tennessee Titans": "NFL_TEN.svg", "Washington Commanders": "NFL_WAS.png",
+    // Alias
+    "Cleveland": "NFL_CLE.png", "Baltimore": "NFL_BAL.png"
 };
+
 
 // Alias para compatibilidad con Scoreboard si es necesario
 export const SB_NBA_LOGOS = nbaLogos;

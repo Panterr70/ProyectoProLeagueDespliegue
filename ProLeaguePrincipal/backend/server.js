@@ -36,38 +36,7 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// Config Multer para subida local de avatares
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "./uploads/";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage });
-
-// Endpoint para subir avatar local (para ahorrar en Firebase Storage)
-app.post("/api/auth/upload-avatar/:uid", upload.single("avatar"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No se subió ningún archivo" });
-  const avatarUrl = `/uploads/${req.file.filename}`;
-  res.json({ avatarUrl });
-});
-
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*", // En producción, permitir todo o especificar vercel.app
-    methods: ["GET", "POST"],
-    credentials: true
-  },
-});
-
-const __dirname = path.resolve();
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use(express.static(path.join(__dirname, "../frontend")));
+app.use(express.json());
 
 const allowedOrigins = [
   "https://proyecto-pro-league-despliegue.vercel.app",
@@ -80,12 +49,11 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Permitir si no hay origin (como herramientas de test o apps moviles) o si está en la lista o es de vercel
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
       callback(null, true);
     } else {
       console.log("CORS bloqueado para:", origin);
-      callback(null, true); // En desarrollo o para depurar, podemos ser más permisivos si falla
+      callback(null, true);
     }
   },
   credentials: true,
@@ -110,11 +78,45 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(express.json());
+
+// Config Multer para subida local de avatares
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "./uploads/";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
+
+// Endpoint para subir avatar local (para ahorrar en Firebase Storage)
+app.post("/api/auth/upload-avatar/:uid", upload.single("avatar"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No se subió ningún archivo" });
+  const avatarUrl = `/uploads/${req.file.filename}`;
+  res.json({ avatarUrl });
+});
+
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*", 
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+});
+
+const __dirname = path.resolve();
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 // Rutas
 app.use("/api/news", newsRoutes);
 app.use("/api/auth", authRoutes);
+
 
 // Ruta principal
 app.get("/", (req, res) => {
@@ -304,33 +306,41 @@ app.get("/api/nfl/players", async (req, res) => {
 
   if (apiCache.players.has(cacheKey)) {
     const entry = apiCache.players.get(cacheKey);
-    if (now - entry.timestamp < 300000) { // 5 min para jugadores
-      return res.json(entry.data);
-    }
+    if (now - entry.timestamp < 300000) return res.json(entry.data);
   }
   
   try {
+    let url = "https://api.balldontlie.io/nfl/v1/players";
     const params = new URLSearchParams();
-    if (teamId) params.append("team_ids[]", teamId);
-    if (search) params.append("search", search);
-    params.append("per_page", 100);
+    
+    // Si hay teamId, la API de NFL prefiere el endpoint de plantilla: /teams/{id}/players
+    if (teamId && !search) {
+      url = `https://api.balldontlie.io/nfl/v1/teams/${teamId}/players`;
+    } else {
+      if (teamId) params.append("team_ids[]", teamId);
+      if (search) params.append("search", search);
+      params.append("per_page", 100);
+      url = `${url}?${params.toString()}`;
+    }
 
-    const response = await axios.get(
-      `https://api.balldontlie.io/nfl/v1/players?${params}`,
-      { headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } }
-    );
+    console.log(`🏈 Buscando NFL: ${url}`);
 
-    apiCache.players.set(cacheKey, { data: response.data.data, timestamp: now });
-    res.json(response.data.data);
+    const response = await axios.get(url, { 
+      headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } 
+    });
+
+    const players = response.data.data;
+    apiCache.players.set(cacheKey, { data: players, timestamp: now });
+    res.json(players);
   } catch (err) {
+    console.error("❌ Error NFL Players:", err.message);
     if (err.response?.status === 429 && apiCache.players.has(cacheKey)) {
       return res.json(apiCache.players.get(cacheKey).data);
     }
-    // Devolvemos 200 con array vacío para que el front no detecte "Error de Servidor"
-    // y simplemente muestre que no hay resultados momentáneamente.
     res.json([]); 
   }
 });
+
 
 
 // =======================
