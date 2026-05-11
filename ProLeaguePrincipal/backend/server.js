@@ -382,6 +382,7 @@ app.get("/api/nba/players", async (req, res) => {
     }
     res.json([]);
   }
+});
 
 
 
