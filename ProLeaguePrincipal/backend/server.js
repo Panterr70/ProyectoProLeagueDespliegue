@@ -306,45 +306,33 @@ app.get("/api/nfl/players", async (req, res) => {
 
   if (apiCache.players.has(cacheKey)) {
     const entry = apiCache.players.get(cacheKey);
-    if (now - entry.timestamp < 1800000) return res.json(entry.data); // 30 min
+    if (now - entry.timestamp < 1800000) return res.json(entry.data);
   }
   
   try {
-    let url = "https://api.balldontlie.io/nfl/v1/players";
     const params = new URLSearchParams();
-    
-    // Si hay teamId, la API de NFL prefiere el endpoint de plantilla: /teams/{id}/players
-    if (teamId && !search) {
-      url = `https://api.balldontlie.io/nfl/v1/teams/${teamId}/players`;
-    } else {
-      if (teamId) params.append("team_ids[]", teamId);
-      if (search) params.append("search", search);
-      params.append("per_page", 100);
-      url = `${url}?${params.toString()}`;
-    }
+    if (teamId) params.append("team_ids[]", teamId);
+    if (search) params.append("search", search);
+    params.append("per_page", 100);
 
-    console.log(`🏈 Buscando NFL: ${url}`);
+    const url = `https://api.balldontlie.io/nfl/v1/players?${params.toString()}`;
+    console.log(`🏈 NFL Query: ${url}`);
 
     const response = await axios.get(url, { 
       headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } 
     });
 
-    const players = response.data.data;
+    const players = response.data.data || [];
     apiCache.players.set(cacheKey, { data: players, timestamp: now });
     res.json(players);
   } catch (err) {
     console.error("❌ Error NFL Players:", err.message);
-    // RECUPERACIÓN DE EMERGENCIA
     if (apiCache.players.has(cacheKey)) {
-      console.warn(`🚑 Rescatando datos de caché para ${cacheKey} tras error.`);
       return res.json(apiCache.players.get(cacheKey).data);
     }
     res.json([]); 
   }
-
 });
-
-
 
 // =======================
 // NBA - CLASIFICACIÓN (ESPN no suele dar 429, pero lo dejamos igual)
@@ -368,44 +356,32 @@ app.get("/api/nba/players", async (req, res) => {
 
   if (apiCache.players.has(cacheKey)) {
     const entry = apiCache.players.get(cacheKey);
-    if (now - entry.timestamp < 1800000) return res.json(entry.data); // 30 min
+    if (now - entry.timestamp < 1800000) return res.json(entry.data);
   }
 
   try {
-    let url = "https://api.balldontlie.io/v1/players";
     const params = new URLSearchParams();
+    if (teamId) params.append("team_ids[]", teamId);
+    if (search) params.append("search", search);
+    params.append("per_page", 100);
 
-    // Si hay teamId y no hay búsqueda de nombre, usamos el endpoint de plantilla (más fiable)
-    if (teamId && !search) {
-      url = `https://api.balldontlie.io/v1/teams/${teamId}/players`;
-    } else {
-      if (teamId) params.append("team_ids[]", teamId);
-      if (search) params.append("search", search);
-      params.append("per_page", 100);
-      url = `${url}?${params.toString()}`;
-    }
-
-    console.log(`🏀 Buscando NBA: ${url}`);
+    const url = `https://api.balldontlie.io/v1/players?${params.toString()}`;
+    console.log(`🏀 NBA Query: ${url}`);
 
     const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` }
     });
 
-    const players = response.data.data;
+    const players = response.data.data || [];
     apiCache.players.set(cacheKey, { data: players, timestamp: now });
     res.json(players);
   } catch (err) {
     console.error("❌ Error NBA Players:", err.message);
-    // RECUPERACIÓN DE EMERGENCIA: Si hay error 429 o cualquier error de red,
-    // buscamos si tenemos algo en caché aunque haya expirado.
     if (apiCache.players.has(cacheKey)) {
-      console.warn(`🚑 Rescatando datos de caché para ${cacheKey} tras error.`);
       return res.json(apiCache.players.get(cacheKey).data);
     }
     res.json([]);
   }
-
-});
 
 
 

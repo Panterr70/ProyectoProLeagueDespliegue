@@ -118,18 +118,23 @@ async function fetchPlayers() {
     if (effectiveSearchTerm) query.append('search', effectiveSearchTerm);
     if (effectiveTeamId) query.append('teamId', effectiveTeamId);
 
+    console.log(`🌐 Fetching: ${API_BASE_URL}${endpoint}?${query.toString()}`);
     const res = await fetch(`${API_BASE_URL}${endpoint}?${query.toString()}`);
     
     if (res.status === 429) {
-      showToast("Demasiadas peticiones. Espera unos segundos...", 'warning');
-      countText.textContent = "Límite de API alcanzado. Espera 30s.";
-      grid.innerHTML = `<div class="players-error"><span>⏳</span><p>La API está saturada. Por favor, espera un momento antes de volver a buscar.</p></div>`;
-      return;
+      console.warn("⚠️ API Rate Limit Hit (429)");
+      showToast("La API está saturada. Reintentando con caché...", 'warning');
+      // No lanzamos error, dejamos que el servidor intente rescatar datos
     }
 
-    if (!res.ok) throw new Error('Error en la búsqueda');
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("❌ Server Error:", res.status, errorData);
+      throw new Error('Error en la búsqueda');
+    }
 
     const players = await res.json();
+    console.log(`✅ Resultado: ${players.length} jugadores`);
     
     // Mapear nombres de equipos para los logos y nombres
     players.forEach(p => {
@@ -143,6 +148,7 @@ async function fetchPlayers() {
 
     searchCache.set(cacheKey, players);
     renderPlayers(players);
+
   } catch (err) {
     console.error('Fetch error:', err);
     showToast("Error en la búsqueda", 'error');
@@ -334,13 +340,22 @@ function populateTeamFilter(teams) {
 let searchDebounce;
 document.getElementById('player-search').addEventListener('input', (e) => {
   searchTerm = e.target.value.trim();
+  
   clearTimeout(searchDebounce);
-  // Require at least 3 characters to avoid API rate limiting (429)
-  if (searchTerm.length > 0 && searchTerm.length < 3) return;
+  
+  // Si se vacía el buscador y no hay equipo seleccionado, resetear
+  if (searchTerm === '' && !selectedTeamId) {
+    renderPlayers([]);
+    document.getElementById('players-count-text').textContent = "Busca un jugador o filtra por equipo.";
+    return;
+  }
+
   searchDebounce = setTimeout(() => {
+    console.log("🔍 Ejecutando búsqueda para:", searchTerm);
     fetchPlayers();
-  }, 600);
+  }, 400); // Reducido a 400ms para mayor fluidez
 });
+
 
 document.getElementById('clear-search').addEventListener('click', () => {
   document.getElementById('player-search').value = '';
