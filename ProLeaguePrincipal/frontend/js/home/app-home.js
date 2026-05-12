@@ -156,12 +156,20 @@ const newsList = document.getElementById("news-list");
 
 
 function showSkeletons() {
+  if (!newsList) return;
   newsList.innerHTML = "";
   for (let i = 0; i < 4; i++) {
-    const skel = document.createElement("div");
-    skel.className = "news-card skeleton";
-    skel.style.minHeight = "250px";
-    newsList.appendChild(skel);
+    const skeleton = document.createElement("div");
+    skeleton.className = "news-card skeleton-card skeleton";
+    skeleton.innerHTML = `
+      <div style="height: 50px; width: 50px; border-radius: 50%; margin: 20px auto; background: rgba(255,255,255,0.1);"></div>
+      <div class="news-card-content">
+        <div class="skeleton-text skeleton" style="width: 30%; height: 15px; margin-bottom: 15px;"></div>
+        <div class="skeleton-text skeleton" style="width: 90%; height: 25px;"></div>
+        <div class="skeleton-text skeleton" style="width: 70%; height: 20px;"></div>
+      </div>
+    `;
+    newsList.appendChild(skeleton);
   }
 }
 

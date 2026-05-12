@@ -99,8 +99,8 @@ ProLeague es un dashboard deportivo interactivo que permite a los usuarios consu
 - **[AMP-08]** Hero Slider animado en la página principal.
 - **[AMP-09]** Reloj deportivo (hora ET — Eastern Time de EEUU).
 - **[AMP-10]** Sistema de caché en el backend para evitar errores 429 de las APIs externas.
-- **[AMP-11]** Skeleton loading screens en búsquedas.
-- **[AMP-12]** Cursor personalizado en la home.
+- **[AMP-11]** Skeleton Screens: Pantallas de carga con efecto shimmer en noticias, tendencias y búsquedas para una UX premium.
+- **[AMP-12]** Modal de salida premium: Interceptor de navegación para prevenir pérdida de cambios sin guardar.
 - **[AMP-13]** Protección de cambios sin guardar (beforeunload) en Dream Team y Perfil.
 - **[AMP-14]** Atajos de teclado (Ctrl+S para guardar Dream Team).
 - **[AMP-15]** Modales de confirmación premium (reemplazando confirm() nativos).

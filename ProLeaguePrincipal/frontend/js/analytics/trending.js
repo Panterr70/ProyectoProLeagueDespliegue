@@ -5,6 +5,14 @@ async function initTrendingPlayers() {
     const container = document.getElementById("trending-container");
     if (!container) return;
 
+    // Show Skeletons
+    container.innerHTML = `
+        <div class="skeleton-trending skeleton" style="grid-column: 1/-1; height: 100px;"></div>
+        <div class="skeleton-trending skeleton"></div>
+        <div class="skeleton-trending skeleton"></div>
+        <div class="skeleton-trending skeleton"></div>
+    `;
+
     try {
         const usersSnapshot = await getDocs(collection(db, "users"));
         const nbaCounts = {};
