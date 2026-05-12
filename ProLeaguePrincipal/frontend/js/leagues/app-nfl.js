@@ -442,19 +442,20 @@ function renderCharts(entries) {
         chartsInstance.radar = new Chart(ctx_radar, {
             type: 'radar',
             data: {
-                labels: ['Victorias', 'Rend. Local', 'Rend. Visita', 'Pts Fav(x10)', 'Racha'],
+                labels: ['Victorias', 'Rend. Local', 'Rend. Visita', 'Eficiencia', 'Racha'],
                 datasets: top5.slice(0, 3).map((e, idx) => {
                     const colors = ['rgba(0, 242, 255,', 'rgba(112, 0, 255,', 'rgba(255, 0, 200,'];
                     const hex = ['#00f2ff', '#7000ff', '#ff00c8'];
+                    
+                    const w = getStat(e, 'wins');
+                    const hw = getStat(e, 'homeWins') || (w * 0.6); 
+                    const aw = getStat(e, 'awayWins') || (w * 0.4);
+                    const streak = Math.abs(getStat(e, 'streak')) || 0;
+                    const eff = (getStat(e, 'pointsFor') / 28) * 10; // Escala NFL (28 pts es top)
+
                     return {
                         label: tf(e.team.displayName || e.team.name),
-                        data: [
-                            getStat(e, 'wins'),
-                            getStat(e, 'homeWins') || (getStat(e, 'wins')/1.5),
-                            getStat(e, 'awayWins') || (getStat(e, 'wins')/2),
-                            (getStat(e, 'pointsFor') / 100),
-                            Math.abs(getStat(e, 'streak')) || 0
-                        ],
+                        data: [w, hw, aw, eff, streak],
                         backgroundColor: colors[idx] + ' 0.2)',
                         borderColor: hex[idx],
                         pointBackgroundColor: '#fff',
@@ -477,5 +478,63 @@ function renderCharts(entries) {
             }
         });
     }
+
+    // 5. HOME VS AWAY (Stacked Bar) - NUEVO
+    const ctx_ha = document.getElementById('chart_homeaway')?.getContext('2d');
+    if(ctx_ha) {
+        const top10 = sortedByWins.slice(0, 10);
+        chartsInstance.homeaway = new Chart(ctx_ha, {
+            type: 'bar',
+            data: {
+                labels: top10.map(e => tf(e.team.displayName || e.team.name)),
+                datasets: [{
+                    label: 'Casa',
+                    data: top10.map(e => getStat(e, 'homeWins') || Math.floor(getStat(e, 'wins') * 0.7)),
+                    backgroundColor: '#1e40af'
+                }, {
+                    label: 'Fuera',
+                    data: top10.map(e => getStat(e, 'awayWins') || Math.floor(getStat(e, 'wins') * 0.3)),
+                    backgroundColor: '#3b82f6'
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } },
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, grid: { display: false } },
+                    y: { stacked: true, grid: { color: gridColor } }
+                }
+            }
+        });
+    }
+
+    // 6. STREAKS (Bar) - NUEVO
+    const ctx_st = document.getElementById('chart_streaks')?.getContext('2d');
+    if(ctx_st) {
+        const sortedByStreak = [...entries].sort((a,b) => Math.abs(getStat(b, 'streak')) - Math.abs(getStat(a, 'streak'))).slice(0, 8);
+        chartsInstance.streaks = new Chart(ctx_st, {
+            type: 'bar',
+            data: {
+                labels: sortedByStreak.map(e => tf(e.team.displayName || e.team.name)),
+                datasets: [{
+                    label: 'Partidos Seguidos (Racha)',
+                    data: sortedByStreak.map(e => getStat(e, 'streak')),
+                    backgroundColor: sortedByStreak.map(e => getStat(e, 'streak') >= 0 ? '#10b981' : '#ef4444'),
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { 
+                  y: { grid: { color: gridColor } },
+                  x: { grid: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // DEBUG
+    console.log(`[NFL Analytics] Total Victorias: ${entries.reduce((acc, e) => acc + getStat(e, 'wins'), 0)} | Total Derrotas: ${entries.reduce((acc, e) => acc + getStat(e, 'losses'), 0)}`);
 }
 
