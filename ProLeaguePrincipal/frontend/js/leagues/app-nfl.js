@@ -264,7 +264,7 @@ function mostrarEquipos(equipos){
         try {
           // Nota: La API balldontlie usa IDs propios. Mapear esto si es necesario.
           // Intentaremos buscar por nombre si no tenemos el ID exacto.
-          const res = await fetch(`${API_BASE_URL}/api/nfl/players?search=${encodeURIComponent(team.name)}`);
+          const res = await fetch(`${API_BASE_URL}/api/nfl/players?teamId=${team.id}`);
           let players = await res.json();
           
           newBtn.style.display = "none";
