@@ -235,7 +235,8 @@ function mostrarEquipos(equipos){
       }
       window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
 
-      document.getElementById("modal-logo").src = team.logos?.[0]?.href || "../../logos/nfl_default.png";
+      const finalLogo = teamLogos[team.full_name] || `${team.abbreviation}.png`;
+      document.getElementById("modal-logo").src = `../../logos/${finalLogo}`;
       document.getElementById("modal-name").textContent = team.displayName || team.name;
       document.getElementById("modal-city").textContent = `Localidad: ${team.location || 'Desconocido'}`;
       document.getElementById("modal-conference").textContent = `División: ${team.standingSummary || 'Desconocido'}`;
