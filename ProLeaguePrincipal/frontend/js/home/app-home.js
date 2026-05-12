@@ -46,28 +46,7 @@ if (!user) {
 
 let currentFilter = "all";
 
-// =======================
-// CUSTOM CURSOR
-// =======================
-function initCustomCursor() {
-  const cursor = document.createElement("div");
-  const dot = document.createElement("div");
-  cursor.className = "custom-cursor";
-  dot.className = "custom-cursor-dot";
-  document.body.appendChild(cursor);
-  document.body.appendChild(dot);
-
-  document.addEventListener("mousemove", (e) => {
-    cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
-    dot.style.transform = `translate(${e.clientX - 2}px, ${e.clientY - 2}px)`;
-  });
-
-  document.querySelectorAll("a, button, .dot, .nav-logo").forEach(el => {
-    el.addEventListener("mouseenter", () => cursor.style.transform += " scale(2)");
-    el.addEventListener("mouseleave", () => cursor.style.transform = cursor.style.transform.replace(" scale(2)", ""));
-  });
-}
-initCustomCursor();
+// Custom Cursor Removed
 
 // =======================
 // FAVORITES BADGE
@@ -396,7 +375,7 @@ async function initNews() {
 
         <div class="news-interactions">
           <button class="interaction-btn like-btn" data-id="${newsId}">
-             <span class="like-icon">🤍</span> <span class="like-count">0</span>
+             <span class="like-icon"><i class="far fa-heart"></i></span> <span class="like-count">0</span>
           </button>
           <button class="interaction-btn comment-btn" data-id="${newsId}">
              💬 Comentar
@@ -438,10 +417,10 @@ function setupNewsInteractions(card, newsId, title, category) {
             likeBtn.querySelector(".like-count").textContent = likes.length;
             if (likes.includes(user.uid)) {
                 likeBtn.classList.add("liked");
-                likeBtn.querySelector(".like-icon").textContent = "❤️";
+                likeBtn.querySelector(".like-icon").innerHTML = `<i class="fas fa-heart" style="color: #ef4444;"></i>`;
             } else {
                 likeBtn.classList.remove("liked");
-                likeBtn.querySelector(".like-icon").textContent = "🤍";
+                likeBtn.querySelector(".like-icon").innerHTML = `<i class="far fa-heart"></i>`;
             }
 
             commentsList.innerHTML = comments.map(c => `

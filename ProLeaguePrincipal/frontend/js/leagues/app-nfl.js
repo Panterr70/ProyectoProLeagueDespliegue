@@ -331,12 +331,12 @@ function renderCharts(entries) {
 
     Object.values(chartsInstance).forEach(chart => { if (chart) chart.destroy(); });
 
-    Chart.defaults.color = '#cbd5e1';
-    Chart.defaults.font.family = 'Space Grotesk, sans-serif';
+    // Global Styles for Charts
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = "'Outfit', sans-serif";
     const gridColor = 'rgba(255, 255, 255, 0.05)';
     
     const getStat = (entry, statName) => entry.stats.find(s => s.name === statName)?.value || 0;
-    
     const sortedByWins = [...entries].sort((a,b) => getStat(b, 'winPercent') - getStat(a, 'winPercent'));
     const top5 = sortedByWins.slice(0, 5);
 
@@ -346,79 +346,100 @@ function renderCharts(entries) {
         return parts.length > 1 ? parts[parts.length-1] : name;
     }
 
-    if(document.getElementById('chart_top5')) {
-        chartsInstance.top5 = new Chart(document.getElementById('chart_top5'), {
+    // 1. TOP 5 VICTORIAS
+    const ctx_top5 = document.getElementById('chart_top5')?.getContext('2d');
+    if(ctx_top5) {
+        const gradient = ctx_top5.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(0, 242, 255, 0.8)');
+        gradient.addColorStop(1, 'rgba(112, 0, 255, 0.1)');
+
+        chartsInstance.top5 = new Chart(ctx_top5, {
             type: 'bar',
             data: {
                 labels: top5.map(e => tf(e.team.displayName || e.team.name)),
                 datasets: [{
                     label: 'Victorias',
                     data: top5.map(e => getStat(e, 'wins')),
-                    backgroundColor: 'rgba(0, 242, 255, 0.6)',
+                    backgroundColor: gradient,
                     borderColor: '#00f2ff',
                     borderWidth: 2,
-                    borderRadius: 8
+                    borderRadius: 8,
+                    hoverBackgroundColor: '#00f2ff'
                 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                scales: { y: { grid: { color: gridColor } }, x: { grid: { display: false } } },
+                scales: { 
+                  y: { grid: { color: gridColor }, border: { display: false } },
+                  x: { grid: { display: false } }
+                },
                 plugins: { legend: { display: false } }
             }
         });
     }
 
-    if(document.getElementById('chart_global_winloss')) {
+    // 2. GLOBAL LIGA (Doughnut)
+    const ctx_global = document.getElementById('chart_global_winloss')?.getContext('2d');
+    if(ctx_global) {
         const totalWins = entries.reduce((acc, e) => acc + getStat(e, 'wins'), 0);
         const totalLosses = entries.reduce((acc, e) => acc + getStat(e, 'losses'), 0);
-        chartsInstance.global = new Chart(document.getElementById('chart_global_winloss'), {
+        chartsInstance.global = new Chart(ctx_global, {
             type: 'doughnut',
             data: {
                 labels: ['Victorias', 'Derrotas'],
                 datasets: [{
                     data: [totalWins, totalLosses],
-                    backgroundColor: ['rgba(16, 185, 129, 0.7)', 'rgba(239, 68, 68, 0.7)'],
-                    borderColor: ['#10b981', '#ef4444'],
-                    borderWidth: 2,
-                    hoverOffset: 15
+                    backgroundColor: ['#10b981', '#ef4444'],
+                    hoverOffset: 15,
+                    borderWidth: 0
                 }]
             },
-            options: { cutout: '70%', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            options: { 
+              cutout: '75%', 
+              responsive: true, 
+              maintainAspectRatio: false, 
+              plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } } 
+            }
         });
     }
 
-    if(document.getElementById('chart_points')) {
+    // 3. EFICIENCIA (Horizontal Bar)
+    const ctx_pts = document.getElementById('chart_points')?.getContext('2d');
+    if(ctx_pts) {
         const sortedByPts = [...entries].sort((a,b) => getStat(b, 'pointsFor') - getStat(a, 'pointsFor')).slice(0, 5);
-        chartsInstance.points = new Chart(document.getElementById('chart_points'), {
+        chartsInstance.points = new Chart(ctx_pts, {
             type: 'bar',
             data: {
                 labels: sortedByPts.map(e => tf(e.team.displayName || e.team.name)),
                 datasets: [{
                     label: 'Puntos A Favor',
                     data: sortedByPts.map(e => getStat(e, 'pointsFor')),
-                    backgroundColor: 'rgba(251, 191, 36, 0.6)',
+                    backgroundColor: 'rgba(251, 191, 36, 0.7)',
                     borderColor: '#fbbf24',
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderRadius: 4
                 }, {
                     label: 'Puntos En Contra',
                     data: sortedByPts.map(e => getStat(e, 'pointsAgainst')),
                     backgroundColor: 'rgba(239, 68, 68, 0.4)',
                     borderColor: '#ef4444',
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderRadius: 4
                 }]
             },
             options: {
                 indexAxis: 'y',
                 responsive: true, maintainAspectRatio: false,
-                scales: { x: { grid: { color: gridColor } }, y: { grid: { display: false } } }
+                scales: { x: { grid: { color: gridColor } }, y: { grid: { display: false } } },
+                plugins: { legend: { position: 'bottom' } }
             }
         });
     }
 
-    if(document.getElementById('chart_radar')) {
-        chartsInstance.radar = new Chart(document.getElementById('chart_radar'), {
+    // 4. RADAR TOP 3
+    const ctx_radar = document.getElementById('chart_radar')?.getContext('2d');
+    if(ctx_radar) {
+        chartsInstance.radar = new Chart(ctx_radar, {
             type: 'radar',
             data: {
                 labels: ['Victorias', 'Rend. Local', 'Rend. Visita', 'Pts Fav(x10)', 'Racha'],
@@ -429,15 +450,16 @@ function renderCharts(entries) {
                         label: tf(e.team.displayName || e.team.name),
                         data: [
                             getStat(e, 'wins'),
-                            getStat(e, 'homeWins') || (getStat(e, 'wins')/2),
+                            getStat(e, 'homeWins') || (getStat(e, 'wins')/1.5),
                             getStat(e, 'awayWins') || (getStat(e, 'wins')/2),
                             (getStat(e, 'pointsFor') / 100),
-                            getStat(e, 'streak') || 0
+                            Math.abs(getStat(e, 'streak')) || 0
                         ],
                         backgroundColor: colors[idx] + ' 0.2)',
                         borderColor: hex[idx],
-                        pointBackgroundColor: hex[idx],
-                        borderWidth: 2
+                        pointBackgroundColor: '#fff',
+                        borderWidth: 2,
+                        fill: true
                     }
                 })
             },
@@ -445,13 +467,15 @@ function renderCharts(entries) {
                 responsive: true, maintainAspectRatio: false,
                 scales: {
                     r: {
-                        angleLines: { color: gridColor },
-                        grid: { color: gridColor },
-                        pointLabels: { color: '#cbd5e1', font: {size: 10} },
+                        angleLines: { color: 'rgba(255,255,255,0.1)' },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        pointLabels: { color: '#94a3b8', font: {size: 10} },
                         ticks: { display: false }
                     }
-                }
+                },
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
             }
         });
     }
 }
+

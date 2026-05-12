@@ -71,7 +71,7 @@ function renderLeagueTrending(container, league, players, colorClass) {
     sectionTitle.style.borderBottom = `2px solid ${league === 'NBA' ? 'var(--nba-red)' : 'var(--nfl-blue)'}`;
     sectionTitle.style.paddingBottom = "10px";
     sectionTitle.style.marginBottom = "20px";
-    sectionTitle.innerHTML = `<h3 style="display:flex; align-items:center; gap:10px;">${league === 'NBA' ? '🏀' : '🏈'} Top Picks ${league}</h3>`;
+    sectionTitle.innerHTML = `<h3 style="display:flex; align-items:center; gap:10px;"><i class="fas ${league === 'NBA' ? 'fa-basketball-ball' : 'fa-football-ball'}"></i> Top Picks ${league}</h3>`;
     container.appendChild(sectionTitle);
 
     players.forEach(([name, count], index) => {
@@ -83,10 +83,11 @@ function renderLeagueTrending(container, league, players, colorClass) {
                 <h3>${name}</h3>
                 <p>${count} ${count === 1 ? 'voto' : 'votos'}</p>
             </div>
-            <div class="trending-icon">${league === 'NBA' ? '🏀' : '🏈'}</div>
+            <div class="trending-icon"><i class="fas ${league === 'NBA' ? 'fa-basketball-ball' : 'fa-football-ball'}"></i></div>
         `;
         container.appendChild(card);
     });
 }
+
 
 initTrendingPlayers();

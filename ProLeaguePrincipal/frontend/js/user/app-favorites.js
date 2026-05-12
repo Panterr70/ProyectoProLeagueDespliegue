@@ -69,21 +69,25 @@ async function cargarFavoritos(uid) {
         : "../../logos/default.png";
 
       const card = document.createElement("div");
-      card.className = "team-card";
+      card.className = "fav-team-card";
       card.innerHTML = `
-        <div class="team-card-inner">
-          <div class="team-card-front">
-            <img class="team-logo" src="${logoPath}" alt="${fav.teamName}">
-            <div class="team-name">${fav.teamName}</div>
-            <div class="team-info">Liga: ${fav.league}</div>
-            <button class="remove-fav">❌ Quitar</button>
-          </div>
+        <div class="fav-card-glow"></div>
+        <div class="fav-card-content">
+          <div class="fav-league-badge ${fav.league.toLowerCase()}">${fav.league}</div>
+          <img class="fav-team-logo" src="${logoPath}" alt="${fav.teamName}">
+          <h3 class="fav-team-name">${fav.teamName}</h3>
+          <button class="remove-fav-btn" title="Quitar de favoritos">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            Eliminar
+          </button>
         </div>
       `;
 
+
       contenedor.appendChild(card);
 
-      card.querySelector(".remove-fav").addEventListener("click", async (e) => {
+      card.querySelector(".remove-fav-btn").addEventListener("click", async (e) => {
+
         e.stopPropagation();
 
         try {

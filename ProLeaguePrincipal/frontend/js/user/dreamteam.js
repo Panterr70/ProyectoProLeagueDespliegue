@@ -32,6 +32,34 @@ window.addEventListener("beforeunload", (e) => {
     }
 });
 
+// Interceptar navegación interna para mostrar modal bonito [WOW]
+document.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (link && isDirty) {
+        const targetUrl = link.href;
+        // Solo si es navegación a otra página de nuestra web
+        if (targetUrl && !targetUrl.includes("#") && !targetUrl.startsWith("javascript:")) {
+            e.preventDefault();
+            const modal = document.getElementById("exit-modal");
+            if (modal) {
+                modal.style.display = "flex";
+                
+                const confirmBtn = document.getElementById("confirm-exit");
+                const cancelBtn = document.getElementById("cancel-exit");
+                
+                confirmBtn.onclick = () => {
+                    isDirty = false; // Reset dirty para permitir salir
+                    window.location.href = targetUrl;
+                };
+                
+                cancelBtn.onclick = () => {
+                    modal.style.display = "none";
+                };
+            }
+        }
+    }
+});
+
 const sportField = document.getElementById("sport-field");
 const selectorTitle = document.getElementById("selector-title");
 const searchInput = document.getElementById("dt-search-input");

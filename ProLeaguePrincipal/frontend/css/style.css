@@ -53,7 +53,14 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
+
+main {
+  flex: 1;
+}
+
 
 /* Fondo Dinámico Premium */
 body::before {
@@ -90,30 +97,8 @@ body::after {
 
 
 
-/* CUSTOM CURSOR PREMIUM */
-.custom-cursor {
-  width: 25px;
-  height: 25px;
-  border: 1.5px solid var(--primary-color);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 10000;
-  transition: transform 0.15s ease-out, border 0.3s ease;
-  mix-blend-mode: screen;
-  box-shadow: 0 0 15px var(--primary-glow);
-}
+/* Custom Cursor Removed */
 
-.custom-cursor-dot {
-  width: 5px;
-  height: 5px;
-  background: var(--primary-color);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 10001;
-  box-shadow: 0 0 10px var(--primary-color);
-}
 
 /* Entrada Animada para secciones */
 main > section, .nba-main, .chat-main-v2 {
@@ -1167,7 +1152,6 @@ html {
   align-items: center;
   background-color: var(--dark-bg);
   background-image: 
-    url("../images/bg-nba.jpg"), /* Puedes cambiar esto dinámicamente o dejar un fondo oscuro elegante */
     radial-gradient(at 0% 0%, rgba(112, 0, 255, 0.4) 0, transparent 50%),
     radial-gradient(at 100% 100%, rgba(0, 242, 255, 0.4) 0, transparent 50%);
   background-size: cover;
@@ -1333,6 +1317,34 @@ html {
   transform: translateY(1px) scale(0.98);
 }
 
+/* Fix for eye icon button inside login/register to prevent inheriting styles */
+.login-register-container .toggle-password-btn,
+.login-register-container .toggle-password-btn::before,
+.login-register-container .toggle-password-btn:hover::before {
+  background: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  content: none !important;
+  position: absolute !important;
+}
+
+.login-register-container .toggle-password-btn {
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+}
+
+.login-register-container .toggle-password-btn:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+
 /* LINKS INFERIORES */
 .login-register-container p {
   margin-top: 25px;
@@ -1367,6 +1379,20 @@ html {
 .login-register-container a:hover::after {
   width: 100%;
   background-color: #fff;
+}
+
+.password-container {
+  position: relative !important;
+  width: 100% !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.password-container input {
+  padding-right: 45px !important;
+  width: 100% !important;
+  display: block !important;
 }
 
 /* MENSAJES DE ERROR */
@@ -5214,3 +5240,265 @@ input:focus, select:focus {
     transform: scale(1.1);
     background: var(--secondary-color);
 }
+
+/* ===================== */
+/* MODERN FOOTER PREMIUM */
+/* ===================== */
+.site-footer {
+  background: rgba(5, 5, 7, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 60px 20px 30px 20px;
+  margin-top: auto;
+  color: #fff;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-brand h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8em;
+  font-weight: 800;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 15px;
+}
+
+.footer-brand p {
+  color: var(--text-secondary);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.footer-links h4, .footer-info h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1em;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: all 0.3s;
+  font-size: 0.95em;
+}
+
+.footer-links a:hover {
+  color: var(--primary-color);
+  padding-left: 5px;
+}
+
+.footer-info p {
+  color: var(--text-dim);
+  font-size: 0.9em;
+  margin-bottom: 8px;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 30px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.85em;
+}
+
+/* Trophy Icon Fix */
+.players-landing i, 
+.players-landing .fa-trophy,
+.players-landing img[src*="trophy"],
+.loading-trending i {
+  color: var(--primary-color) !important;
+  filter: drop-shadow(0 0 15px var(--primary-glow));
+}
+
+/* Password Toggle SVG */
+.toggle-password-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.4) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 8px !important;
+  width: auto !important;
+  margin: 0 !important;
+  z-index: 10;
+}
+
+.toggle-password-btn:hover {
+  color: var(--primary-color) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+.toggle-password-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+.toggle-password-btn::before,
+.toggle-password-btn::after {
+  content: none !important;
+}
+
+/* Profile Edit Button */
+.btn-edit-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary-gradient);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9em;
+  transition: all 0.3s;
+  margin-top: 15px;
+  border: none;
+  box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.btn-edit-profile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--primary-glow);
+  filter: brightness(1.1);
+}
+
+
+/* ===================== */
+/* FAVORITES PREMIUM */
+/* ===================== */
+.team-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.fav-team-card {
+  position: relative;
+  background: rgba(20, 20, 28, 0.6);
+  border-radius: 24px;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.fav-team-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--primary-color);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--primary-glow);
+}
+
+.fav-card-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 0%, var(--primary-glow), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.fav-team-card:hover .fav-card-glow {
+  opacity: 0.3;
+}
+
+.fav-league-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.fav-league-badge.nba { background: var(--nba-red); color: #fff; }
+.fav-league-badge.nfl { background: var(--nfl-blue); color: #fff; }
+
+.fav-team-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+  transition: transform 0.4s;
+}
+
+.fav-team-card:hover .fav-team-logo {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.fav-team-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4em;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #fff;
+}
+
+.remove-fav-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  width: 100%;
+  justify-content: center;
+}
+
+.remove-fav-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  transform: scale(1.02);
+}
+
+

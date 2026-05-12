@@ -58,6 +58,21 @@
 
   <div id="footer-placeholder"></div>
 
+  <!-- MODAL DE SALIDA (CAMBIOS SIN GUARDAR) -->
+  <div id="exit-modal" class="modal-premium" style="display: none;">
+    <div class="modal-premium-content">
+      <div class="modal-premium-header">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>¿Quieres salir del sitio web?</h3>
+      </div>
+      <p>Es posible que los cambios no se guarden si abandonas la página ahora.</p>
+      <div class="modal-premium-footer">
+        <button id="cancel-exit" class="btn-modal-secondary">Seguir editando</button>
+        <button id="confirm-exit" class="btn-modal-primary">Salir sin guardar</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="../../js/user/dreamteam.js"></script>
   <script>
     fetch("../components/header.html")

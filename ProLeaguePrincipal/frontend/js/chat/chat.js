@@ -198,7 +198,11 @@ scrollDownBtn.style.cssText = `
     transition: all 0.3s;
 `;
 
-document.querySelector(".chat-view").appendChild(scrollDownBtn);
+const chatView = document.querySelector(".chat-view") || document.querySelector(".chat-content");
+if (chatView) {
+    chatView.appendChild(scrollDownBtn);
+}
+
 
 scrollDownBtn.onclick = scrollToBottom;
 

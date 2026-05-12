@@ -94,7 +94,7 @@ function renderUsers(users, searchTerm = "") {
 
         card.innerHTML = `
             <div class="user-card-header">
-                <img src="${avatarUrl}" alt="Avatar" class="user-card-avatar">
+                <img src="${avatarUrl}" alt="Avatar" class="user-card-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${data.username}&background=random'">
             </div>
             <div class="user-card-body">
                 <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
