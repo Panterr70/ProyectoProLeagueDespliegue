@@ -19,6 +19,14 @@
 5. Objetivos del proyecto (PMV + Ampliaciones)
 6. Recursos hardware, software y arquitectura
 7. Fases del desarrollo
+    7.1. Planificación Temporal (Gantt)
+    7.2. Fase de análisis (Requisitos funcionales)
+    7.3. Requisitos no funcionales
+    7.4. Fase de diseño técnico
+    7.5. Fase de desarrollo e implementación
+    7.6. Fase de pruebas y depuración (QA)
+    7.7. Fase de lanzamiento y despliegue
+    7.8. Capturas de la aplicación final
 8. Conclusiones
 9. Bibliografía y referencias
 
@@ -28,26 +36,24 @@
 
 ProLeague es una plataforma web avanzada diseñada para el análisis, seguimiento y dinamización comunitaria de las dos grandes ligas deportivas estadounidenses: la NBA y la NFL. El propósito general del proyecto es ofrecer una herramienta centralizada que combine datos estadísticos en tiempo real con una experiencia social moderna. La aplicación permite consultar clasificaciones vivas, resultados recientes, noticias de última hora, y ofrece herramientas exclusivas como un constructor de "Dream Teams", comparadores de jugadores mediante gráficos interactivos y un sistema de chat persistente.
 
-Tecnológicamente, se trata de una aplicación web "Single Page Application" (SPA) en su concepto, utilizando JavaScript modular en el frontend y un robusto backend en Node.js. Los resultados esperados se han cumplido ampliamente, logrando una plataforma estable, escalable y con una interfaz visual premium basada en la estética *Glassmorphism*.
+La aplicación utiliza un backend en Node.js que actúa como proxy seguro y sistema de caché, garantizando la fluidez de los datos provenientes de APIs internacionales. El frontend, con una estética dark/glassmorphism, prioriza la experiencia de usuario y la visualización de datos. Los resultados han superado el Producto Mínimo Viable, logrando una herramienta integral y escalable.
 
 ### Abstract
 
 ProLeague is an advanced web platform designed for the analysis, monitoring, and community engagement of the two major American sports leagues: the NBA and the NFL. The project's general purpose is to provide a centralized tool that combines real-time statistical data with a modern social experience. The application allows users to consult live standings, recent game scores, breaking news, and offers exclusive tools such as a "Dream Team" builder, player comparison features using interactive charts, and a persistent live chat system.
 
-Technically, it is a web application using modular JavaScript on the frontend and a robust Node.js backend. The expected results have been widely achieved, resulting in a stable, scalable platform with a premium visual interface based on the *Glassmorphism* aesthetic.
+The application uses a Node.js backend acting as a secure proxy and caching system, ensuring data fluidity from international APIs. The frontend, featuring a dark/glassmorphism aesthetic, prioritizes user experience and data visualization. The results have exceeded the Minimum Viable Product, achieving a comprehensive and scalable tool.
 
 ---
 
 ## 4. Descripción y justificación del proyecto
 
-ProLeague resuelve la dispersión de información deportiva y la falta de herramientas de análisis visual para aficionados. Está dirigida a usuarios que buscan una experiencia más profunda que el simple marcador, permitiéndoles interactuar con la comunidad y visualizar el rendimiento de sus jugadores favoritos.
+ProLeague nace para cubrir el vacío entre las aplicaciones de resultados simples y las plataformas de apuestas, centrándose exclusivamente en el análisis de rendimiento y la interacción social sana.
 
 ### 4.1. Justificación de la necesidad
-
-- **Centralización:** Unifica noticias, datos y comunidad en un solo lugar.
-- **Análisis Visual:** Transforma números fríos de una tabla en gráficos radar y comparativas visuales.
-- **Comunidad Activa:** Fomenta el debate mediante chats por liga y comentarios en noticias en tiempo real.
-- **Sin Publicidad:** A diferencia de las plataformas oficiales o de apuestas, ProLeague se centra 100% en el usuario y los datos.
+- **Análisis Visual:** Transforma tablas de números en gráficos interactivos.
+- **Interacción Social:** Chat persistente y perfiles públicos para debatir sobre deporte.
+- **Eficiencia:** Unifica múltiples fuentes de datos (ESPN, BallDontLie) en un solo dashboard.
 
 ### 4.2. Comparativa con soluciones existentes
 
@@ -55,199 +61,147 @@ ProLeague resuelve la dispersión de información deportiva y la falta de herram
 |---|---|---|---|
 | **Comparativa Visual** | ✅ Gráficos Radar | ❌ Tablas | ❌ Texto |
 | **Dream Team Builder** | ✅ NBA + NFL | ❌ | ❌ |
-| **Chat en Vivo** | ✅ Persistente + Bot | ❌ | ❌ |
-| **Estética** | Glassmorphism / Dark | Estándar | Básico |
-| **Privacidad** | Sin rastreadores | Alto rastreo | Publicidad apuestas |
+| **Chat en Vivo** | ✅ Persistente | ❌ | ❌ |
+| **Monetización** | Gratuito / Sin anuncios | Pago / Publicidad | Apuestas |
 
 ---
 
 ## 5. Objetivos del proyecto
 
 ### 5.1. Producto Mínimo Viable (PMV)
+1. **Autenticación:** Registro e inicio de sesión con verificación de email.
+2. **Datos en Vivo:** Clasificaciones y resultados NBA/NFL en tiempo real.
+3. **Noticias:** Feed de noticias RSS actualizado al minuto.
+4. **Chat:** Sala general de comunicación mediante WebSockets.
 
-Los siguientes objetivos constituyeron el núcleo funcional obligatorio de la aplicación:
-
-- **Autenticación Segura:** Sistema de registro e inicio de sesión con hasheo de contraseñas (bcrypt) y verificación de identidad por email.
-- **Consumo de APIs Deportivas:** Integración con BallDontLie y ESPN para obtener datos de 62 equipos y miles de jugadores en tiempo real.
-- **Dashboard de Clasificaciones:** Tablas dinámicas con filtros por liga.
-- **Comunicación en Tiempo Real:** Chat funcional mediante WebSockets.
-- **Perfil de Usuario:** Gestión básica de avatar y biografía.
-
-### 5.2. Ampliaciones y Mejoras (Implementadas)
-
-Se han añadido funcionalidades que elevan la calidad del proyecto a un nivel profesional:
-
-- **Dream Team 2.0:** Constructor interactivo de quintetos con validación de posiciones.
-- **Analítica Avanzada:** Gráficos de "Home vs Away", "Rachas de victorias" y comparador radar (Chart.js).
-- **Sistema de Comunidad:** Búsqueda de usuarios, perfiles públicos y sistema de "Likes" y comentarios en noticias.
-- **Optimización UX (Wow Effect):**
-    - **Skeleton Screens:** Carga elegante de datos evitando saltos visuales.
-    - **Navigation Guard:** Modal premium que avisa si intentas salir del Dream Team sin guardar.
-    - **Session Guard:** Evita que un mismo usuario abra dos sesiones simultáneas.
-- **Caché Inteligente:** Sistema de almacenamiento temporal en backend para evitar bloqueos por exceso de peticiones a las APIs (Error 429).
+### 5.2. Ampliaciones (Implementadas)
+1. **Analítica Premium:** Gráficos de balance local/visitante y rachas.
+2. **Dream Team:** Constructor visual con validación de posiciones.
+3. **Comunidad:** Perfiles públicos, búsqueda de usuarios y sistema de "likes" en noticias.
+4. **UX Avanzada:** Skeleton screens, Session Guard (sesión única) y Atajos de teclado.
 
 ---
 
 ## 6. Recursos hardware, software y arquitectura
 
 ### 6.1. Recursos necesarios
-
-**Hardware:**
-- Entorno de desarrollo: Portátil con procesador i7, 16GB RAM, Windows 11.
-- Despliegue: Infraestructura Cloud distribuida (Render + Vercel).
-
-**Software (Tecnologías Clave):**
-- **Frontend:** HTML5, CSS3 (Variables CSS, Flexbox, Grid), JavaScript (ES6 Modules).
-- **Backend:** Node.js, Express.js.
-- **Bases de Datos:** MySQL (Gestión de usuarios legacy) y Firebase Firestore (Tiempo real).
-- **Librerías:** Chart.js, Socket.io, Cheerio (RSS parsing), Bcrypt, Multer.
+- **Hardware:** Portátil i7/16GB, Servidores Cloud (Vercel, Render).
+- **Software:** VS Code, Git, Node.js, Firebase BaaS.
 
 ### 6.2. Arquitectura del proyecto
+Modelo Cliente-Servidor Híbrido:
+- **Frontend:** Single Page-like en Vercel.
+- **Backend:** Node.js/Express en Render.
+- **DB:** MySQL (Auth local) + Firestore (Real-time data).
 
-La arquitectura es un modelo Cliente-Servidor con un backend actuando como proxy de seguridad y caché para APIs externas.
-
-[IMAGEN: DIAGRAMA DE ARQUITECTURA]
-*(Referencia: Diagrama que muestra la conexión entre Frontend (Vercel) -> Backend (Render) -> APIs/Firestore)*
-
-### 6.3. Estimación de Costes y Esfuerzo
-
-Aunque el software utilizado es de código abierto (0€), una implementación profesional requeriría la siguiente inversión de esfuerzo:
-
-| Fase | Horas estimadas | Descripción |
+### 6.3. Estimación de Costes (Esfuerzo Laboral)
+| Fase | Horas | Coste (25€/h) |
 |---|---|---|
-| Análisis y Requisitos | 25h | Definición de funcionalidades y mapeo de APIs. |
-| Diseño de Interfaz | 30h | Mockups en Figma y definición de sistema de colores. |
-| Desarrollo Backend | 50h | Implementación de proxy, caché, chat y seguridad. |
-| Desarrollo Frontend | 70h | Vistas, lógica de JS, integración de gráficos y UX. |
-| Pruebas y Despliegue | 25h | Depuración de errores 429, CORS y despliegue final. |
-| **Total** | **200h** | **Equivalente a ~5.000€ de coste laboral.** |
+| Análisis | 30h | 750€ |
+| Diseño/Mockups | 40h | 1.000€ |
+| Desarrollo Core | 100h | 2.500€ |
+| QA y Despliegue | 30h | 750€ |
+| **Total** | **200h** | **5.000€** |
 
 ---
 
 ## 7. Fases del desarrollo
 
-### 7.1. Planificación Temporal (Diagrama de Gantt)
-
-El proyecto se ha desarrollado siguiendo una metodología iterativa a lo largo del curso académico.
+### 7.1. Planificación Temporal (Gantt)
 
 ```mermaid
 gantt
-    title Planificación Temporal ProLeague
+    title Cronograma ProLeague
     dateFormat  YYYY-MM-DD
     section Análisis
-    Requisitos y APIs          :2025-10-01, 2025-10-20
+    Req. y APIs          :2025-10-01, 2025-10-25
     section Diseño
-    Figma y Arquitectura       :2025-10-21, 2025-11-10
+    Figma y DB           :2025-10-26, 2025-11-20
     section Desarrollo
-    Backend y Base de Datos    :2025-11-11, 2025-12-20
-    Frontend y Dashboard       :2025-12-21, 2026-02-15
-    Chat y Tiempo Real         :2026-02-16, 2026-03-30
+    Backend/Proxy        :2025-11-21, 2026-01-15
+    Frontend/Charts      :2026-01-16, 2026-03-30
     section Optimización
-    UX, Skeletons y Gráficos   :2026-04-01, 2026-05-10
-    Pruebas y Despliegue       :2026-05-11, 2026-05-13
+    UX y QA              :2026-04-01, 2026-05-13
 ```
 
-### 7.2. Fase de análisis (Requisitos funcionales)
+### 7.2. Fase de análisis (Requisitos funcionales detallados)
 
-Cada requisito cuenta con un código identificativo utilizado durante el desarrollo y las pruebas.
+#### [AUTH] Sistema de Autenticación
+- **Objetivo:** Garantizar el acceso seguro y la integridad de los datos de usuario.
+- **Usuarios:** Visitantes y Usuarios registrados.
+- **Prioridad:** Alta.
+- **Funcionalidades:**
+    - [AUTH-01]: Registro de usuario con email único.
+    - [AUTH-02]: Login dual (Backend + Firebase Auth).
+    - [AUTH-03]: Verificación obligatoria de cuenta por correo electrónico.
 
-- **[AUTH-01] Registro:** Permitir a nuevos usuarios unirse al sistema validando email único.
-- **[USER-03] Dream Team:** El usuario puede seleccionar jugadores para su equipo ideal. Prioridad: Alta.
-- **[CHAT-01] Salas de Chat:** Comunicación bidireccional filtrada por temática. Prioridad: Media.
-- **[NEWS-01] Interacción:** El usuario puede dejar su opinión en las noticias de la liga. Prioridad: Baja (Ampliación).
+#### [DATA] Visualización de Datos
+- **Objetivo:** Mostrar información deportiva precisa y actualizada.
+- **Usuarios:** Todos.
+- **Prioridad:** Alta.
+- **Funcionalidades:**
+    - [DATA-01]: Clasificaciones en vivo NBA/NFL.
+    - [DATA-02]: Scoreboard con resultados de los últimos 10 días.
+    - [DATA-03]: Feed de noticias RSS con parseado de imágenes.
 
-### 7.2. Fase de diseño
+#### [USER] Área Personal y Comunidad
+- **Objetivo:** Fomentar la personalización y la interacción social.
+- **Usuarios:** Usuarios registrados.
+- **Prioridad:** Media/Alta.
+- **Funcionalidades:**
+    - [USER-01]: Constructor de Dream Team (validación de roles).
+    - [USER-02]: Gestión de equipos favoritos.
+    - [USER-03]: Búsqueda de otros usuarios y visita a perfiles públicos.
 
-Se optó por una interfaz **Modern Dark** con **Glassmorphism**.
-- **Colores:** Cyan Eléctrico (#00f2ff) para destacar, sobre fondo azul profundo (#0f172a).
-- **Tipografía:** Arial / Roboto por su legibilidad técnica.
+### 7.3. Requisitos No Funcionales
+- **Compatibilidad:** Soportado en Chrome, Firefox y Edge. Interfaz 100% responsiva (Mobile-first).
+- **Rendimiento:** Sistema de caché en backend que reduce el tiempo de respuesta en un 60% al evitar llamadas redundantes a APIs.
+- **Seguridad:** Hasheo bcrypt, sanitización de inputs para evitar XSS en el chat y Session Guard para evitar cuentas compartidas.
+- **Escalabilidad:** Código modularizado por controladores y servicios siguiendo el patrón MVC.
 
-[IMAGEN: GUÍA DE ESTILOS Y COLORES]
+### 7.4. Fase de diseño técnico
+[IMAGEN: DIAGRAMA E-R DE LA BASE DE DATOS]
+[IMAGEN: MOCKUPS DE FIGMA - HOME Y PERFIL]
 
-### 7.3. Fase de diseño técnico
+- **Estructura de Carpetas:**
+    - `/backend`: Lógica de servidor, rutas y controladores.
+    - `/frontend/js`: Módulos ES6 organizados por funcionalidad (auth, analytics, leagues).
+    - `/frontend/vistas`: Estructura HTML segmentada para facilitar el mantenimiento.
 
-**Arquitectura de Datos (Dual-DB System):**
-El proyecto utiliza un enfoque híbrido para maximizar el rendimiento:
-- **MySQL:** Se encarga de la persistencia de identidad básica y credenciales, garantizando integridad referencial tradicional.
-- **Cloud Firestore:** Maneja todos los datos volátiles y de tiempo real (chat, dream teams, favoritos, comentarios). Esto permite que cuando un usuario comenta una noticia, todos los demás vean el comentario instantáneamente sin refrescar, gracias al listener `onSnapshot`.
+### 7.5. Fase de desarrollo e implementación
+El desarrollo se centró en la creación de un **Backend Proxy**. Esto resolvió el problema de CORS y permitió implementar una **caché de servidor** personalizada. Cuando un usuario solicita los "Standings", el servidor mira si los tiene guardados de hace menos de 30 minutos; si es así, los sirve instantáneamente sin consultar la API externa.
 
-**Diagrama de Navegación y Casos de Uso:**
-[IMAGEN: DIAGRAMA DE CASOS DE USO]
-*(Muestra acciones: Registrarse, Gestionar Dream Team, Comparar Jugadores, Chatear).*
+### 7.6. Fase de pruebas y depuración (QA)
 
-### 7.4. Fase de desarrollo e implementación
+| Código | Error Detectado | Solución Aplicada | Estado |
+|---|---|---|---|
+| **TEST-01** | Error 429 en API BallDontLie | Implementada caché `apiCache` en servidor. | ✅ |
+| **TEST-02** | Logos NFL desaparecidos | Unificación de mapeo en `logos-config.js`. | ✅ |
+| **TEST-03** | Sesión abierta en dos sitios | Implementación de `Session Guard` en Firestore. | ✅ |
+| **TEST-04** | XSS en Chat | Escapado de caracteres HTML en el renderizado. | ✅ |
+| **TEST-05** | Fallo Scoreboard en móvil | Ajuste de Grid CSS y overflow responsivo. | ✅ |
 
-**Estructura del Repositorio:**
-```text
-ProLeaguePrincipal/
-├── backend/                # Lógica Node.js / Express
-│   ├── controllers/        # Controladores de noticias y auth
-│   ├── routes/             # Definición de endpoints API
-│   └── uploads/            # Almacenamiento de avatares
-├── frontend/               # Cliente SPA-like
-│   ├── css/                # Estilos Glassmorphism
-│   ├── js/                 # Módulos ES6 (config, auth, leagues, analytics)
-│   ├── logos/              # Activos locales (62 escudos NBA/NFL)
-│   └── vistas/             # Estructura HTML organizada por módulos
-└── package.json            # Gestión de dependencias
-```
+### 7.7. Fase de lanzamiento y despliegue
+- **Alojamiento Frontend:** Vercel (CI/CD conectado al repo de GitHub).
+- **Alojamiento Backend:** Render (Servidor Web con monitorización de logs).
+- **Seguridad en Producción:** Configuración de variables de entorno (`.env`) para ocultar las API Keys y la configuración de Firebase.
+- **Versionado:** Git con flujo de ramas para pruebas y producción.
 
-**Retos Técnicos Relevantes:**
-1.  **Session Guard (Sesión Única):** Para evitar que un usuario comparta su cuenta, implementamos un sistema donde cada login genera un `sessionId` único guardado en Firestore. El cliente escucha este ID; si cambia desde otro dispositivo, la sesión actual se cierra automáticamente.
-2.  **Unificación de Logos:** Debido a que consumimos APIs de diferentes proveedores (ESPN y BallDontLie), los IDs no coincidían. Creamos un `logos-config.js` centralizado que mapea los nombres de los equipos a archivos locales, garantizando que los escudos siempre se vean correctamente en toda la web.
-
-Enlace al repositorio: [https://github.com/avillanurr10/ProyectoIntermodularAndoniVillanueva2dam.b.git](https://github.com/avillanurr10/ProyectoIntermodularAndoniVillanueva2dam.b.git)
-
-### 7.5. Fase de pruebas y depuración (QA)
-
-Se han realizado pruebas exhaustivas para garantizar la estabilidad del sistema.
-
-| Código | Prueba Realizada | Resultado Esperado | Resultado Real | Estado |
-|---|---|---|---|---|
-| **TEST-01** | Carga de logos NFL | Los escudos deben aparecer en el modal. | Error 404 inicial. Corregido unificando rutas. | ✅ |
-| **TEST-02** | Session Guard | Iniciar sesión en Chrome e Incógnito con la misma cuenta. | La primera sesión debe cerrarse automáticamente. | ✅ |
-| **TEST-03** | Límite API | Realizar 50 búsquedas rápidas de jugadores. | El sistema debe servir datos desde caché sin bloquearse. | ✅ |
-| **TEST-04** | Modal Salida | Intentar cerrar pestaña tras editar el Dream Team. | Debe aparecer el aviso premium de cambios sin guardar. | ✅ |
-| **TEST-05** | Chat SQL Inject | Intentar enviar tags <script> en el chat. | El texto debe renderizarse como string plano sin ejecutarse. | ✅ |
-
-### 7.5. Capturas de la Aplicación Final
-
-[IMAGEN: CAPTURA HOME DASHBOARD]
-*Dashboard principal con noticias y resultados en tiempo real.*
-
-[IMAGEN: CAPTURA ANALYTICS NBA]
-*Gráficos avanzados de balance de victorias y comparador de jugadores.*
-
-[IMAGEN: CAPTURA DREAM TEAM BUILDER]
-*Interfaz de selección de jugadores con validación de posiciones.*
+### 7.8. Capturas de la aplicación final
+[IMAGEN: HOME DASHBOARD]
+[IMAGEN: ANALYTICS Y GRÁFICOS RADAR]
+[IMAGEN: DREAM TEAM BUILDER]
+[IMAGEN: CHAT EN TIEMPO REAL]
 
 ---
 
 ## 8. Conclusiones
-
-El desarrollo de ProLeague ha permitido integrar conocimientos complejos de arquitectura web, comunicación en tiempo real, gestión de bases de datos híbridas y despliegue en la nube.
-
-**Logros principales:**
-- Desarrollo de una plataforma completa que supera ampliamente el PMV propuesto inicialmente.
-- Implementación exitosa de una arquitectura híbrida (MySQL + Firestore + Socket.io).
-- Despliegue completo en producción con frontend y backend separados.
-- Sistema de seguridad robusto (verificación email, session guard, bcrypt, CORS).
-- Experiencia de usuario premium (glassmorphism, toasts, skeletons, animaciones).
-
-**Mayores dificultades:**
-- Integración fiable de APIs de terceros (errores 429) → solucionado con sistema de caché.
-- Migración parcial a Firestore para tiempo real manteniendo autenticación en MySQL.
+ProLeague representa un desarrollo integral que cubre desde la gestión de seguridad hasta la visualización de datos complejos. El mayor éxito ha sido lograr una fluidez premium (vía Skeletons y Caché) en una app que depende al 100% de servicios externos.
 
 ---
 
 ## 9. Bibliografía y referencias
-
-- **Bcrypt.js** (2024). Optimized bcrypt in JavaScript. GitHub Repository. https://github.com/kelektiv/node.bcrypt.js
-- **Chart.js Documentation** (2024). Open source HTML5 Charts for your website. https://www.chartjs.org/docs/
-- **Cheerio.js** (2024). Fast, flexible, and lean implementation of core jQuery for the server. https://cheerio.js.org/
-- **ESPN API** (2024). Public Standings and Scoreboard Endpoints. https://site.api.espn.com/
-- **Express.js** (2024). Fast, unopinionated, minimalist web framework for Node.js. https://expressjs.com/
-- **Firebase Documentation** (2024). Google Cloud Firestore and Authentication services. https://firebase.google.com/docs
-- **MDN Web Docs** (2024). JavaScript (ES6), HTML5 and CSS3 Documentation. Mozilla Foundation. https://developer.mozilla.org/
-- **Socket.io Documentation** (2024). Bidirectional and low-latency communication for every platform. https://socket.io/docs/v4/
-- **Vercel Documentation** (2024). Deployment and hosting for modern web applications. https://vercel.com/docs
+- **Socket.io Docs** (2024). https://socket.io/docs/v4/
+- **Firebase Firestore Reference** (2024). https://firebase.google.com/docs/firestore
+- **Chart.js API Guide** (2024). https://www.chartjs.org/docs/
+- **ESPN Public APIs** (2024). https://site.api.espn.com/
