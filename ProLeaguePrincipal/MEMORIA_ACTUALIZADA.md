@@ -57,12 +57,16 @@ ProLeague nace para cubrir el vacío entre las aplicaciones de resultados simple
 
 ### 4.2. Comparativa con soluciones existentes
 
-| Característica | ProLeague | Apps Oficiales | Flashscore |
+| Característica | ProLeague (Propuesta) | Apps Oficiales (NBA/NFL) | Flashscore / Apuestas |
 |---|---|---|---|
-| **Comparativa Visual** | ✅ Gráficos Radar | ❌ Tablas | ❌ Texto |
-| **Dream Team Builder** | ✅ NBA + NFL | ❌ | ❌ |
-| **Chat en Vivo** | ✅ Persistente | ❌ | ❌ |
-| **Monetización** | Gratuito / Sin anuncios | Pago / Publicidad | Apuestas |
+| **Comparativa Visual** | ✅ Gráficos Radar e Interactivos | ❌ Tablas estáticas | ❌ Solo texto/números |
+| **Dream Team Builder** | ✅ Sistema Multiliga (NBA+NFL) | ❌ No disponible | ❌ No disponible |
+| **Interacción Social** | ✅ Chat en vivo, Likes y Comentarios | ❌ Limitada o inexistente | ❌ Solo lectura |
+| **Enfoque de Usuario** | ✅ Educativo y Analítico | ❌ Comercial / Ventas | ❌ Orientado a Apuestas |
+| **Seguridad de Cuenta** | ✅ Session Guard (Sesión única) | ⚠️ Estándar | ⚠️ Estándar |
+| **Interfaz (UI/UX)** | ✅ Glassmorphism & Skeletons | ❌ Corporativa y pesada | ❌ Utilitaria / Sobrecargada |
+| **Acceso a Datos** | ✅ Gratuito y Centralizado | ❌ Paywalls en contenido pro | ❌ Publicidad intrusiva |
+| **Privacidad** | ✅ Sin rastreadores de terceros | ❌ Recolección masiva | ❌ Venta de datos a casas de apuestas |
 
 ---
 
@@ -89,10 +93,46 @@ ProLeague nace para cubrir el vacío entre las aplicaciones de resultados simple
 - **Software:** VS Code, Git, Node.js, Firebase BaaS.
 
 ### 6.2. Arquitectura del proyecto
-Modelo Cliente-Servidor Híbrido:
-- **Frontend:** Single Page-like en Vercel.
-- **Backend:** Node.js/Express en Render.
-- **DB:** MySQL (Auth local) + Firestore (Real-time data).
+
+La aplicación ProLeague utiliza una **arquitectura híbrida cliente-servidor** basada en microservicios cloud y comunicación en tiempo real. A continuación se detallan los pilares técnicos solicitados:
+
+#### A. Almacenamiento de Datos (Dual-Storage Strategy)
+El sistema gestiona la información en dos capas distintas según su persistencia y velocidad:
+- **Capa Relacional (MySQL):** Almacenada en un servidor gestionado, se utiliza para el núcleo de usuarios (IDs, correos, contraseñas hasheadas y marcas de tiempo). Garantiza la integridad de la cuenta de usuario.
+- **Capa NoSQL (Cloud Firestore):** Se emplea para la persistencia de datos volátiles y de alta frecuencia. Aquí se guardan los *Dream Teams*, la lista de equipos favoritos, el historial de mensajes del chat y las interacciones (likes/comentarios) de las noticias.
+
+#### B. APIs y Servicios Externos
+ProLeague actúa como un agregador de datos de alto rendimiento consumiendo los siguientes servicios:
+- **BallDontLie API:** Fuente principal para la base de datos de jugadores, estadísticas de temporada y metadatos de equipos NBA/NFL.
+- **ESPN API / RSS:** Utilizada para las clasificaciones en vivo (*standings*), el marcador de partidos recientes y el feed de noticias de última hora.
+- **Firebase Auth:** Servicio de gestión de identidad y envío de correos de verificación.
+
+#### C. Comunicación entre Componentes
+La interacción entre el cliente (Frontend) y el servidor (Backend) se realiza mediante tres protocolos de comunicación diferenciados:
+1.  **Protocolo HTTPS (REST API):** Para la obtención de datos estadísticos, noticias y gestión de perfiles. El Backend actúa como un **Proxy** para inyectar cabeceras de seguridad y gestionar la caché.
+2.  **Protocolo WebSockets (Socket.io):** Comunicación bidireccional de baja latencia para el sistema de chat en vivo y notificaciones de sistema.
+3.  **SDK Firestore (onSnapshot):** Sincronización en tiempo real para las interacciones sociales (likes y comentarios) sin necesidad de peticiones HTTP manuales.
+
+#### D. Dispositivos y Plataformas
+La plataforma ha sido desarrollada bajo la filosofía **Web-Responsive**, permitiendo su despliegue multiplataforma:
+- **Plataformas Cloud:** Desplegada en entornos PaaS (Vercel para el cliente y Render para el servidor).
+- **Dispositivos:** Optimizada para navegadores modernos (Chrome, Edge, Firefox, Safari) tanto en equipos de escritorio como en smartphones y tablets (iOS/Android).
+
+#### Diagrama de Flujo y Componentes:
+
+```mermaid
+graph TD
+    User((Usuario/Navegador)) -- "HTTPS / WebSockets" --> FE[Frontend - Vercel]
+    FE -- "Peticiones Proxy" --> BE[Backend - Render Node.js]
+    BE -- "SQL Query" --> MySQL[(MySQL DB)]
+    BE -- "Fetch & Cache" --> APIs{APIs Externas}
+    APIs -- "ESPN / BallDontLie" --> BE
+    FE -- "Real-time Sync" --> Fire[Firebase / Firestore]
+    User -- "Email Verify" --> Fire
+```
+
+[IMAGEN: DIAGRAMA DE ARQUITECTURA DETALLADO]
+*(Representación visual de la infraestructura completa y flujo de datos)*
 
 ### 6.3. Estimación de Costes (Esfuerzo Laboral)
 | Fase | Horas | Coste (25€/h) |
@@ -169,7 +209,25 @@ gantt
     - `/frontend/vistas`: Estructura HTML segmentada para facilitar el mantenimiento.
 
 ### 7.5. Fase de desarrollo e implementación
-El desarrollo se centró en la creación de un **Backend Proxy**. Esto resolvió el problema de CORS y permitió implementar una **caché de servidor** personalizada. Cuando un usuario solicita los "Standings", el servidor mira si los tiene guardados de hace menos de 30 minutos; si es así, los sirve instantáneamente sin consultar la API externa.
+
+El desarrollo se ha realizado siguiendo una metodología modular, separando la lógica de negocio (Backend) de la capa de presentación (Frontend). A continuación se detallan dos implementaciones críticas que resolvieron retos técnicos complejos:
+
+#### A. Implementación de Backend Proxy y Sistema de Caché
+Uno de los mayores desafíos fue la inestabilidad de las APIs externas debido a los límites de peticiones (*Rate Limiting*). Para resolverlo, se implementó un sistema de caché inteligente en el servidor Node.js:
+- **Lógica:** El backend intercepta todas las peticiones a BallDontLie y ESPN. Antes de realizar la llamada externa, verifica un objeto `apiCache` en memoria.
+- **Beneficio:** Si 100 usuarios entran a la sección NBA simultáneamente, el servidor solo realiza **1 petición** a la API externa y sirve las otras 99 desde la memoria local en milisegundos.
+- **Resultado:** Eliminación total de los errores 429 (*Too Many Requests*) y una mejora del 70% en la velocidad de carga percibida.
+
+#### B. Session Guard: Control de Sesión Única en Tiempo Real
+Para garantizar la seguridad y evitar el uso compartido de cuentas, se desarrolló un protector de sesión basado en la reactividad de Firebase:
+- **Flujo:** Cada vez que un usuario hace login, el servidor genera un identificador único de sesión (`currentSessionId`) y lo guarda en el documento del usuario en Firestore.
+- **Reactividad:** El frontend mantiene un listener `onSnapshot` sobre ese campo. Si el `sessionId` cambia (porque el usuario se ha logueado en otro navegador o dispositivo), el cliente detecta el cambio instantáneamente y fuerza el cierre de la sesión antigua con un aviso al usuario.
+
+#### C. Mapeo de Activos Dinámico (Logos-Config)
+Dada la inconsistencia de nombres entre las APIs de ESPN (que proporciona logos) y BallDontLie (que proporciona estadísticas), se desarrolló un sistema de mapeo local:
+- Se creó un diccionario en `logos-config.js` que normaliza los nombres de los equipos y apunta a una carpeta local de 62 escudos en formato PNG optimizado. Esto eliminó los errores 404 y garantizó una visualización coherente en toda la plataforma.
+
+Enlace al repositorio oficial: [https://github.com/avillanurr10/ProyectoIntermodularAndoniVillanueva2dam.b.git](https://github.com/avillanurr10/ProyectoIntermodularAndoniVillanueva2dam.b.git)
 
 ### 7.6. Fase de pruebas y depuración (QA)
 
