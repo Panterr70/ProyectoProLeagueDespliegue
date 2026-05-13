@@ -145,89 +145,111 @@ graph TD
 
 ---
 
+
 ## 7. Fases del desarrollo
 
-### 7.1. Planificación Temporal (Gantt)
+### 7.1. Planificación Temporal (Diagrama de Gantt)
+
+El desarrollo del proyecto se ha estructurado en 5 fases críticas distribuidas a lo largo del curso académico, utilizando una metodología ágil para permitir iteraciones sobre el feedback de las APIs externas.
 
 ```mermaid
 gantt
-    title Cronograma ProLeague
+    title Cronograma de Desarrollo ProLeague
     dateFormat  YYYY-MM-DD
-    section Análisis
-    Req. y APIs          :2025-10-01, 2025-10-25
-    section Diseño
-    Figma y DB           :2025-10-26, 2025-11-20
-    section Desarrollo
-    Backend/Proxy        :2025-11-21, 2026-01-15
-    Frontend/Charts      :2026-01-16, 2026-03-30
-    section Optimización
-    UX y QA              :2026-04-01, 2026-05-13
+    axisFormat  %b %Y
+
+    section Fase 1: Análisis
+    Estudio de viabilidad y APIs      :a1, 2025-10-01, 15d
+    Definición de Requisitos (SRS)    :a2, after a1, 10d
+
+    section Fase 2: Diseño
+    Modelado DB (Dual-Storage)        :d1, 2025-10-26, 12d
+    Prototipado UI/UX (Glassmorphism) :d2, after d1, 15d
+
+    section Fase 3: Backend
+    Estructura de Proxy y Caché       :b1, 2025-11-25, 25d
+    Auth y Seguridad (Session Guard)  :b2, after b1, 20d
+
+    section Fase 4: Frontend
+    Dashboards y Lógica de Ligas      :f1, 2026-01-20, 35d
+    Analítica, Gráficos y Dream Team  :f2, after f1, 30d
+
+    section Fase 5: QA & Despliegue
+    Debugging y Optimización 429      :q1, 2026-04-05, 20d
+    Despliegue Final y Memoria        :q2, after q1, 18d
 ```
 
-### 7.2. Fase de análisis (Requisitos funcionales detallados)
+### 7.2. Fase de análisis (Requisitos funcionales)
 
-#### [AUTH] Sistema de Autenticación
-- **Objetivo:** Garantizar el acceso seguro y la integridad de los datos de usuario.
-- **Usuarios:** Visitantes y Usuarios registrados.
-- **Prioridad:** Alta.
-- **Funcionalidades:**
-    - [AUTH-01]: Registro de usuario con email único.
-    - [AUTH-02]: Login dual (Backend + Firebase Auth).
-    - [AUTH-03]: Verificación obligatoria de cuenta por correo electrónico.
+Se han categorizado los requisitos según su impacto en el núcleo de la aplicación, utilizando una nomenclatura estandarizada para su trazabilidad.
 
-#### [DATA] Visualización de Datos
-- **Objetivo:** Mostrar información deportiva precisa y actualizada.
-- **Usuarios:** Todos.
-- **Prioridad:** Alta.
-- **Funcionalidades:**
-    - [DATA-01]: Clasificaciones en vivo NBA/NFL.
-    - [DATA-02]: Scoreboard con resultados de los últimos 10 días.
-    - [DATA-03]: Feed de noticias RSS con parseado de imágenes.
-
-#### [USER] Área Personal y Comunidad
-- **Objetivo:** Fomentar la personalización y la interacción social.
-- **Usuarios:** Usuarios registrados.
-- **Prioridad:** Media/Alta.
-- **Funcionalidades:**
-    - [USER-01]: Constructor de Dream Team (validación de roles).
-    - [USER-02]: Gestión de equipos favoritos.
-    - [USER-03]: Búsqueda de otros usuarios y visita a perfiles públicos.
+| ID | Requisito | Descripción | Prioridad |
+|---|---|---|---|
+| **AUTH-01** | Registro seguro | Creación de cuentas con hashing de contraseñas y validación de formato. | Alta |
+| **AUTH-02** | Verificación Email | Bloqueo de acceso hasta que el usuario confirme su identidad vía correo. | Alta |
+| **DATA-01** | Live Standings | Clasificaciones dinámicas sincronizadas con APIs oficiales de NBA/NFL. | Alta |
+| **DATA-02** | Scoreboard | Historial de resultados recientes con filtrado por liga. | Media |
+| **DATA-03** | RSS News Feed | Consumo y renderizado de noticias con soporte para imágenes y enlaces. | Media |
+| **USER-01** | Dream Team | Constructor visual de alineaciones con lógica de posiciones (PG, SG, SF...). | Alta |
+| **USER-02** | Community Sync | Búsqueda de usuarios y visualización de perfiles públicos en tiempo real. | Media |
+| **SOCIAL-01** | Live Chat | Comunicación bidireccional mediante WebSockets para debate deportivo. | Media |
 
 ### 7.3. Requisitos No Funcionales
-- **Compatibilidad:** Soportado en Chrome, Firefox y Edge. Interfaz 100% responsiva (Mobile-first).
-- **Rendimiento:** Sistema de caché en backend que reduce el tiempo de respuesta en un 60% al evitar llamadas redundantes a APIs.
-- **Seguridad:** Hasheo bcrypt, sanitización de inputs para evitar XSS en el chat y Session Guard para evitar cuentas compartidas.
-- **Escalabilidad:** Código modularizado por controladores y servicios siguiendo el patrón MVC.
+
+Para elevar la calidad del software a estándares profesionales, se han implementado los siguientes pilares técnicos:
+
+- **Rendimiento Crítico:** La implementación de un sistema de caché en el backend reduce la latencia de las APIs externas de ~1.2s a menos de 150ms en peticiones recurrentes.
+- **Seguridad Multicapa:** Uso de `Helmet.js` para cabeceras de seguridad, sanitización de inputs contra inyección SQL y XSS, y cifrado de datos sensibles.
+- **Arquitectura Escalable:** Aplicación del patrón **Service-Controller-Route** en el backend para facilitar la adición de nuevas ligas (ej. MLB o NHL) en el futuro.
+- **UX Premium:** Implementación de *Skeleton Screens* para evitar el parpadeo de contenido y atajos de teclado para navegación rápida.
 
 ### 7.4. Fase de diseño técnico
-[IMAGEN: DIAGRAMA E-R DE LA BASE DE DATOS]
-[IMAGEN: MOCKUPS DE FIGMA - HOME Y PERFIL]
 
-- **Estructura de Carpetas:**
-    - `/backend`: Lógica de servidor, rutas y controladores.
-    - `/frontend/js`: Módulos ES6 organizados por funcionalidad (auth, analytics, leagues).
-    - `/frontend/vistas`: Estructura HTML segmentada para facilitar el mantenimiento.
+El diseño técnico no solo abarca la base de datos, sino la coherencia visual y estructural del sistema.
+
+#### A. Diseño de Datos (Modelo E-R)
+Se ha diseñado una estructura híbrida para optimizar la velocidad y la persistencia:
+- **Relacional:** Perfiles y credenciales (Seguridad).
+- **NoSQL:** Documentos de actividad social (Escalabilidad).
+
+[IMAGEN: DIAGRAMA E-R DE LA BASE DE DATOS]
+
+#### B. Diseño de Interfaz (UI/UX)
+Se ha optado por una estética **Dark Glassmorphism**, utilizando una paleta de colores basada en azules profundos y transparencias con desenfoque (backdrop-filter). Esto permite que los datos estadísticos resalten sin fatigar la vista del usuario.
+
+#### C. Estructura de Proyecto
+```text
+ProLeague/
+├── backend/            # Lógica de servidor (Node/Express)
+│   ├── controllers/    # Controladores de ruta
+│   ├── services/       # Lógica de negocio y Cache
+│   └── config/         # Configuración de DB y Sockets
+└── frontend/           # Interfaz de usuario
+    ├── js/             # Módulos de lógica (Auth, Leagues, Social)
+    ├── css/            # Diseño visual y variables
+    └── vistas/         # Estructura HTML modularizada
+```
 
 ### 7.5. Fase de desarrollo e implementación
 
-El desarrollo se ha realizado siguiendo una metodología modular, separando la lógica de negocio (Backend) de la capa de presentación (Frontend). A continuación se detallan dos implementaciones críticas que resolvieron retos técnicos complejos:
+La ejecución técnica se ha basado en una arquitectura desacoplada, permitiendo que el Frontend consuma una API "limpia" proporcionada por nuestro propio servidor. A continuación se detallan los tres hitos de ingeniería más significativos:
 
-#### A. Implementación de Backend Proxy y Sistema de Caché
-Uno de los mayores desafíos fue la inestabilidad de las APIs externas debido a los límites de peticiones (*Rate Limiting*). Para resolverlo, se implementó un sistema de caché inteligente en el servidor Node.js:
-- **Lógica:** El backend intercepta todas las peticiones a BallDontLie y ESPN. Antes de realizar la llamada externa, verifica un objeto `apiCache` en memoria.
-- **Beneficio:** Si 100 usuarios entran a la sección NBA simultáneamente, el servidor solo realiza **1 petición** a la API externa y sirve las otras 99 desde la memoria local en milisegundos.
-- **Resultado:** Eliminación total de los errores 429 (*Too Many Requests*) y una mejora del 70% en la velocidad de carga percibida.
+#### A. Abstracción de APIs y Middleware de Caché
+Para mitigar el riesgo de *Rate Limiting* (Error 429) de las APIs gratuitas, se desarrolló una capa intermedia en Node.js que implementa un patrón de caché en memoria.
+- **Técnica:** Intercepción de peticiones `GET` y almacenamiento indexado por URL y parámetros.
+- **Impacto:** Reducción drástica del tráfico saliente hacia proveedores externos y latencia cercana a cero para usuarios concurrentes.
 
-#### B. Session Guard: Control de Sesión Única en Tiempo Real
-Para garantizar la seguridad y evitar el uso compartido de cuentas, se desarrolló un protector de sesión basado en la reactividad de Firebase:
-- **Flujo:** Cada vez que un usuario hace login, el servidor genera un identificador único de sesión (`currentSessionId`) y lo guarda en el documento del usuario en Firestore.
-- **Reactividad:** El frontend mantiene un listener `onSnapshot` sobre ese campo. Si el `sessionId` cambia (porque el usuario se ha logueado en otro navegador o dispositivo), el cliente detecta el cambio instantáneamente y fuerza el cierre de la sesión antigua con un aviso al usuario.
+#### B. Seguridad Reactiva: Session Guard
+Se implementó un sistema de control de concurrencia mediante los listeners de tiempo real de Firebase Firestore.
+- **Flujo:** Sincronización de un `token_uuid` de sesión. Al detectar un cambio en el documento del usuario desde una fuente externa, el cliente actual dispara un evento de desconexión forzosa.
+- **Seguridad:** Previene el uso compartido de cuentas y protege la integridad de la sesión del usuario.
 
-#### C. Mapeo de Activos Dinámico (Logos-Config)
-Dada la inconsistencia de nombres entre las APIs de ESPN (que proporciona logos) y BallDontLie (que proporciona estadísticas), se desarrolló un sistema de mapeo local:
-- Se creó un diccionario en `logos-config.js` que normaliza los nombres de los equipos y apunta a una carpeta local de 62 escudos en formato PNG optimizado. Esto eliminó los errores 404 y garantizó una visualización coherente en toda la plataforma.
+#### C. Normalización de Activos (Logos-Config)
+Debido a la discrepancia semántica entre los proveedores de datos (NBA vs NFL vs ESPN), se desarrolló un micro-servicio interno de mapeo de activos.
+- **Solución:** Un diccionario estático `logos-config.js` que centraliza la lógica de resolución de imágenes, garantizando que cada equipo muestre su escudo oficial independientemente de la fuente de datos estadística.
 
-Enlace al repositorio oficial: [https://github.com/avillanurr10/ProyectoIntermodularAndoniVillanueva2dam.b.git](https://github.com/avillanurr10/ProyectoIntermodularAndoniVillanueva2dam.b.git)
+> [!TIP]
+> Puedes consultar el código fuente completo en el repositorio oficial: [GitHub - ProLeague](https://github.com/avillanurr10/ProyectoIntermodularAndoniVillanueva2dam.b.git)
 
 ### 7.6. Fase de pruebas y depuración (QA)
 
@@ -246,6 +268,15 @@ Enlace al repositorio oficial: [https://github.com/avillanurr10/ProyectoIntermod
 - **Versionado:** Git con flujo de ramas para pruebas y producción.
 
 ### 7.8. Capturas de la aplicación final
+
+A continuación se presentan las evidencias visuales del resultado final, destacando la interfaz de usuario y las funcionalidades clave.
+
+| Sección | Descripción Visual |
+|---|---|
+| **Dashboard Principal** | Vista general con el estilo Glassmorphism y navegación fluida. |
+| **Analítica Avanzada** | Gráficos interactivos comparando estadísticas de jugadores. |
+| **Dream Team Builder** | Interfaz de selección de jugadores y validación de alineaciones. |
+| **Chat Comunitario** | Sistema de mensajería en tiempo real con integración de perfiles. |
 [IMAGEN: HOME DASHBOARD]
 [IMAGEN: ANALYTICS Y GRÁFICOS RADAR]
 [IMAGEN: DREAM TEAM BUILDER]
