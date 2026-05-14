@@ -204,11 +204,11 @@ setInterval(() => {
   const rooms = ["nba", "nfl"];
   rooms.forEach(room => {
     const events = [
-      "📢 Recordatorio: Mantened el respeto en el chat.",
-      "📊 ¿Sabías que? Puedes ver las estadísticas en la pestaña principal.",
-      "🔥 ¡El partido está al rojo vivo!",
-      "👀 ¡Ojo a esa jugada!",
-      "🤖 Soy un bot, pero disfruto del deporte."
+      "📢 Recordatorio: El respeto es la base de nuestra comunidad. ¡Hablemos de deporte!",
+      "🧹 Info: El historial del chat se refresca periódicamente para vuestra comodidad.",
+      "🚫 Prohibido: Insultos o toxicidad. El Bot está vigilando... 👀",
+      "📊 Tip: Usa los comparadores de jugadores para ganar tus debates deportivos.",
+      "💎 ProLeague: El sitio oficial de los fans de la NBA y NFL."
     ];
     const randomEvent = events[Math.floor(Math.random() * events.length)];
     

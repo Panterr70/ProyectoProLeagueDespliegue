@@ -68,6 +68,16 @@ async function switchRoom(newRoom) {
     chatMessages.innerHTML = `<div class="loading-chat">Cargando #${newRoom}...</div>`;
 
     await loadChatHistory(newRoom);
+
+    // 🤖 BOT: Mensaje de bienvenida con reglas
+    setTimeout(() => {
+        addMessageToDOM({
+            user: "🤖 ProLeagueBot",
+            text: `¡Bienvenido a #${newRoom}! 🏀🏈 Recuerda: mantén el respeto, evita insultos y disfruta del deporte. El chat se limpia automáticamente para mantener la fluidez.`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        scrollToBottom();
+    }, 1000);
 }
 
 // 2. FIRESTORE HISTORY

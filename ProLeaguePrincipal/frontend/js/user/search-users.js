@@ -67,18 +67,26 @@ function renderUsers(users, searchTerm = "") {
     resultsGrid.innerHTML = "";
     
     let matchCount = 0;
+    const seenUsernames = new Set(); // Para evitar duplicados visuales
 
     users.forEach((data) => {
         const userId = data.id;
+        const rawUsername = data.username || "";
         
-        // Evitar mostrarse a uno mismo
-        if (userId === currentUserId) return;
+        // 1. LIMPIEZA: No mostrar usuarios sin nombre o "undefined"
+        if (!rawUsername || rawUsername === "undefined") return;
 
-        // Búsqueda súper flexible (busca en nombre y email)
+        // 2. LIMPIEZA: No mostrarse a uno mismo (doble check por UID y por nombre)
+        if (userId === currentUserId || rawUsername === username) return;
+
+        // 3. LIMPIEZA: Evitar duplicados (solo mostramos la primera vez que vemos este nombre)
+        if (seenUsernames.has(rawUsername.toLowerCase())) return;
+        seenUsernames.add(rawUsername.toLowerCase());
+
+        // 4. BÚSQUEDA: Filtrado por término
         if (searchTerm) {
-            const username = (data.username || "").toLowerCase();
             const email = (data.email || "").toLowerCase();
-            if (!username.includes(searchTerm) && !email.includes(searchTerm)) {
+            if (!rawUsername.toLowerCase().includes(searchTerm) && !email.includes(searchTerm)) {
                 return;
             }
         }
@@ -90,16 +98,16 @@ function renderUsers(users, searchTerm = "") {
         
         const avatarUrl = data.avatar 
             ? (data.avatar.startsWith('http') ? data.avatar : `${API_BASE_URL}${data.avatar}`)
-            : `https://ui-avatars.com/api/?name=${data.username}&background=random`;
+            : `https://ui-avatars.com/api/?name=${rawUsername}&background=random`;
 
         card.innerHTML = `
             <div class="user-card-header">
-                <img src="${avatarUrl}" alt="Avatar" class="user-card-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${data.username}&background=random'">
+                <img src="${avatarUrl}" alt="Avatar" class="user-card-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${rawUsername}&background=random'">
             </div>
             <div class="user-card-body">
                 <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
-                    <h4>${data.username}</h4>
-                    <button class="copy-btn-mini" data-copy="${data.username}" title="Copiar nombre">
+                    <h4>${rawUsername}</h4>
+                    <button class="copy-btn-mini" data-copy="${rawUsername}" title="Copiar nombre">
                         📋
                     </button>
                 </div>
@@ -116,7 +124,7 @@ function renderUsers(users, searchTerm = "") {
         const copyBtn = card.querySelector('.copy-btn-mini');
         copyBtn.onclick = (e) => {
             e.preventDefault();
-            navigator.clipboard.writeText(data.username);
+            navigator.clipboard.writeText(rawUsername);
             const originalText = copyBtn.innerHTML;
             copyBtn.innerHTML = "✅";
             setTimeout(() => copyBtn.innerHTML = originalText, 1500);
