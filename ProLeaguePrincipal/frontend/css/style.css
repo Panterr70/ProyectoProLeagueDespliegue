@@ -6177,3 +6177,117 @@ input:focus, select:focus {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ==========================================
+   COACH PRO AI ASISTENTE
+   ========================================== */
+#coach-pro-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 10000;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.coach-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: 50%;
+    box-shadow: 0 0 20px var(--primary-glow), 0 0 40px rgba(0, 212, 255, 0.2);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: coach-float 3s ease-in-out infinite;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.coach-eye {
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 22px;
+    animation: coach-blink 4s infinite;
+}
+
+.coach-eye.left { left: 18px; }
+.coach-eye.right { right: 18px; }
+
+.coach-mouth {
+    width: 15px;
+    height: 8px;
+    border-bottom: 3px solid white;
+    border-radius: 50%;
+    margin-top: 15px;
+}
+
+.coach-bubble {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 15px 15px 0 15px;
+    font-size: 0.9rem;
+    max-width: 250px;
+    margin-bottom: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+    pointer-events: none;
+    text-align: right;
+    line-height: 1.4;
+}
+
+.coach-bubble.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#coach-pro-container:hover .coach-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px var(--primary-glow);
+}
+
+#coach-pro-container.jump .coach-avatar {
+    animation: coach-jump 0.5s ease;
+}
+
+@keyframes coach-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+@keyframes coach-blink {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+}
+
+@keyframes coach-jump {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3) translateY(-20px); }
+}
+
+@media (max-width: 768px) {
+    #coach-pro-container {
+        bottom: 20px;
+        right: 20px;
+    }
+    .coach-avatar {
+        width: 50px;
+        height: 50px;
+    }
+    .coach-bubble {
+        max-width: 180px;
+        font-size: 0.8rem;
+    }
+}

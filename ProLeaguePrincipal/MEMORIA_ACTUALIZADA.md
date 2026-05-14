@@ -49,6 +49,7 @@ ProLeague is an advanced web platform designed for the analysis and community en
 - **Seguridad Reactiva:** Re-autenticación obligatoria para cambios de credenciales.
 - **Diseño Premium:** Campo de la NFL realista con texturas CSS y yardas dinámicas.
 - **Sincronización Automática:** Sistema de "Auto-fichaje" entre Firebase y MySQL para consistencia de datos.
+- **Coach Pro AI:** Asistente virtual animado con lógica de interacción y consejos dinámicos para el usuario (UX/Gamificación).
 
 ---
 

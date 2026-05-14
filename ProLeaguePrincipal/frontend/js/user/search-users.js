@@ -12,6 +12,7 @@ let allUsersCache = []; // Cache para filtrado en vivo
 // Obtener el ID del usuario actual para no mostrarlo
 const currentUser = JSON.parse(localStorage.getItem("user"));
 const currentUserId = currentUser ? currentUser.uid : null;
+const currentUsername = currentUser ? currentUser.username : null;
 
 // Filtrado en vivo (Real-time Filtering)
 searchInput.addEventListener("input", (e) => {
@@ -71,17 +72,29 @@ function renderUsers(users, searchTerm = "") {
 
     users.forEach((data) => {
         const userId = data.id;
-        const rawUsername = data.username || "";
+        const rawUsername = (data.username || "").trim();
+        const cleanName = rawUsername.toLowerCase();
+        const userEmail = (data.email || "").toLowerCase();
         
-        // 1. LIMPIEZA: No mostrar usuarios sin nombre o "undefined"
-        if (!rawUsername || rawUsername === "undefined") return;
+        // 1. FILTRO DE BASURA: No mostrar usuarios sin nombre, "undefined" o muy cortos
+        if (!rawUsername || cleanName === "undefined" || rawUsername.length < 3) return;
 
-        // 2. LIMPIEZA: No mostrarse a uno mismo (doble check por UID y por nombre)
-        if (userId === currentUserId || rawUsername === username) return;
+        // 2. FILTRO DE DUPLICADOS: Si ya hemos mostrado este nombre (en cualquier formato), saltar
+        if (seenUsernames.has(cleanName)) {
+            console.log(`[FILTER] Duplicado detectado y eliminado: ${rawUsername}`);
+            return;
+        }
+        seenUsernames.add(cleanName);
 
-        // 3. LIMPIEZA: Evitar duplicados (solo mostramos la primera vez que vemos este nombre)
-        if (seenUsernames.has(rawUsername.toLowerCase())) return;
-        seenUsernames.add(rawUsername.toLowerCase());
+        // 3. FILTRO DE UNO MISMO: (Triple check: ID, Nombre, Email)
+        const myName = (currentUsername || "").toLowerCase();
+        const myEmail = (currentUser && currentUser.email) ? currentUser.email.toLowerCase() : "";
+        const myUid = currentUserId;
+
+        if (userId === myUid || cleanName === myName || (userEmail && userEmail === myEmail)) {
+            console.log(`[FILTER] Tú eres este usuario, te ocultamos: ${rawUsername}`);
+            return;
+        }
 
         // 4. BÚSQUEDA: Filtrado por término
         if (searchTerm) {
@@ -96,13 +109,29 @@ function renderUsers(users, searchTerm = "") {
         const card = document.createElement("div");
         card.className = "user-card-social";
         
-        const avatarUrl = data.avatar 
-            ? (data.avatar.startsWith('http') ? data.avatar : `${API_BASE_URL}${data.avatar}`)
-            : `https://ui-avatars.com/api/?name=${rawUsername}&background=random`;
+        // Construcción inteligente de la URL del avatar
+        let avatarUrl = "";
+        if (data.avatar) {
+            if (data.avatar.startsWith('http')) {
+                avatarUrl = data.avatar;
+            } else {
+                // Asegurar que empiece por /uploads/
+                let path = data.avatar.startsWith('/') ? data.avatar : `/${data.avatar}`;
+                if (!path.startsWith('/uploads/')) {
+                    path = `/uploads${path}`;
+                }
+                avatarUrl = `${API_BASE_URL}${path}`;
+            }
+        } else {
+            avatarUrl = `https://ui-avatars.com/api/?name=${rawUsername}&background=random&color=fff`;
+        }
 
         card.innerHTML = `
             <div class="user-card-header">
-                <img src="${avatarUrl}" alt="Avatar" class="user-card-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${rawUsername}&background=random'">
+                <img src="${avatarUrl}" 
+                     alt="Avatar" 
+                     class="user-card-avatar" 
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${rawUsername}&background=random&color=fff'">
             </div>
             <div class="user-card-body">
                 <div style="display:flex; align-items:center; justify-content:center; gap:5px;">

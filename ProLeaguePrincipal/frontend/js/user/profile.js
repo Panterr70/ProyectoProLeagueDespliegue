@@ -159,16 +159,27 @@ document.getElementById("save-profile").addEventListener("click", async () => {
       formData.append("avatar", avatarInput.files[0]);
       const upRes = await fetch(`${API_BASE_URL}/api/auth/upload-avatar/${uid}`, { method: "POST", body: formData });
       const upData = await upRes.json();
-      avatarUrl = upData.avatarUrl;
+      
+      // Cache busting: añadir un timestamp para que el navegador no use la imagen vieja
+      avatarUrl = `${upData.avatarUrl}?t=${Date.now()}`;
       user.avatar = avatarUrl;
     }
 
     await updateDoc(doc(db, "users", uid), { bio, avatar: avatarUrl });
     user.bio = bio;
+    user.avatar = avatarUrl; // Asegurar que el objeto local tiene la nueva URL
+    
     localStorage.setItem("user", JSON.stringify(user));
+    
+    // Forzar refresco visual de la imagen
+    document.getElementById("profile-img").src = avatarUrl.startsWith('http') 
+        ? avatarUrl 
+        : `${API_BASE_URL}${avatarUrl}`;
+
     isDirty = false;
     showToast("Perfil actualizado correctamente", 'success');
   } catch (err) {
+    console.error("Error al guardar perfil:", err);
     showToast("Error al actualizar perfil", 'error');
   }
 });

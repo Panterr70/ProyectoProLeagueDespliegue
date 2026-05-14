@@ -38,6 +38,9 @@ const httpServer = createServer(app);
 
 app.use(express.json());
 
+// Servir archivos estáticos (Avatares)
+app.use("/uploads", express.static("uploads"));
+
 const allowedOrigins = [
   "https://proyecto-pro-league-despliegue.vercel.app",
   "https://proyecto-pro-league-despliegue-avillanurr10s-projects.vercel.app",

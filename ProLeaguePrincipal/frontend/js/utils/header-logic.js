@@ -1,9 +1,13 @@
 import { auth } from "../config/firebase-config.js";
+import { initCoachPro } from "./coach-pro.js";
 
 /**
  * Inicializa toda la lógica del header después de que se haya insertado en el DOM.
  */
 export function initHeaderLogic() {
+  // Iniciar el Asistente Coach Pro
+  initCoachPro();
+
   const menuBtn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('nav-menu');
   const userContainer = document.getElementById('user-menu-container');
