@@ -1,0 +1,45 @@
+[33m0827526[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;31mdeploy/main[m[33m)[m HEAD@{0}: pull origin main --rebase (finish): returning to refs/heads/main
+[33m0827526[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;31mdeploy/main[m[33m)[m HEAD@{1}: pull origin main --rebase (start): checkout 08275261971fcc2cc6ff478384713cc7fc661295
+[33m95ae419[m HEAD@{2}: commit (merge): Renovación de la seguridad y la interfaz de usuario/experiencia de usuario de ProLeague (autenticación híbrida, chat premium y NFL Field)
+[33m7658c18[m HEAD@{3}: commit: fix:Paso a limpio la memoria
+[33m1440d14[m HEAD@{4}: commit: 6.2 arquitectura del proyecto
+[33m4e5518b[m HEAD@{5}: commit: Requisitos NF
+[33m7074079[m HEAD@{6}: commit: Plantilla de Memoria actualizada
+[33m25adf56[m HEAD@{7}: commit: Filtrado correcto de jugadores de la NFL usando teamId en lugar del nombre de búsqueda.
+[33mb8efff6[m HEAD@{8}: commit: resolve NFL team logo 404 in modal by unifying logo resolution
+[33mca0e99a[m HEAD@{9}: commit: mejoras: nuevos gráficos de balance local/visitante y rachas con datos reales
+[33m3448973[m HEAD@{10}: commit: mejoras: pantallas de carga skeleton shimmer y actualización de memoria
+[33mcea719c[m HEAD@{11}: commit: mejoras: corregido icono password, iconos fontawesome y modal premium de salida
+[33mac8afc0[m HEAD@{12}: commit: fix:punto y como error de compliacion bck
+[33meb2a983[m HEAD@{13}: commit: fix:estabilizo la busqueda de jugadores de la api
+[33m686a82f[m HEAD@{14}: commit: fix:
+[33m4d5f699[m HEAD@{15}: commit: fix:Errores de producción, política CORS, plantillas de la NFL y permisos de Firebase.
+[33m3e8a9a8[m HEAD@{16}: commit: refactor: limpieza de código muerto, centralización de utilidades y mapa funcional
+[33mafa2e07[m HEAD@{17}: commit: feat: QoL premium - modal personalizado, chat scroll fix, búsqueda inteligente y atajos de teclado
+[33m523db96[m HEAD@{18}: commit: UI/UX Premium Upgrade: Dynamic backgrounds, enhanced cards, dashboard tables and centralized header logic
+[33m19dbf9a[m HEAD@{19}: commit: fix: implementación de caché en backend y corrección de mapeo de escudos NBA/NFL
+[33md850be3[m HEAD@{20}: commit: fix: carga de perfiles públicos y feat: implementación de UI reactiva con skeletons y copy-to-clipboard
+[33m73147e3[m HEAD@{21}: commit: Mejora de UX: protección de cambios sin guardar y sustitución de alerts por notificaciones premium
+[33m69d95f9[m HEAD@{22}: commit: [AUTH-04] Mejora de usabilidad: añadido selector de visibilidad de contraseña
+[33md205796[m HEAD@{23}: commit: [AUTH-02] Fix: Importación de setDoc corregida en el Login
+[33m347fd00[m HEAD@{24}: commit: [AUTH-01] Solución final al bloqueo de usuarios no verificados
+[33mb1dfb5e[m HEAD@{25}: commit: Refuerzo de seguridad:bloqueo de acceso sin verificacion
+[33mfb26901[m HEAD@{26}: commit: Implementación de control de sesión única y sistema de verificación de email
+[33m185c49b[m HEAD@{27}: commit: Implementación de control de sesión única y validación de email
+[33madcef16[m HEAD@{28}: commit: Fix: Final CORS brute force, player search cache and profile team logo
+[33me638e94[m HEAD@{29}: commit: Fix: CORS issues, header layout, players view API and trending section
+[33m7ed3350[m HEAD@{30}: commit: fix: mejora para moviles
+[33mab5d316[m HEAD@{31}: commit: fix: limpieza de localhost
+[33m5326ca9[m HEAD@{32}: commit: feat:Entry point front login.html
+[33m3515078[m HEAD@{33}: commit: feat.Despliegue de Back Render
+[33mf9f25d2[m HEAD@{34}: commit: feat:preparar el código para su implementación con URL de API dinámicas
+[33m7e1a5d4[m HEAD@{35}: commit: feat: renovación de la comunidad, chat persistente de Firebase y mejoras en la interfaz de usuario premium
+[33mf753b87[m HEAD@{36}: commit: feat: Añado quitento ideal y arreglo permisos de FB
+[33mb2fb072[m HEAD@{37}: commit: fix: corregidos errores 404 en assets y errores de permisos en Firebase
+[33meb0257d[m HEAD@{38}: commit: refactor: refactorización de carpetas y correcciones de error de la api
+[33m210d655[m HEAD@{39}: commit: Migración bd a Firebase y mejoras generales
+[33m71f9ece[m HEAD@{40}: commit: Subo cambio jugadores mas ultimos partidos
+[33m2e27ddd[m HEAD@{41}: commit: mejora de la interfaz + arreglo log y register
+[33mca8ee78[m HEAD@{42}: commit: Retoques de la intefaz y sin navbar en el log y regis
+[33m077a0cc[m HEAD@{43}: commit: Subida 50% + chat finalizado
+[33m55ad90b[m HEAD@{44}: clone: from https://github.com/avillanurr10/ProyectoIntermodularAndoniVillanueva2dam.b.git

@@ -11,6 +11,7 @@
  */
 
       import bcrypt from "bcrypt";
+      import fetch from "node-fetch";
       import { pool as db } from "../db.js"; // renombramos pool como db aquí
 
       export const register = async (req, res) => {
@@ -143,12 +144,54 @@
 
   export const findEmailByUsername = async (req, res) => {
     const { username } = req.params;
+    
     try {
-      const [rows] = await db.query("SELECT email FROM users WHERE username = ?", [username]);
-      if (rows.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
-      res.json({ email: rows[0].email });
+      // 1. INTENTO CON FIRESTORE REST API (Para que funcione en Render/Nube)
+      const firestoreUrl = `https://firestore.googleapis.com/v1/projects/proleague-b1b5c/databases/(default)/documents:runQuery`;
+      const query = {
+        structuredQuery: {
+          from: [{ collectionId: "users" }],
+          where: {
+            fieldFilter: {
+              field: { fieldPath: "username" },
+              op: "EQUAL",
+              value: { stringValue: username }
+            }
+          },
+          limit: 1
+        }
+      };
+
+      const fsResponse = await fetch(firestoreUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(query)
+      });
+
+      if (fsResponse.ok) {
+        const results = await fsResponse.json();
+        // Firestore runQuery devuelve un array. El primer elemento tiene el documento si existe.
+        if (results && results.length > 0 && results[0].document) {
+          const email = results[0].document.fields.email.stringValue;
+          return res.json({ email });
+        }
+      }
+
+      // 2. FALLBACK A MYSQL (Si Firestore falla o no encuentra, probamos local por si acaso)
+      try {
+        const [rows] = await db.query("SELECT email FROM users WHERE username = ?", [username]);
+        if (rows.length > 0) {
+          return res.json({ email: rows[0].email });
+        }
+      } catch (mysqlErr) {
+        console.warn("MySQL lookup skipped or failed.");
+      }
+
+      return res.status(404).json({ error: "Usuario no encontrado en ningún sistema" });
+
     } catch (err) {
-      res.status(500).json({ error: "Error en el servidor" });
+      console.error("Error global en findEmailByUsername:", err);
+      res.status(500).json({ error: "Error interno del servidor al buscar usuario" });
     }
   };
 
