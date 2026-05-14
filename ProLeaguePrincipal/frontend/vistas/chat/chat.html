@@ -54,11 +54,14 @@
       <section class="chat-content">
         <div class="chat-view-header">
           <div class="header-info">
+            <button id="sidebar-toggle" class="btn-secondary" style="display: none; padding: 8px 12px; margin-right: 10px;">
+              <i class="fas fa-bars"></i>
+            </button>
             <span class="header-hash">#</span>
             <h2 id="current-room-name">general</h2>
           </div>
           <div class="header-actions">
-             <span id="user-count">... personas</span>
+             <span id="user-count" style="display:none;"></span>
           </div>
         </div>
 
@@ -103,6 +106,31 @@
       .then(html => {
         document.getElementById("footer-placeholder").innerHTML = html;
       });
+
+    // Lógica Sidebar Móvil
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.querySelector('.chat-sidebar');
+    
+    if(sidebarToggle && sidebar) {
+      sidebarToggle.onclick = (e) => {
+        e.stopPropagation();
+        sidebar.classList.toggle('active');
+      };
+
+      // Cerrar al hacer click fuera
+      document.addEventListener('click', (e) => {
+        if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== sidebarToggle) {
+          sidebar.classList.remove('active');
+        }
+      });
+
+      // Cerrar al seleccionar canal en móvil
+      sidebar.addEventListener('click', (e) => {
+        if (e.target.closest('.channel-item') && window.innerWidth <= 768) {
+          sidebar.classList.remove('active');
+        }
+      });
+    }
   </script>
 
 </body>

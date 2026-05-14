@@ -247,12 +247,24 @@ function mostrarEquipos(equipos) {
       const modal = document.getElementById("team-modal");
       modal.style.display = "flex";
       
+      // FIX: Bloquear scroll del body y resetear scroll del modal
+      document.body.style.overflow = "hidden";
+      modal.scrollTop = 0;
+
       // ===== FIX: Asegurar que el botón de cerrar funciona siempre =====
       const closeBtn = document.getElementById("modal-close");
       if(closeBtn) {
-        closeBtn.onclick = () => modal.style.display = "none";
+        closeBtn.onclick = () => {
+          modal.style.display = "none";
+          document.body.style.overflow = "auto";
+        };
       }
-      window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
+      window.onclick = e => { 
+        if(e.target === modal) {
+          modal.style.display = "none";
+          document.body.style.overflow = "auto";
+        }
+      };
 
       document.getElementById("modal-logo").src = `../../logos/${logoSrc}`;
       document.getElementById("modal-name").textContent = team.full_name;

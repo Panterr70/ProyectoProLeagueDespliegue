@@ -74,17 +74,24 @@
     </section>
 
     <section class="profile-security">
-      <h3>Seguridad</h3>
-
       <form id="security-form" onsubmit="return false;">
-        <div class="security-fields">
-          <input type="text" id="new-username" placeholder="Nuevo nombre de usuario" autocomplete="username">
-          <input type="password" id="new-password" placeholder="Nueva contraseña" autocomplete="new-password">
+        <div class="security-card">
+          <h3>Seguridad</h3>
+          <p class="security-hint">Para cambiar tu nombre de usuario o contraseña, por seguridad necesitamos tu contraseña actual.</p>
+          <div class="input-group-premium">
+            <label for="current-password">Contraseña Actual</label>
+            <input type="password" id="current-password" placeholder="Tu contraseña actual">
+          </div>
+          <div class="input-group-premium">
+            <label for="new-username">Nuevo nombre de usuario</label>
+            <input type="text" id="new-username" placeholder="Nuevo usuario">
+          </div>
+          <div class="input-group-premium">
+            <label for="new-password">Nueva contraseña</label>
+            <input type="password" id="new-password" placeholder="Mínimo 6 caracteres">
+          </div>
+          <button id="change-credentials" class="btn-danger">Actualizar credenciales</button>
         </div>
-
-        <button type="button" id="change-credentials" class="btn-danger">
-          Actualizar credenciales
-        </button>
       </form>
 
     </section>
@@ -96,6 +103,21 @@
 
   <!-- JS -->
   <script type="module" src="../../js/user/profile.js"></script>
+
+  <!-- MODAL DE SALIDA (CAMBIOS SIN GUARDAR) -->
+  <div id="exit-modal" class="modal-premium" style="display: none;">
+    <div class="modal-premium-content">
+      <div class="modal-premium-header">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>¿Quieres salir del sitio web?</h3>
+      </div>
+      <p>Es posible que los cambios no se guarden si abandonas la página ahora.</p>
+      <div class="modal-premium-footer">
+        <button id="cancel-exit" class="btn-modal-secondary">Seguir editando</button>
+        <button id="confirm-exit" class="btn-modal-primary">Salir sin guardar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     fetch("../components/header.html")

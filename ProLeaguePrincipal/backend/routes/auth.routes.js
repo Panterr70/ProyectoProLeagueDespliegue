@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
-import { register, login, updateProfile, getUserProfile } from "../controllers/auth.controller.js";
+import { register, login, updateProfile, getUserProfile, findEmailByUsername } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -23,6 +23,7 @@ router.post("/register", register);
 router.post("/login", login);
 router.put("/update-profile", updateProfile);
 router.get("/user/:id", getUserProfile);
+router.get("/find-email/:username", findEmailByUsername);
 
 // Nueva ruta para subir avatar
 router.post("/upload-avatar/:userId", upload.single("avatar"), (req, res) => {

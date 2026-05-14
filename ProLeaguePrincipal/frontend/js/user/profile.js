@@ -1,7 +1,7 @@
 import { auth, db } from "../config/firebase-config.js";
 import { API_BASE_URL } from "../config/config.js";
 import { nbaLogos, nflLogos } from "../config/logos-config.js";
-import { updateProfile, updatePassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { updateProfile, updatePassword, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { showToast } from "../utils/toast.js";
 
@@ -9,7 +9,33 @@ import { showToast } from "../utils/toast.js";
 let isDirty = false;
 const markDirty = () => { isDirty = true; };
 
-// ===== CARGAR USUARIO =====
+// Interceptar navegación interna para mostrar modal bonito [WOW]
+document.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (link && isDirty) {
+        const targetUrl = link.href;
+        // Solo si es navegación a otra página de nuestra web y no es un hash o javascript
+        if (targetUrl && !targetUrl.includes("#") && !targetUrl.startsWith("javascript:") && !targetUrl.includes("mailto:")) {
+            e.preventDefault();
+            const modal = document.getElementById("exit-modal");
+            if (modal) {
+                modal.style.display = "flex";
+                
+                const confirmBtn = document.getElementById("confirm-exit");
+                const cancelBtn = document.getElementById("cancel-exit");
+                
+                confirmBtn.onclick = () => {
+                    isDirty = false; // Reset dirty para permitir salir
+                    window.location.href = targetUrl;
+                };
+                
+                cancelBtn.onclick = () => {
+                    modal.style.display = "none";
+                };
+            }
+        }
+    }
+});
 
 // ===== CARGAR USUARIO =====
 let user = JSON.parse(localStorage.getItem("user"));
@@ -19,7 +45,6 @@ if (!user || (!user.uid && !user.id)) {
 
 // Función para refrescar los datos del perfil desde Firestore
 async function loadUserProfile() {
-  // Esperar a que Firebase Auth esté listo para evitar errores de permisos
   onAuthStateChanged(auth, async (firebaseUser) => {
     try {
       const uid = firebaseUser ? firebaseUser.uid : (user.uid || user.id);
@@ -31,8 +56,6 @@ async function loadUserProfile() {
       const userDoc = await getDoc(doc(db, "users", uid));
       
       if (!userDoc.exists()) {
-        console.warn("El documento del usuario no existe en Firestore.");
-        // Si no existe, al menos mostramos lo del localStorage
         mostrarDatosPerfil(user);
         return;
       }
@@ -44,11 +67,6 @@ async function loadUserProfile() {
 
     } catch (err) {
       console.error("Error en loadUserProfile:", err);
-      if (err.code === 'permission-denied') {
-        showToast("Error de permisos en Firebase. Revisa las reglas de Firestore.", 'error');
-      } else {
-        showToast("Error cargando perfil", 'error');
-      }
     }
   });
 }
@@ -63,7 +81,7 @@ function mostrarDatosPerfil(userData) {
     ? (userData.avatar.startsWith('http') ? userData.avatar : `${API_BASE_URL}${userData.avatar}`)
     : `https://ui-avatars.com/api/?name=${avatarBase}&background=random`;
 
-  // Mostrar Quinteto NBA
+  // NBA Mini Grid
   if (userData.dreamTeamNBA) {
     for (const pos in userData.dreamTeamNBA) {
       const el = document.getElementById(`nba-${pos}`);
@@ -74,7 +92,7 @@ function mostrarDatosPerfil(userData) {
     }
   }
 
-  // Mostrar Ofensiva NFL
+  // NFL Mini Grid
   if (userData.dreamTeamNFL) {
     for (const pos in userData.dreamTeamNFL) {
       const el = document.getElementById(`nfl-${pos}`);
@@ -85,7 +103,6 @@ function mostrarDatosPerfil(userData) {
     }
   }
 
-  // Mostrar Favoritos
   renderFavoritos(userData.favorites || []);
 }
 
@@ -113,157 +130,111 @@ function renderFavoritos(favorites) {
 }
 loadUserProfile();
 
-// ===== HEADER / FOOTER =====
-async function loadHeaderFooter() {
-  try {
-    const headerHtml = await fetch("../components/header.html").then(r => r.text());
-    document.getElementById("header-placeholder").innerHTML = headerHtml;
+// Detectar cambios
+document.getElementById("profile-bio").addEventListener("input", markDirty);
+document.getElementById("new-username").addEventListener("input", markDirty);
+document.getElementById("new-password").addEventListener("input", markDirty);
+document.getElementById("current-password")?.addEventListener("input", markDirty);
 
-    const navProfile = document.getElementById("nav-profile");
-    const navLogout = document.getElementById("nav-logout");
-
-    if (user) {
-      if (navProfile) navProfile.style.display = "inline";
-      if (navLogout) navLogout.style.display = "inline";
-    }
-
-    if (navLogout) {
-      navLogout.addEventListener("click", e => {
-        e.preventDefault();
-        auth.signOut();
-        localStorage.removeItem("user");
-        window.location.href = "../auth/login.html";
-      });
-    }
-
-    // Lógica de Menú Móvil
-    const menuBtn = document.getElementById('mobile-menu-btn');
-    const menu = document.getElementById('nav-menu');
-    if(menuBtn && menu) {
-      menuBtn.onclick = () => {
-        menu.classList.toggle('active');
-        menuBtn.classList.toggle('active');
-      };
-    }
-
-    const footerHtml = await fetch("../components/footer.html").then(r => r.text());
-    document.getElementById("footer-placeholder").innerHTML = footerHtml;
-  } catch (err) {
-    console.error("Error cargando header/footer:", err);
-  }
-}
-loadHeaderFooter();
-
-// ===== VISTA PREVIA AVATAR =====
+// Imagen Avatar
 document.getElementById("avatar-input").addEventListener("change", () => {
   const file = document.getElementById("avatar-input").files[0];
   if (file) {
     document.getElementById("profile-img").src = URL.createObjectURL(file);
-    markDirty(); // Cambio detectado
+    markDirty();
   }
 });
 
-// Detectar cambios en inputs y bio [QoL-01]
-document.getElementById("profile-bio").addEventListener("input", markDirty);
-document.getElementById("new-username").addEventListener("input", markDirty);
-document.getElementById("new-password").addEventListener("input", markDirty);
-
-// Prevenir salida si hay cambios [QoL-01]
-window.addEventListener("beforeunload", (e) => {
-  if (isDirty) {
-    e.preventDefault();
-    e.returnValue = ""; // Requerido por navegadores modernos
-  }
-});
-
-// ===== GUARDAR PERFIL (BIO + AVATAR) =====
+// Guardar Bio y Avatar
 document.getElementById("save-profile").addEventListener("click", async () => {
   const bio = document.getElementById("profile-bio").value;
   const avatarInput = document.getElementById("avatar-input");
   const uid = user.uid || user.id;
-  if (!uid) {
-    showToast("Error: No se encontró el ID de usuario. Reintenta iniciando sesión.", 'error');
-    return;
-  }
   let avatarUrl = user.avatar || null;
 
   try {
-    // 1. Si hay una nueva imagen, subirla al backend local
+    showToast("Guardando cambios...", 'info', 1500);
     if (avatarInput.files && avatarInput.files[0]) {
       const formData = new FormData();
       formData.append("avatar", avatarInput.files[0]);
-
-      const upRes = await fetch(`${API_BASE_URL}/api/auth/upload-avatar/${uid}`, {
-        method: "POST",
-        body: formData
-      });
+      const upRes = await fetch(`${API_BASE_URL}/api/auth/upload-avatar/${uid}`, { method: "POST", body: formData });
       const upData = await upRes.json();
-      if (!upRes.ok) throw new Error(upData.error || "Error subiendo avatar");
-      
-      avatarUrl = upData.avatarUrl; // URL relativa del servidor local
+      avatarUrl = upData.avatarUrl;
       user.avatar = avatarUrl;
     }
 
-    // 2. Actualizar Firestore con la BIO y la nueva URL del avatar
-    await updateDoc(doc(db, "users", uid), { 
-      bio: bio,
-      avatar: avatarUrl 
-    });
-    
+    await updateDoc(doc(db, "users", uid), { bio, avatar: avatarUrl });
     user.bio = bio;
     localStorage.setItem("user", JSON.stringify(user));
-    
-    isDirty = false; // Cambios guardados con éxito
-
-    // Actualizar vista
-    document.getElementById("profile-img").src = avatarUrl.startsWith('http') 
-        ? avatarUrl 
-        : `${API_BASE_URL}${avatarUrl}`;
-    
-    showToast("¡Perfil actualizado con éxito!", 'success');
+    isDirty = false;
+    showToast("Perfil actualizado correctamente", 'success');
   } catch (err) {
-    console.error(err);
-    showToast("Error actualizando perfil", 'error');
+    showToast("Error al actualizar perfil", 'error');
   }
 });
 
-// ===== CAMBIAR CREDENCIALES =====
+// ===== CAMBIAR CREDENCIALES (RE-AUTH) =====
 document.getElementById("change-credentials").addEventListener("click", async () => {
+  const currentPassword = document.getElementById("current-password").value;
   const newUsername = document.getElementById("new-username").value.trim();
   const newPassword = document.getElementById("new-password").value.trim();
 
+  if (!currentPassword) {
+    showToast("Introduce tu contraseña actual para confirmar", 'warning');
+    return;
+  }
   if (!newUsername && !newPassword) {
-    showToast("Introduce al menos un cambio", 'warning');
+    showToast("No has introducido ningún cambio", 'info');
     return;
   }
 
   try {
-    const uid = user.uid || user.id;
-    
+    showToast("Verificando seguridad...", 'info', 2000);
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) throw new Error("No hay usuario autenticado");
+
+    // 1. RE-AUTENTICAR (Imprescindible para seguridad)
+    const credential = EmailAuthProvider.credential(firebaseUser.email, currentPassword);
+    await reauthenticateWithCredential(firebaseUser, credential);
+
+    const uid = firebaseUser.uid;
+
+    // 2. CAMBIAR USERNAME
     if (newUsername) {
-      // 1. Firestore
       await updateDoc(doc(db, "users", uid), { username: newUsername });
-      // 2. Auth Profile
-      if (auth.currentUser) await updateProfile(auth.currentUser, { displayName: newUsername });
-      
+      await updateProfile(firebaseUser, { displayName: newUsername });
       user.username = newUsername;
       document.getElementById("profile-username").textContent = newUsername;
     }
 
-    if (newPassword && auth.currentUser) {
-      await updatePassword(auth.currentUser, newPassword);
+    // 3. CAMBIAR PASSWORD
+    if (newPassword) {
+      await updatePassword(firebaseUser, newPassword);
     }
 
     localStorage.setItem("user", JSON.stringify(user));
-    isDirty = false; // Cambios guardados con éxito
-    showToast("Credenciales actualizadas", 'success');
+    isDirty = false;
+    
+    // Limpiar campos
+    document.getElementById("current-password").value = "";
+    document.getElementById("new-username").value = "";
+    document.getElementById("new-password").value = "";
+    
+    showToast("¡Credenciales actualizadas con éxito!", 'success');
 
   } catch (err) {
     console.error(err);
-    if (err.code === 'auth/requires-recent-login') {
-      showToast("Por seguridad, vuelve a iniciar sesión para cambiar la contraseña", 'warning');
+    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+      showToast("La contraseña actual es incorrecta", 'error');
+    } else if (err.code === 'auth/weak-password') {
+      showToast("La nueva contraseña es muy débil", 'warning');
     } else {
-      showToast("Error actualizando credenciales", 'error');
+      showToast("Error de seguridad: " + err.message, 'error');
     }
   }
+});
+
+// Prevenir salida (browser default as backup)
+window.addEventListener("beforeunload", (e) => {
+  if (isDirty) { e.preventDefault(); e.returnValue = ""; }
 });

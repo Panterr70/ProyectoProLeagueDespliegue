@@ -113,6 +113,7 @@ function initUI() {
             btn.classList.add("active");
             currentLeague = btn.getAttribute("data-league");
             renderField();
+            loadTrendingSuggestions(); // ACTUALIZAR SUGERENCIAS AL CAMBIAR LIGA
         };
     });
     renderField();

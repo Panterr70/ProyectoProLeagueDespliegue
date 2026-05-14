@@ -141,3 +141,14 @@
     }
   };
 
+  export const findEmailByUsername = async (req, res) => {
+    const { username } = req.params;
+    try {
+      const [rows] = await db.query("SELECT email FROM users WHERE username = ?", [username]);
+      if (rows.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+      res.json({ email: rows[0].email });
+    } catch (err) {
+      res.status(500).json({ error: "Error en el servidor" });
+    }
+  };
+

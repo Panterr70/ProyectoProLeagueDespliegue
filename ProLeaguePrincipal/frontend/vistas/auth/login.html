@@ -22,6 +22,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
+        <div style="text-align: right; margin-top: -10px; margin-bottom: 20px;">
+          <a href="#" id="forgot-password-link" style="font-size: 0.8rem; opacity: 0.7; color: var(--text-main); text-decoration: none;">¿Has olvidado tu contraseña?</a>
+        </div>
 
         <button type="submit">Entrar</button>
       </form>
@@ -33,7 +36,8 @@
 
   <script type="module">
     import { auth, db } from "../../js/config/firebase-config.js";
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { API_BASE_URL } from "../../js/config/config.js";
+    import { signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // TOAST UTILITY
@@ -71,17 +75,35 @@
 
     loginForm.addEventListener("submit", async e => {
       e.preventDefault();
-      const email = document.getElementById("login-username").value;
+      const input = document.getElementById("login-username").value.trim();
       const password = document.getElementById("login-password").value;
+      let email = input;
+
+      showToast("Verificando credenciales...", 'info', 2000);
 
       try {
-        // 1. Iniciar sesión con Firebase Auth
+        // 1. Si el input no es un email (no tiene @), buscar por username en el BACKEND
+        if (!input.includes("@")) {
+          const response = await fetch(`${API_BASE_URL}/api/auth/find-email/${input}`);
+          if (!response.ok) {
+            showToast("Nombre de usuario no encontrado", 'error');
+            return;
+          }
+          const data = await response.json();
+          email = data.email;
+        }
+
+        // 2. Iniciar sesión con Firebase Auth
         let userCredential;
         try {
           userCredential = await signInWithEmailAndPassword(auth, email, password);
         } catch (authErr) {
           console.error("Auth Error:", authErr);
-          showToast("Correo o contraseña incorrectos", 'error');
+          if (authErr.code === 'auth/invalid-credential') {
+             showToast("Usuario o contraseña incorrectos", 'error');
+          } else {
+             showToast("Error al iniciar sesión", 'error');
+          }
           return;
         }
 
@@ -91,37 +113,27 @@
         await user.reload();
         user = auth.currentUser; 
 
-        // 1.5 Verificar si el email está validado (QoL: Seguridad)
+        // 3. Verificar si el email está validado
         if (!user.emailVerified) {
-          showToast("Tu correo no ha sido verificado. Por favor, verifícalo para entrar.", 'warning', 6000);
+          showToast("Tu correo no ha sido verificado. Revisa tu bandeja de entrada.", 'warning', 6000);
           await auth.signOut();
-          localStorage.removeItem("user"); // Limpiar por si acaso
+          localStorage.removeItem("user");
           return; 
         }
 
-        // 2. Obtener datos adicionales desde Firestore
+        // 4. Obtener datos adicionales desde Firestore
         let userData = {};
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          userData = userDoc.exists() ? userDoc.data() : {};
-        } catch (dbErr) {
-          console.error("Firestore Error:", dbErr);
-          showToast("Error al conectar con la base de datos (Firestore). ¿Está activada?", 'warning');
-          // Continuamos aunque falle Firestore para no bloquear el login si Auth fue bien
-        }
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        userData = userDoc.exists() ? userDoc.data() : {};
 
-        // 3. Generar y guardar Session ID (QoL: Control de sesión única)
+        // 5. Generar y guardar Session ID
         const sessionId = Date.now().toString();
-        try {
-          await setDoc(doc(db, "users", user.uid), {
-            lastLogin: new Date().toISOString(),
-            currentSessionId: sessionId
-          }, { merge: true });
-        } catch (dbErr) {
-          console.error("Error updating session:", dbErr);
-        }
+        await setDoc(doc(db, "users", user.uid), {
+          lastLogin: new Date().toISOString(),
+          currentSessionId: sessionId
+        }, { merge: true });
 
-        // 4. Guardar en localStorage para compatibilidad con el resto de la web
+        // 6. Guardar en localStorage
         const userObj = {
           uid: user.uid,
           email: user.email,
@@ -129,18 +141,63 @@
           bio: userData.bio || "",
           avatar: userData.avatar || "",
           favorites: userData.favorites || [],
-          sessionId: sessionId // Guardamos el ID de esta pestaña
+          sessionId: sessionId
         };
         localStorage.setItem("user", JSON.stringify(userObj));
 
-        showToast("¡Bienvenido de nuevo!", 'success');
+        // 7. AUTO-SINCRO CON MYSQL [Garantiza que el usuario exista para login por Username]
+        fetch(`${API_BASE_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            username: userObj.username, 
+            email: userObj.email, 
+            password: 'firebase_synced_user' // Password placeholder (la real está en Firebase)
+          })
+        }).catch(() => {}); // Ignoramos errores si ya existe
+
+        showToast("¡Bienvenido de nuevo, " + userObj.username + "!", 'success');
         setTimeout(() => { window.location.href = "../home/home.html"; }, 1000);
 
       } catch (err) {
         console.error("General Login Error:", err);
-        showToast("Error inesperado al iniciar sesión", 'error');
+        showToast("Error inesperado: " + err.message, 'error');
       }
     });
+
+    // FUNCIONALIDAD: RECUPERAR CONTRASEÑA
+    document.getElementById("forgot-password-link").addEventListener("click", async (e) => {
+      e.preventDefault();
+      const emailOrUser = document.getElementById("login-username").value.trim();
+      
+      if (!emailOrUser) {
+        showToast("Escribe tu email o usuario arriba para recuperarla", 'warning');
+        return;
+      }
+
+      let email = emailOrUser;
+      
+      try {
+        showToast("Buscando cuenta...", 'info', 1500);
+        // Si no es email (no tiene @), buscamos el email asociado al username en el BACKEND
+        if (!emailOrUser.includes("@")) {
+          const response = await fetch(`${API_BASE_URL}/api/auth/find-email/${emailOrUser}`);
+          if (!response.ok) {
+            showToast("Nombre de usuario no encontrado", 'error');
+            return;
+          }
+          const data = await response.json();
+          email = data.email;
+        }
+
+        await sendPasswordResetEmail(auth, email);
+        showToast("¡Enlace enviado! Revisa la bandeja de entrada vinculada a esta cuenta.", 'success', 6000);
+      } catch (err) {
+        console.error(err);
+        showToast("Error al enviar email: " + err.message, 'error');
+      }
+    });
+
   </script>
 </body>
 </html>

@@ -35,6 +35,7 @@
   <div id="toast-container"></div>
   <script type="module">
     import { auth, db } from "../../js/config/firebase-config.js";
+    import { API_BASE_URL } from "../../js/config/config.js";
     import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -106,6 +107,17 @@
           lastLogin: new Date().toISOString(),
           currentSessionId: sessionId
         });
+
+        // 5. SINCRONIZAR CON MYSQL (Backend) [GOD MODE]
+        try {
+          await fetch(`${API_BASE_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
+          });
+        } catch (syncErr) {
+          console.warn("Aviso: Sincronización MySQL fallida, pero cuenta Firebase creada.");
+        }
 
         showToast("¡Cuenta creada! Revisa tu email para verificarla antes de entrar.", 'info', 5000);
         
