@@ -175,21 +175,28 @@
 
       if (fsResponse.ok) {
         const results = await fsResponse.json();
-        console.log(`Firestore Query Results for ${username}:`, JSON.stringify(results));
+        console.log(`[DEBUG] Full Firestore Response for ${cleanUsername}:`, JSON.stringify(results));
 
-        // Buscamos el primer objeto que contenga un "document"
+        // Buscamos el documento en los resultados
         const found = results.find(item => item.document);
         
         if (found && found.document && found.document.fields && found.document.fields.email) {
           const email = found.document.fields.email.stringValue;
-          console.log(`Found email: ${email} for user: ${username}`);
+          console.log(`[SUCCESS] Found email: ${email} for user: ${cleanUsername}`);
           return res.json({ email });
         } else {
-          console.warn(`User ${username} not found in Firestore results.`);
+          console.warn(`[WARN] User ${cleanUsername} not found in Firestore results.`);
+          // PRUEBA EXTRA: Listar los primeros 5 usuarios de la DB para ver qué hay realmente
+          try {
+            const listUrl = `https://firestore.googleapis.com/v1/projects/proleague-b1b5c/databases/(default)/documents/users?pageSize=5&key=${apiKey}`;
+            const listRes = await fetch(listUrl);
+            const listData = await listRes.json();
+            console.log("[DEBUG] Sample users in DB:", JSON.stringify(listData));
+          } catch(e) {}
         }
       } else {
         const errorText = await fsResponse.text();
-        console.error(`Firestore API Error: ${fsResponse.status}`, errorText);
+        console.error(`[ERROR] Firestore API: ${fsResponse.status}`, errorText);
       }
 
       // 2. FALLBACK A MYSQL (Si Firestore falla o no encuentra, probamos local por si acaso)
