@@ -147,7 +147,12 @@
     
     try {
       // 1. INTENTO CON FIRESTORE REST API (Para que funcione en Render/Nube)
-      const firestoreUrl = `https://firestore.googleapis.com/v1/projects/proleague-b1b5c/databases/(default)/documents:runQuery`;
+      // Añadimos la API Key para tener permisos de lectura
+      const apiKey = "AIzaSyByQy2d_UWJ-Itkh7L9lnuwnKgKySGWlBc";
+      const firestoreUrl = `https://firestore.googleapis.com/v1/projects/proleague-b1b5c/databases/(default)/documents:runQuery?key=${apiKey}`;
+      
+      const cleanUsername = username.trim();
+
       const query = {
         structuredQuery: {
           from: [{ collectionId: "users" }],
@@ -155,7 +160,7 @@
             fieldFilter: {
               field: { fieldPath: "username" },
               op: "EQUAL",
-              value: { stringValue: username }
+              value: { stringValue: cleanUsername }
             }
           },
           limit: 1
@@ -170,11 +175,21 @@
 
       if (fsResponse.ok) {
         const results = await fsResponse.json();
-        // Firestore runQuery devuelve un array. El primer elemento tiene el documento si existe.
-        if (results && results.length > 0 && results[0].document) {
-          const email = results[0].document.fields.email.stringValue;
+        console.log(`Firestore Query Results for ${username}:`, JSON.stringify(results));
+
+        // Buscamos el primer objeto que contenga un "document"
+        const found = results.find(item => item.document);
+        
+        if (found && found.document && found.document.fields && found.document.fields.email) {
+          const email = found.document.fields.email.stringValue;
+          console.log(`Found email: ${email} for user: ${username}`);
           return res.json({ email });
+        } else {
+          console.warn(`User ${username} not found in Firestore results.`);
         }
+      } else {
+        const errorText = await fsResponse.text();
+        console.error(`Firestore API Error: ${fsResponse.status}`, errorText);
       }
 
       // 2. FALLBACK A MYSQL (Si Firestore falla o no encuentra, probamos local por si acaso)
