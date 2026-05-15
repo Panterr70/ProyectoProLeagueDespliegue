@@ -139,7 +139,7 @@ async function cargarClasificacion() {
 
   } catch(err) {
     console.error("Error cargando clasificación NFL:", err);
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px;">⚠️ Error cargando la clasificación</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px;"><span class="material-icons" style="vertical-align:middle;">warning</span> Error cargando la clasificación</td></tr>`;
   }
 }
 
@@ -181,7 +181,7 @@ function mostrarEquipos(equipos){
     `;
 
     const favBtn = document.createElement("button");
-    favBtn.textContent="⭐";
+    favBtn.innerHTML = "<span class='material-icons' style='font-size: 18px;'>star_outline</span>";
     favBtn.className="fav-btn";
     favBtn.onclick = async e => {
       e.stopPropagation();
@@ -205,11 +205,11 @@ function mostrarEquipos(equipos){
         }) }, { merge: true });
         
         const animStar = document.createElement("div");
-        animStar.textContent = "⭐";
+        animStar.innerHTML = "<span class='material-icons'>star</span>";
         animStar.className = "fav-anim-star";
         card.querySelector(".team-card-front").appendChild(animStar);
         setTimeout(() => animStar.remove(), 1000);
-        showToast("¡Añadido a favoritos! ⭐", "success");
+        showToast("¡Añadido a favoritos! <span class='material-icons' style='font-size:16px; vertical-align:middle;'>star</span>", "success");
       
       } catch (err) {
         console.error("Error Firestore:", err);

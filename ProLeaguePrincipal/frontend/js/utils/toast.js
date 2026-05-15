@@ -11,10 +11,10 @@ export function showToast(message, type = 'success', duration = 3500) {
     }
 
     const icons = { 
-        success: '✅', 
-        error: '❌', 
-        info: 'ℹ️', 
-        warning: '⚠️' 
+        success: 'check_circle', 
+        error: 'error', 
+        info: 'info', 
+        warning: 'warning' 
     };
 
     const toast = document.createElement('div');
@@ -22,7 +22,7 @@ export function showToast(message, type = 'success', duration = 3500) {
     
     // Estructura del toast
     toast.innerHTML = `
-        <span class="toast-icon">${icons[type] || '📢'}</span>
+        <span class="toast-icon material-icons">${icons[type] || 'campaign'}</span>
         <span class="toast-message">${message}</span>
         <button class="toast-close">✕</button>
     `;
@@ -87,7 +87,7 @@ export function showConfirm(message) {
         const dialog = document.createElement('div');
         dialog.className = 'confirm-dialog';
         dialog.innerHTML = `
-            <h3>⚠️ Confirmación</h3>
+            <h3><span class="material-icons" style="color:#ffc107;">warning</span> Confirmación</h3>
             <p>${message}</p>
             <div class="confirm-actions">
                 <button class="confirm-btn-cancel">Cancelar</button>

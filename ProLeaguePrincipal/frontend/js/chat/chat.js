@@ -69,11 +69,11 @@ async function switchRoom(newRoom) {
 
     await loadChatHistory(newRoom);
 
-    // 🤖 BOT: Mensaje de bienvenida con reglas
+    // [BOT] Mensaje de bienvenida con reglas
     setTimeout(() => {
         addMessageToDOM({
-            user: "🤖 ProLeagueBot",
-            text: `¡Bienvenido a #${newRoom}! 🏀🏈 Recuerda: mantén el respeto, evita insultos y disfruta del deporte. El chat se limpia automáticamente para mantener la fluidez.`,
+            user: "ProLeagueBot",
+            text: `¡Bienvenido a #${newRoom}! <span class='material-icons' style='font-size:16px; vertical-align:middle; color:#ff8c00;'>sports_basketball</span> <span class='material-icons' style='font-size:16px; vertical-align:middle; color:#5271ff;'>sports_football</span> Recuerda: mantén el respeto, evita insultos y disfruta del deporte. El chat se limpia automáticamente para mantener la fluidez.`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
         scrollToBottom();
@@ -187,7 +187,7 @@ function scrollToBottom() {
 // QoL: BOTÓN FLOTANTE PARA BAJAR EL CHAT
 // ==========================================
 const scrollDownBtn = document.createElement("button");
-scrollDownBtn.innerHTML = "⬇️";
+scrollDownBtn.innerHTML = "<span class='material-icons'>arrow_downward</span>";
 scrollDownBtn.className = "scroll-down-btn";
 scrollDownBtn.style.cssText = `
     position: absolute;

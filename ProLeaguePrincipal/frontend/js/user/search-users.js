@@ -81,7 +81,6 @@ function renderUsers(users, searchTerm = "") {
 
         // 2. FILTRO DE DUPLICADOS: Si ya hemos mostrado este nombre (en cualquier formato), saltar
         if (seenUsernames.has(cleanName)) {
-            console.log(`[FILTER] Duplicado detectado y eliminado: ${rawUsername}`);
             return;
         }
         seenUsernames.add(cleanName);
@@ -92,7 +91,6 @@ function renderUsers(users, searchTerm = "") {
         const myUid = currentUserId;
 
         if (userId === myUid || cleanName === myName || (userEmail && userEmail === myEmail)) {
-            console.log(`[FILTER] Tú eres este usuario, te ocultamos: ${rawUsername}`);
             return;
         }
 
@@ -137,13 +135,13 @@ function renderUsers(users, searchTerm = "") {
                 <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
                     <h4>${rawUsername}</h4>
                     <button class="copy-btn-mini" data-copy="${rawUsername}" title="Copiar nombre">
-                        📋
+                        <span class="material-icons" style="font-size: 14px;">content_copy</span>
                     </button>
                 </div>
                 <p class="user-card-bio">${data.bio ? (data.bio.substring(0, 50) + "...") : "Fan de ProLeague"}</p>
                 <div class="user-card-stats">
-                    <span>🏀 ${data.dreamTeamNBA ? 'Con equipo' : 'Sin NBA'}</span>
-                    <span>🏈 ${data.dreamTeamNFL ? 'Con equipo' : 'Sin NFL'}</span>
+                    <span><span class="material-icons" style="font-size: 14px; vertical-align: middle; color: #ff8c00;">sports_basketball</span> ${data.dreamTeamNBA ? 'Con equipo' : 'Sin NBA'}</span>
+                    <span><span class="material-icons" style="font-size: 14px; vertical-align: middle; color: #5271ff;">sports_football</span> ${data.dreamTeamNFL ? 'Con equipo' : 'Sin NFL'}</span>
                 </div>
                 <a href="public-profile.html?id=${userId}" class="btn-secondary">VER PERFIL</a>
             </div>
@@ -155,7 +153,7 @@ function renderUsers(users, searchTerm = "") {
             e.preventDefault();
             navigator.clipboard.writeText(rawUsername);
             const originalText = copyBtn.innerHTML;
-            copyBtn.innerHTML = "✅";
+            copyBtn.innerHTML = '<span class="material-icons" style="font-size: 14px; color: #00f2ff;">check_circle</span>';
             setTimeout(() => copyBtn.innerHTML = originalText, 1500);
         };
 

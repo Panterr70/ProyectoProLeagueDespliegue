@@ -991,7 +991,6 @@ html {
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
 }
 
-/* (Old News Section Removed) */
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .slider-overlay h1 {
@@ -1193,13 +1192,6 @@ html {
   animation: authSlideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   opacity: 0;
   transform: translateY(30px);
-}
-
-@keyframes authSlideUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* LOGO */
@@ -2689,17 +2681,21 @@ body {
 
 .search-icon {
   position: absolute;
-  left: 18px;
+  left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1em;
+  font-size: 20px;
   pointer-events: none;
   opacity: 0.6;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .players-search-input {
   width: 100%;
-  padding: 14px 44px 14px 44px;
+  padding: 14px 44px 14px 48px;
   border-radius: 50px;
   border: 1px solid rgba(255,255,255,0.1);
   background: rgba(255,255,255,0.05);

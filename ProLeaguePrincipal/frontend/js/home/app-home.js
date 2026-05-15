@@ -386,7 +386,7 @@ async function initNews() {
              <span class="like-icon"><i class="far fa-heart"></i></span> <span class="like-count">0</span>
           </button>
           <button class="interaction-btn comment-btn" data-id="${newsId}">
-             💬 Comentar
+             <span class="material-icons" style="font-size:16px; vertical-align:middle;">chat_bubble_outline</span> Comentar
           </button>
         </div>
 

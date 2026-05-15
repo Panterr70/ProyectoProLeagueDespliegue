@@ -6,6 +6,7 @@
   <title>Jugadores - ProLeague</title>
   <meta name="description" content="Busca jugadores de NBA y NFL. Consulta su equipo, posición y datos en ProLeague.">
   <link rel="stylesheet" href="../../css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="dynamic-body">
@@ -23,7 +24,7 @@
     <!-- HERO BANNER -->
     <section class="players-hero">
       <div class="players-hero-content">
-        <h1>🏆 Jugadores</h1>
+        <h1><span class="material-icons" style="font-size: 32px; vertical-align: middle;">emoji_events</span> Jugadores</h1>
         <p>Busca cualquier jugador de la NBA o NFL</p>
       </div>
     </section>
@@ -31,17 +32,17 @@
     <!-- SEARCH & FILTERS -->
     <section class="players-controls">
       <div class="players-search-wrapper">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon material-icons">search</span>
         <input type="text" id="player-search" class="players-search-input" placeholder="Buscar jugador por nombre...">
         <button id="clear-search" class="clear-search-btn" title="Limpiar">✕</button>
       </div>
 
       <div class="players-league-tabs">
         <button class="league-tab active" data-league="NBA" id="tab-nba">
-          <span class="tab-icon">🏀</span> NBA
+          <span class="tab-icon material-icons">sports_basketball</span> NBA
         </button>
         <button class="league-tab" data-league="NFL" id="tab-nfl">
-          <span class="tab-icon">🏈</span> NFL
+          <span class="tab-icon material-icons">sports_football</span> NFL
         </button>
       </div>
 
@@ -62,12 +63,12 @@
       <div class="players-grid" id="players-grid">
         <!-- Landing state -->
         <div class="players-landing" id="players-landing">
-          <div class="landing-icon">🏆</div>
+          <div class="landing-icon material-icons" style="font-size: 64px;">emoji_events</div>
           <h2>Explora los Jugadores</h2>
           <p>Selecciona NBA o NFL para comenzar</p>
           <div class="landing-buttons">
-            <button class="btn-primary" onclick="setLeague('NBA')">🏀 Ver NBA</button>
-            <button class="btn-secondary" onclick="setLeague('NFL')">🏈 Ver NFL</button>
+            <button class="btn-primary" onclick="setLeague('NBA')"><span class="material-icons" style="font-size: 18px; vertical-align: middle;">sports_basketball</span> Ver NBA</button>
+            <button class="btn-secondary" onclick="setLeague('NFL')"><span class="material-icons" style="font-size: 18px; vertical-align: middle;">sports_football</span> Ver NFL</button>
           </div>
         </div>
       </div>

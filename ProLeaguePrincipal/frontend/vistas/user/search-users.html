@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comunidad - ProLeague</title>
   <link rel="stylesheet" href="../../css/style.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 </head>
 <body class="dynamic-body">
@@ -25,8 +26,8 @@
     <section class="user-search-container">
       <div class="search-box-social">
         <input type="text" id="user-search-input" placeholder="Nombre de usuario a buscar...">
-        <button id="user-search-btn" class="btn-search">
-            <span class="search-icon">🔍</span> BUSCAR
+        <button id="user-search-btn" class="btn-search" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span class="material-icons">search</span> BUSCAR
         </button>
       </div>
     </section>
@@ -37,7 +38,7 @@
         <!-- Tarjetas dinámicas -->
       </div>
       <div id="search-placeholder" class="empty-social-state">
-          <div class="social-icon-bg">👥</div>
+          <div class="social-icon-bg"><span class="material-icons" style="font-size: 64px;">groups</span></div>
           <h3>Busca a tus amigos</h3>
           <p>Encuentra a otros usuarios para ver sus equipos de ensueño y favoritos.</p>
       </div>

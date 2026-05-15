@@ -55,7 +55,6 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
       callback(null, true);
     } else {
-      console.log("CORS bloqueado para:", origin);
       callback(null, true);
     }
   },
@@ -113,7 +112,6 @@ const io = new Server(httpServer, {
 });
 
 const __dirname = path.resolve();
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 // Rutas
@@ -136,29 +134,27 @@ const messages = {
 };
 
 io.on("connection", (socket) => {
-  console.log("Nuevo cliente conectado:", socket.id);
 
   // Unirse a una sala (nba o nfl)
   socket.on("joinRoom", (room) => {
     if (room !== "nba" && room !== "nfl") return;
 
     socket.join(room);
-    console.log(`Socket ${socket.id} se unió a ${room}`);
 
     // Enviar historial
     socket.emit("loadMessages", { room, messages: messages[room] });
 
-    // 🤖 BOT: Mensaje de bienvenida personal
-    const welcomeText = room === 'nba' ? "¡Bienvenido al chat NBA! 🏀" : "¡Bienvenido al chat NFL! 🏈";
+    // [BOT] Mensaje de bienvenida personal
+    const welcomeText = room === 'nba' ? "¡Bienvenido al chat NBA! <span class='material-icons' style='font-size:16px; vertical-align:middle; color:#ff8c00;'>sports_basketball</span>" : "¡Bienvenido al chat NFL! <span class='material-icons' style='font-size:16px; vertical-align:middle; color:#5271ff;'>sports_football</span>";
     socket.emit("message", {
-      user: "🤖 ProLeagueBot",
-      text: welcomeText,
+      user: "ProLeagueBot",
+      text: `${welcomeText} <span class='material-icons' style='font-size:16px; vertical-align:middle;'>star</span>`,
       time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
       room
     });
 
-    // 🤖 BOT: Avisar a otros (opcional, puede ser spam)
-    // socket.to(room).emit("message", { user: "🤖 ProLeagueBot", text: "Un nuevo usuario se ha unido.", ... });
+    // [BOT] Avisar a otros (opcional, puede ser spam)
+    // socket.to(room).emit("message", { user: "ProLeagueBot", text: "Un nuevo usuario se ha unido.", ... });
   });
 
   // Recibir mensaje
@@ -188,8 +184,8 @@ io.on("connection", (socket) => {
     const room = category.toLowerCase(); // 'nba' o 'nfl'
     
     const botMsg = {
-      user: "🤖 ProLeagueBot",
-      text: `¡${username} ha comentado en la noticia: "${title}"! 💬 "${text}"`,
+      user: "ProLeagueBot",
+      text: `¡${username} ha comentado en la noticia: "${title}"! <span class='material-icons' style='font-size:16px; vertical-align:middle; color:#00f2ff;'>chat_bubble</span> "${text}"`,
       time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
       room
     };
@@ -198,25 +194,24 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Cliente desconectado:", socket.id);
   });
 });
 
-// 🤖 BOT: Eventos automáticos (Simulación)
+// [BOT] Eventos automáticos (Simulación)
 setInterval(() => {
   const rooms = ["nba", "nfl"];
   rooms.forEach(room => {
     const events = [
-      "📢 Recordatorio: El respeto es la base de nuestra comunidad. ¡Hablemos de deporte!",
-      "🧹 Info: El historial del chat se refresca periódicamente para vuestra comodidad.",
-      "🚫 Prohibido: Insultos o toxicidad. El Bot está vigilando... 👀",
-      "📊 Tip: Usa los comparadores de jugadores para ganar tus debates deportivos.",
-      "💎 ProLeague: El sitio oficial de los fans de la NBA y NFL."
+      "<span class='material-icons' style='font-size:16px; vertical-align:middle; color:#ffc107;'>campaign</span> Recordatorio: El respeto es la base de nuestra comunidad. ¡Hablemos de deporte!",
+      "<span class='material-icons' style='font-size:16px; vertical-align:middle; color:#00f2ff;'>cleaning_services</span> Info: El historial del chat se refresca periódicamente.",
+      "<span class='material-icons' style='font-size:16px; vertical-align:middle; color:#ef4444;'>block</span> Prohibido: Insultos o toxicidad. El Bot está vigilando...",
+      "<span class='material-icons' style='font-size:16px; vertical-align:middle; color:#4ade80;'>assessment</span> Tip: Usa los comparadores de jugadores para ganar tus debates.",
+      "<span class='material-icons' style='font-size:16px; vertical-align:middle; color:#5271ff;'>diamond</span> ProLeague: El sitio oficial de los fans de la NBA y NFL."
     ];
     const randomEvent = events[Math.floor(Math.random() * events.length)];
     
     const botMsg = {
-      user: "🤖 ProLeagueBot",
+      user: "ProLeagueBot",
       text: randomEvent,
       time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
       room
@@ -248,7 +243,7 @@ async function fetchWithCache(cacheKey, url, axiosConfig) {
 
   // Si tenemos datos en caché y no han expirado, devolverlos
   if (cacheEntry && cacheEntry.data && (now - cacheEntry.timestamp < CACHE_DURATION)) {
-    console.log(`📦 Sirviendo ${cacheKey} desde caché.`);
+    console.log(`[Cache] Sirviendo ${cacheKey} desde caché.`);
     return cacheEntry.data;
   }
 
@@ -262,7 +257,7 @@ async function fetchWithCache(cacheKey, url, axiosConfig) {
     return data;
   } catch (err) {
     if (err.response?.status === 429 && cacheEntry && cacheEntry.data) {
-      console.warn(`⚠️ API saturada (429). Rescatando ${cacheKey} de la última caché disponible.`);
+      console.warn(`[API] API saturada (429). Rescatando ${cacheKey} de la última caché disponible.`);
       return cacheEntry.data;
     }
     throw err;
@@ -319,7 +314,7 @@ app.get("/api/nfl/players", async (req, res) => {
     params.append("per_page", 100);
 
     const url = `https://api.balldontlie.io/nfl/v1/players?${params.toString()}`;
-    console.log(`🏈 NFL Query: ${url}`);
+    console.log(`[NFL] Query: ${url}`);
 
     const response = await axios.get(url, { 
       headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` } 
@@ -369,7 +364,7 @@ app.get("/api/nba/players", async (req, res) => {
     params.append("per_page", 100);
 
     const url = `https://api.balldontlie.io/v1/players?${params.toString()}`;
-    console.log(`🏀 NBA Query: ${url}`);
+    console.log(`[NBA] Query: ${url}`);
 
     const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${process.env.BALLDONTLIE_API_KEY}` }

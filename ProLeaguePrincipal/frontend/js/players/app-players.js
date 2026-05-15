@@ -63,14 +63,14 @@ async function loadTeamsAndPlayers(league) {
     countText.textContent = `Listado de ${league} listo. Busca un jugador o filtra por equipo.`;
     grid.innerHTML = `
       <div class="players-landing">
-        <div class="landing-icon">${league === 'NBA' ? '🏀' : '🏈'}</div>
+        <div class="landing-icon"><span class="material-icons" style="font-size: 48px;">${league === 'NBA' ? 'sports_basketball' : 'sports_football'}</span></div>
         <h2>Busca en la ${league}</h2>
         <p>Escribe arriba para encontrar jugadores</p>
       </div>`;
 
   } catch (err) {
     console.error('Error:', err);
-    grid.innerHTML = `<div class="players-error"><span>⚠️</span><p>Error cargando equipos. Revisa tu conexión.</p></div>`;
+    grid.innerHTML = `<div class="players-error"><span class="material-icons">warning</span><p>Error cargando equipos. Revisa tu conexión.</p></div>`;
     countText.textContent = 'Error';
   }
 }
@@ -118,11 +118,11 @@ async function fetchPlayers() {
     if (effectiveSearchTerm) query.append('search', effectiveSearchTerm);
     if (effectiveTeamId) query.append('teamId', effectiveTeamId);
 
-    console.log(`🌐 Fetching: ${API_BASE_URL}${endpoint}?${query.toString()}`);
+    console.log(`[API] Fetching: ${API_BASE_URL}${endpoint}?${query.toString()}`);
     const res = await fetch(`${API_BASE_URL}${endpoint}?${query.toString()}`);
     
     if (res.status === 429) {
-      console.warn("⚠️ API Rate Limit Hit (429)");
+      console.warn("[API] Rate Limit Hit (429)");
       showToast("La API está saturada. Reintentando con caché...", 'warning');
       // No lanzamos error, dejamos que el servidor intente rescatar datos
     }
@@ -134,7 +134,7 @@ async function fetchPlayers() {
     }
 
     const players = await res.json();
-    console.log(`✅ Resultado: ${players.length} jugadores`);
+    console.log(`[API] Resultado: ${players.length} jugadores`);
     
     // Mapear nombres de equipos para los logos y nombres
     players.forEach(p => {
@@ -152,7 +152,7 @@ async function fetchPlayers() {
   } catch (err) {
     console.error('Fetch error:', err);
     showToast("Error en la búsqueda", 'error');
-    grid.innerHTML = `<div class="players-error"><span>⚠️</span><p>No se pudo completar la búsqueda.</p></div>`;
+    grid.innerHTML = `<div class="players-error"><span class="material-icons">warning</span><p>No se pudo completar la búsqueda.</p></div>`;
   }
 }
 
@@ -168,7 +168,7 @@ function renderPlayers(players) {
   if (players.length === 0) {
     grid.innerHTML = `
       <div class="players-empty">
-        <span>🔍</span>
+        <span class="material-icons" style="font-size: 48px;">search</span>
         <p>No se encontraron resultados para "<strong>${searchTerm || 'este filtro'}</strong>"</p>
       </div>`;
     return;
@@ -223,7 +223,7 @@ function createPlayerCard(player, index) {
         ${logoPath
           ? `<img src="${logoPath}" alt="${teamName}" class="player-team-logo" onerror="this.style.display='none'">`
           : `<div class="player-logo-placeholder" style="color:${sportColor}; background:${sportColor}11;">
-               ${league === 'NBA' ? '🏀' : '🏈'}
+               <span class="material-icons" style="font-size: 32px;">${league === 'NBA' ? 'sports_basketball' : 'sports_football'}</span>
                <span class="vintage-badge">Vintage</span>
              </div>`
         }
@@ -232,7 +232,7 @@ function createPlayerCard(player, index) {
         <span class="player-league-badge" style="background:${sportColor}22; color:${sportColor}; border:1px solid ${sportColor}44;">${league}</span>
         <div style="display:flex; align-items:center; gap:8px;">
           <h3 class="player-name">${fullName}</h3>
-          <button class="copy-btn-mini" data-copy="${fullName}" title="Copiar nombre">📋</button>
+          <button class="copy-btn-mini" data-copy="${fullName}" title="Copiar nombre"><span class="material-icons" style="font-size: 14px;">content_copy</span></button>
         </div>
         <p class="player-team">${teamName || 'Agente Libre'}</p>
         <div class="player-tags">
@@ -240,7 +240,7 @@ function createPlayerCard(player, index) {
           ${!logoPath ? `<span class="player-tag vintage-tag">Equipo Histórico</span>` : ''}
         </div>
       </div>
-      <button class="player-detail-btn" title="Ver detalles">→</button>
+      <button class="player-detail-btn" title="Ver detalles"><span class="material-icons">arrow_forward</span></button>
     </div>
 
   `;
@@ -251,7 +251,7 @@ function createPlayerCard(player, index) {
     e.stopPropagation();
     navigator.clipboard.writeText(fullName);
     const originalText = copyBtn.innerHTML;
-    copyBtn.innerHTML = "✅";
+    copyBtn.innerHTML = "<span class='material-icons' style='font-size: 14px; color: #00f2ff;'>check_circle</span>";
     setTimeout(() => copyBtn.innerHTML = originalText, 1500);
   });
 
@@ -351,7 +351,7 @@ document.getElementById('player-search').addEventListener('input', (e) => {
   }
 
   searchDebounce = setTimeout(() => {
-    console.log("🔍 Ejecutando búsqueda para:", searchTerm);
+    console.log("[Search] Ejecutando búsqueda para:", searchTerm);
     fetchPlayers();
   }, 400); // Reducido a 400ms para mayor fluidez
 });

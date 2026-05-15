@@ -54,7 +54,7 @@ async function cargarFavoritos(uid) {
     contenedor.innerHTML = "";
 
     if (favoritos.length === 0) {
-      contenedor.innerHTML = "<p>No tienes favoritos todavía ⭐</p>";
+      contenedor.innerHTML = "<p>No tienes favoritos todavía <span class='material-icons' style='font-size:16px; vertical-align:middle;'>star_outline</span></p>";
       return;
     }
 

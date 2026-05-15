@@ -153,7 +153,7 @@ async function loadTrendingSuggestions() {
             hint.style.fontSize = "0.75rem";
             hint.style.color = "#94a3b8";
             hint.style.marginBottom = "5px";
-            hint.textContent = "🔥 POPULARES:";
+            hint.innerHTML = "<span class='material-icons' style='font-size:16px; vertical-align:middle; color:#ff3b3b;'>local_fire_department</span> POPULARES:";
             suggestionContainer.appendChild(hint);
 
             sorted.forEach(([name]) => {
@@ -322,7 +322,7 @@ saveBtn.onclick = async () => {
 
 // 1. Botón Dinámico de "Limpiar Quinteto"
 const clearBtn = document.createElement("button");
-clearBtn.innerHTML = "🗑️ Limpiar";
+clearBtn.innerHTML = "<span class='material-icons' style='font-size:18px; vertical-align:middle;'>delete</span> Limpiar";
 clearBtn.className = saveBtn.className; // Hereda el estilo
 clearBtn.style.backgroundColor = "rgba(255, 59, 59, 0.1)";
 clearBtn.style.border = "1px solid #ff3b3b";

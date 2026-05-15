@@ -7,14 +7,14 @@
  */
 
 const COACH_PHRASES = [
-    "¡Ey! No olvides pulir tu Dream Team antes de la jornada. 🏀",
-    "¿Has visto los últimos resultados de la NFL? ¡Vaya locura! 🏈",
-    "Recuerda: el respeto en el chat es lo que nos hace grandes. 🤝",
-    "¿Buscas a alguien? Usa el buscador de la comunidad. 🔍",
-    "¡Bienvenido de nuevo! Soy tu Coach Pro, listo para el análisis. 🤖",
-    "Tip: Los gráficos de radar te dicen quién es el mejor de verdad. 📈",
-    "¿Sabías que puedes comparar jugadores de distintas ligas? Prueba el Comparador. 💎",
-    "Nota técnica: Las fotos de perfil en la nube (Render) son temporales porque usamos almacenamiento gratuito. ¡En local son permanentes! ☁️🔧"
+    "¡Ey! No olvides pulir tu Dream Team antes de la jornada. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>sports_basketball</span>",
+    "¿Has visto los últimos resultados de la NFL? ¡Vaya locura! <span class='material-icons' style='font-size:16px; vertical-align:middle;'>sports_football</span>",
+    "Recuerda: el respeto en el chat es lo que nos hace grandes. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>handshake</span>",
+    "¿Buscas a alguien? Usa el buscador de la comunidad. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>search</span>",
+    "¡Bienvenido de nuevo! Soy tu Coach Pro, listo para el análisis. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>smart_toy</span>",
+    "Tip: Los gráficos de radar te dicen quién es el mejor de verdad. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>trending_up</span>",
+    "¿Sabías que puedes comparar jugadores de distintas ligas? Prueba el Comparador. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>diamond</span>",
+    "Nota técnica: Las fotos de perfil en la nube (Render) son temporales por el hosting. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>cloud_off</span>"
 ];
 
 export function initCoachPro() {
@@ -23,7 +23,7 @@ export function initCoachPro() {
     const coachContainer = document.createElement("div");
     coachContainer.id = "coach-pro-container";
     coachContainer.innerHTML = `
-        <div class="coach-bubble" id="coach-bubble">¡Hola! Soy tu Coach Pro. 🏀</div>
+        <div class="coach-bubble" id="coach-bubble">¡Hola! Soy tu Coach Pro. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>sports_basketball</span></div>
         <div class="coach-avatar">
             <div class="coach-eye left"></div>
             <div class="coach-eye right"></div>
@@ -39,7 +39,7 @@ export function initCoachPro() {
 
         const phrase = forcedText || COACH_PHRASES[Math.floor(Math.random() * COACH_PHRASES.length)];
         
-        bubble.textContent = phrase;
+        bubble.innerHTML = phrase;
         bubble.classList.add("show");
         
         setTimeout(() => {
@@ -48,7 +48,7 @@ export function initCoachPro() {
     };
 
     // Primer mensaje rápido
-    setTimeout(() => showMessage("¡Eh! Bienvenido a la zona VIP de ProLeague. 🦾"), 2000);
+    setTimeout(() => showMessage("¡Eh! Bienvenido a la zona VIP de ProLeague. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>military_tech</span>"), 2000);
 
     // Intervalo más corto para que parezca vivo (20 segundos)
     setInterval(showMessage, 20000);
@@ -56,10 +56,10 @@ export function initCoachPro() {
     // Clic: Mensaje aleatorio y animación
     coachContainer.onclick = () => {
         const randomTips = [
-            "¡Vamooos! A por la victoria hoy. 🔥",
-            "¿Sabías que soy 100% código puro? 🤖",
-            "¡No me pinches, que me desconecto! 😂",
-            "¿Has visto los Dream Teams de hoy? Están on fire. 📈"
+            "¡Vamooos! A por la victoria hoy. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>local_fire_department</span>",
+            "¿Sabías que soy 100% código puro? <span class='material-icons' style='font-size:16px; vertical-align:middle;'>code</span>",
+            "¡No me pinches, que me desconecto! <span class='material-icons' style='font-size:16px; vertical-align:middle;'>electrical_services</span>",
+            "¿Has visto los Dream Teams de hoy? Están on fire. <span class='material-icons' style='font-size:16px; vertical-align:middle;'>trending_up</span>"
         ];
         showMessage(randomTips[Math.floor(Math.random() * randomTips.length)]);
         
